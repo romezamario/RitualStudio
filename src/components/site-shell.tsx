@@ -25,8 +25,10 @@ export default function SiteShell({ title, subtitle, eyebrow, children }: SiteSh
       <header className="site-header">
         <div className="container nav-wrap">
           <Link href="/" className="brand" aria-label="Ritual Studio inicio">
-            Ritual Studio
+            <span className="brand-main">Ritual Studio</span>
+            <span className="brand-sub">by Sol</span>
           </Link>
+
           <nav className="nav-links" aria-label="Navegación principal">
             {links.map((link) => (
               <Link key={link.href} href={link.href}>
@@ -34,9 +36,18 @@ export default function SiteShell({ title, subtitle, eyebrow, children }: SiteSh
               </Link>
             ))}
           </nav>
-          <Link href="/custom" className="btn btn-ghost">
-            Reservar asesoría
-          </Link>
+
+          <div className="header-actions">
+            <span className="palette-swatch" aria-hidden>
+              <i className="swatch swatch-1" />
+              <i className="swatch swatch-2" />
+              <i className="swatch swatch-3" />
+              <i className="swatch swatch-4" />
+            </span>
+            <Link href="/custom" className="btn btn-ghost">
+              Reservar asesoría
+            </Link>
+          </div>
         </div>
       </header>
 

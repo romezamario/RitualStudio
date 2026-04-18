@@ -107,3 +107,22 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Ajuste de paleta visual según identidad Ritual Studio
+### ¿Qué cambia?
+- Se actualizó el sistema de color global para reflejar la paleta oficial de cuatro tonos mostrada en el brandboard: rosa niebla, arena suave, gris humo y carbón.
+- Se refinó la cabecera con lockup de marca (`Ritual Studio` + `by Sol`) y muestra de swatches para reforzar consistencia gráfica.
+- Se armonizaron tarjetas, botones, formularios, fondos y líneas con la nueva familia cromática para una estética más editorial y coherente con el logo compartido.
+
+### ¿Cómo se probó?
+- `npm run lint` (limitado por entorno: `next: not found`).
+- `node --check postcss.config.mjs`.
+- `node --check eslint.config.mjs`.
+
+### Impacto
+- Mejora la coherencia visual del sitio con la identidad de marca recibida, sin alterar rutas ni flujo funcional.
+- Deja base preparada para incorporar assets de logo/galería final cuando estén disponibles como archivos en el repositorio.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
