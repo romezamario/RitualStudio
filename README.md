@@ -51,6 +51,7 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 - Se rediseñó la interfaz completa con dirección visual editorial, inspirada en estudios de diseño floral contemporáneo como referencia estética.
 - Se reemplazó el layout anterior por un shell con navegación tipo cápsula, fondos cálidos y jerarquía tipográfica más sofisticada.
 - Se unificó el sistema visual en componentes de tarjeta, paneles y formularios para mantener consistencia entre todas las rutas del sitio.
+- Se incorporó una galería moodboard con imágenes de referencia floral (Unsplash) para acelerar revisión visual con cliente antes de sesión fotográfica final.
 
 ## Historial de cambios
 
@@ -141,6 +142,24 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 ### Impacto
 - El encabezado en mobile deja de verse saturado y mejora la jerarquía visual sin perder accesos clave.
 - Se preserva la estética editorial en desktop sin cambios de layout principal.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+## PR: Imágenes de ejemplo para dirección visual del sitio
+### ¿Qué cambia?
+- Se añadió una sección "Moodboard inicial" en la home con tres imágenes de referencia para orientar el look & feel editorial.
+- Se enriqueció la página `/arreglos` con preview visual por tarjeta para que cada propuesta tenga contexto fotográfico inmediato.
+- Se mantuvo integración con `next/image` y `remotePatterns` de `images.unsplash.com` para optimización y compatibilidad de build.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npm run build` (falló por restricción de red del entorno al descargar Google Fonts).
+
+### Impacto
+- El sitio ahora cuenta con insumos visuales de ejemplo listos para iteraciones de UI y revisión con stakeholders.
+- Queda clara la separación entre imágenes de referencia (temporales) y assets finales de marca/fotografía propia.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

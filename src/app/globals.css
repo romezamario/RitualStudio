@@ -235,6 +235,18 @@ p {
   color: color-mix(in srgb, var(--ink) 82%, white);
 }
 
+.card-image-wrap {
+  border-radius: 0.85rem;
+  overflow: hidden;
+}
+
+.card-image {
+  display: block;
+  height: 210px;
+  object-fit: cover;
+  width: 100%;
+}
+
 .price-tag {
   color: var(--charcoal);
   font-size: 0.95rem;
@@ -352,6 +364,43 @@ p {
   margin-top: 2rem;
 }
 
+.reference-gallery {
+  margin-top: 2.2rem;
+}
+
+.reference-gallery h2 {
+  font-size: 1.6rem;
+  margin-top: 0.2rem;
+}
+
+.reference-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.reference-item {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  margin: 0;
+  overflow: hidden;
+}
+
+.reference-item img {
+  display: block;
+  height: 220px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.reference-item figcaption {
+  color: color-mix(in srgb, var(--ink) 78%, white);
+  font-size: 0.9rem;
+  padding: 0.75rem 0.85rem 0.9rem;
+}
+
 @media (max-width: 900px) {
   .nav-wrap {
     border-radius: 1rem;
@@ -430,7 +479,8 @@ p {
 
   .feature-grid,
   .split-panel,
-  .contact-grid {
+  .contact-grid,
+  .reference-grid {
     grid-template-columns: 1fr;
   }
 }
