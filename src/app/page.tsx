@@ -1,5 +1,21 @@
 import Link from "next/link";
+import Image from "next/image";
 import SiteShell from "@/components/site-shell";
+
+const referenciasVisuales = [
+  {
+    titulo: "Bouquet editorial en tonos blush",
+    url: "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    titulo: "Mesa floral para evento íntimo",
+    url: "https://images.unsplash.com/photo-1468327768560-75b778cbb551?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    titulo: "Texturas orgánicas y follaje suave",
+    url: "https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?auto=format&fit=crop&w=1200&q=80"
+  }
+];
 
 export default function Home() {
   return (
@@ -34,6 +50,19 @@ export default function Home() {
           Ver colección
         </Link>
       </div>
+
+      <section className="reference-gallery" aria-label="Imágenes de referencia para diseño">
+        <p className="card-label">Moodboard inicial</p>
+        <h2>Imágenes de ejemplo para la dirección visual</h2>
+        <div className="reference-grid">
+          {referenciasVisuales.map((item) => (
+            <figure key={item.titulo} className="reference-item">
+              <Image src={item.url} alt={item.titulo} width={1200} height={900} />
+              <figcaption>{item.titulo}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
     </SiteShell>
   );
 }
