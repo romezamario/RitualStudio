@@ -122,3 +122,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Queda pendiente correr `npm install && npm run lint && npm run build` en un entorno con acceso al registry.
+
+## PR: Fix de build en Vercel por plugin PostCSS faltante
+- Fecha: 2026-04-18
+- Objetivo: Desbloquear `npm run build` en Vercel eliminando la dependencia de un plugin PostCSS no disponible en el entorno de instalación actual.
+
+### Lo aprendido
+- Cuando `postcss.config.mjs` referencia un plugin no instalado (en este caso `@tailwindcss/postcss`), Next.js falla en fase de webpack antes de compilar páginas.
+- Mantener un fallback CSS sin dependencia de PostCSS permite priorizar disponibilidad del deploy aunque se pierdan utilidades de Tailwind temporalmente.
+- Para evitar regresiones de diseño, conviene planificar un PR posterior que reinstale pipeline Tailwind completo en un entorno con acceso al registry.
+
+### Decisiones técnicas
+- Se reemplazó la configuración de PostCSS para no cargar plugins externos durante build.
+- Se removió `@import "tailwindcss";` de `globals.css` para evitar procesamiento CSS dependiente de Tailwind/PostCSS.
+- Se mantuvieron estilos base custom existentes para preservar legibilidad funcional del sitio.
+
+### Pruebas
+- Tipo: Validación manual estructurada + checks de sintaxis.
+- Resultado: Configuración PostCSS queda libre de imports de plugins no instalados; archivos actualizados sin errores de parseo.
+- Evidencia:
+  - `node --check postcss.config.mjs` OK.
+  - `npm run build` no se pudo ejecutar en este entorno porque no están instaladas dependencias (`next: not found`).
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documenta mitigación temporal y siguiente paso recomendado para restaurar Tailwind completo cuando se habilite instalación de paquetes.
