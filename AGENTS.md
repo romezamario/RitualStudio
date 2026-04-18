@@ -175,3 +175,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se agregó sección específica del rediseño en README y trazabilidad completa de decisiones en este archivo.
+
+## PR: Ajuste de paleta visual basado en identidad de Ritual Studio
+- Fecha: 2026-04-18
+- Objetivo: Alinear la interfaz del sitio con la paleta de 4 tonos del brandboard compartido (rosa niebla, arena, gris humo y carbón) para lograr una composición más armónica y coherente con el logo.
+
+### Lo aprendido
+- Traducir una paleta de branding a variables CSS globales facilita mantener consistencia visual en todas las rutas sin tocar cada página por separado.
+- Incluir muestras visibles de color en el header ayuda a reforzar el sistema gráfico sin recargar la interfaz.
+- El contraste en tonos neutros funciona mejor cuando botones y bordes usan niveles distintos de la misma familia cromática.
+
+### Decisiones técnicas
+- Se reemplazó la base cromática anterior por tokens CSS derivados de la imagen de los 4 círculos para controlar fondo, paneles, textos y acentos.
+- Se ajustó el componente `SiteShell` para incorporar lockup textual de marca (`Ritual Studio / by Sol`) y una mini guía visual de paleta en navegación.
+- Se mantuvo la estructura de páginas existente para limitar el alcance al lenguaje visual y evitar cambios funcionales innecesarios.
+
+### Pruebas
+- Tipo: Validación manual estructurada + checks de sintaxis.
+- Resultado: Los archivos de configuración revisados pasan sintaxis; lint de Next.js no ejecuta por ausencia del binario `next` en el entorno.
+- Evidencia:
+  - `npm run lint` falla con `next: not found`.
+  - `node --check postcss.config.mjs` OK.
+  - `node --check eslint.config.mjs` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó que el cambio es visual y se dejó trazabilidad de limitaciones de pruebas por dependencias no instaladas.
