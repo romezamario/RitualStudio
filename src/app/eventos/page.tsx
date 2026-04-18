@@ -3,14 +3,24 @@ import SiteShell from "@/components/site-shell";
 export default function EventosPage() {
   return (
     <SiteShell
+      eyebrow="Producción floral"
       title="Diseño floral para eventos"
-      subtitle="Conceptualizamos ambientaciones completas para bodas, cenas privadas y activaciones de marca."
+      subtitle="Integramos dirección artística y ejecución logística para transformar espacios con narrativa botánica coherente y sofisticada."
     >
-      <ul className="mt-8 list-disc space-y-3 pl-5 text-neutral-300">
-        <li>Sesión de dirección creativa y moodboard.</li>
-        <li>Propuesta por zonas: ceremonia, mesa principal, photo moments.</li>
-        <li>Instalación y retiro coordinado por el equipo Ritual.</li>
-      </ul>
+      <div className="split-panel">
+        <div>
+          <h2>Bodas y cenas privadas</h2>
+          <p>Conceptualización por atmósfera, zonas clave y ritmo visual entre ceremonia, recepción y mesa central.</p>
+        </div>
+        <div>
+          <h2>Activaciones de marca</h2>
+          <p>Intervenciones florales para lanzamientos, hospitality y experiencias inmersivas con enfoque editorial.</p>
+        </div>
+        <div>
+          <h2>Servicio integral</h2>
+          <p>Incluye visita técnica, producción en taller, instalación en sitio y retiro programado por equipo Ritual.</p>
+        </div>
+      </div>
     </SiteShell>
   );
 }
