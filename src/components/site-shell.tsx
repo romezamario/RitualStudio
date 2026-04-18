@@ -12,27 +12,38 @@ const links = [
 type SiteShellProps = {
   title: string;
   subtitle?: string;
+  eyebrow?: string;
   children?: React.ReactNode;
 };
 
-export default function SiteShell({ title, subtitle, children }: SiteShellProps) {
+export default function SiteShell({ title, subtitle, eyebrow, children }: SiteShellProps) {
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100">
-      <header className="border-b border-neutral-800">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
-          <span className="font-serif text-xl">Ritual Studio</span>
-          <nav className="hidden gap-5 text-sm md:flex">
+    <main className="site-root">
+      <div className="ambient-orb ambient-orb-left" aria-hidden />
+      <div className="ambient-orb ambient-orb-right" aria-hidden />
+
+      <header className="site-header">
+        <div className="container nav-wrap">
+          <Link href="/" className="brand" aria-label="Ritual Studio inicio">
+            Ritual Studio
+          </Link>
+          <nav className="nav-links" aria-label="Navegación principal">
             {links.map((link) => (
-              <Link key={link.href} href={link.href} className="text-neutral-300 transition hover:text-white">
+              <Link key={link.href} href={link.href}>
                 {link.label}
               </Link>
             ))}
           </nav>
+          <Link href="/custom" className="btn btn-ghost">
+            Reservar asesoría
+          </Link>
         </div>
       </header>
-      <section className="mx-auto w-full max-w-6xl px-6 py-14">
-        <h1 className="font-serif text-4xl md:text-6xl">{title}</h1>
-        {subtitle ? <p className="mt-4 max-w-2xl text-neutral-300">{subtitle}</p> : null}
+
+      <section className="container hero-block">
+        {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+        <h1>{title}</h1>
+        {subtitle ? <p className="lead">{subtitle}</p> : null}
         {children}
       </section>
     </main>

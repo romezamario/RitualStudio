@@ -148,3 +148,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documenta mitigación temporal y siguiente paso recomendado para restaurar Tailwind completo cuando se habilite instalación de paquetes.
+
+## PR: Rediseño editorial inspirado en averycoxdesign.com/home
+- Fecha: 2026-04-18
+- Objetivo: Rediseñar la experiencia visual de Ritual Studio con una dirección artística más editorial manteniendo el enfoque comercial en venta de arreglos florales.
+
+### Lo aprendido
+- Una dirección visual cálida (paleta beige/café), combinada con tipografía serif dominante, transmite mejor la percepción de estudio premium que una interfaz oscura genérica.
+- Al no depender de Tailwind en build actual, centralizar estilos en `globals.css` permite cambios amplios de UI con menor fricción técnica.
+- Un shell único con CTA persistente mejora continuidad de navegación y reduce inconsistencias entre páginas de servicio.
+
+### Decisiones técnicas
+- Se refactorizó `SiteShell` para incorporar cabecera tipo cápsula, navegación contextual y hero reusable.
+- Se crearon clases CSS reutilizables (`studio-card`, `feature-grid`, `split-panel`, `studio-form`) para alinear todas las vistas bajo un único sistema visual.
+- Se ajustó el copy principal de cada ruta para reforzar narrativa de estudio floral editorial y no tienda masiva.
+
+### Pruebas
+- Tipo: Validación estructurada + checks de configuración (limitada por dependencias no instaladas).
+- Resultado: Los checks de sintaxis sobre configuración pasaron; no fue posible ejecutar lint/build de Next.js por falta de binario `next` en el entorno.
+- Evidencia:
+  - `npm run lint` falla con `next: not found`.
+  - `node --check postcss.config.mjs` OK.
+  - `node --check eslint.config.mjs` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se agregó sección específica del rediseño en README y trazabilidad completa de decisiones en este archivo.

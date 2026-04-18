@@ -4,30 +4,34 @@ import SiteShell from "@/components/site-shell";
 export default function Home() {
   return (
     <SiteShell
-      title="Diseño floral con dirección artística"
-      subtitle="Creamos arreglos a medida para regalos, hospitality y eventos íntimos. Cada pieza nace de una conversación con tu idea, estilo y ocasión."
+      eyebrow="Estudio floral editorial · CDMX"
+      title="Arreglos florales de autor para espacios, regalos y eventos con carácter"
+      subtitle="Inspirados en el lenguaje sobrio y artístico de estudios de diseño contemporáneo, creamos composiciones con intención: textura, escala y narrativa visual adaptada a cada cliente."
     >
-      <div className="mt-10 grid gap-4 md:grid-cols-3">
-        <article className="card">
+      <div className="feature-grid">
+        <article className="studio-card">
+          <p className="card-label">01</p>
           <h2>Arreglos signature</h2>
-          <p>Piezas listas para ordenar con lenguaje estético Ritual.</p>
+          <p>Colección curada para entrega inmediata con estética Ritual: elegante, escultórica y atemporal.</p>
         </article>
-        <article className="card">
+        <article className="studio-card">
+          <p className="card-label">02</p>
           <h2>Diseño a medida</h2>
-          <p>Brief creativo, selección de flor y propuesta personalizada.</p>
+          <p>Traducimos tu idea en una propuesta botánica personalizada con dirección creativa y selección estacional.</p>
         </article>
-        <article className="card">
-          <h2>Eventos</h2>
-          <p>Dirección floral para bodas, cenas de marca y experiencias.</p>
+        <article className="studio-card">
+          <p className="card-label">03</p>
+          <h2>Eventos y hospitality</h2>
+          <p>Producción floral para bodas íntimas, cenas de marca y ambientaciones de alto impacto visual.</p>
         </article>
       </div>
 
-      <div className="mt-10 flex flex-wrap gap-4">
-        <Link href="/custom" className="btn-primary">
-          Solicitar diseño personalizado
+      <div className="cta-row">
+        <Link href="/custom" className="btn btn-primary">
+          Solicitar propuesta
         </Link>
-        <Link href="/arreglos" className="btn-secondary">
-          Ver colección inicial
+        <Link href="/arreglos" className="btn btn-ghost">
+          Ver colección
         </Link>
       </div>
     </SiteShell>

@@ -6,7 +6,7 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 
 ### Stack base
 - Next.js (App Router) + TypeScript.
-- CSS global custom (con clases utilitarias en markup como base para futura reactivación de Tailwind).
+- CSS global custom (sin dependencia activa de Tailwind en build).
 - ESLint con configuración de Next.js.
 - Estructura con `src/` y alias `@/*`.
 
@@ -47,6 +47,11 @@ Se aplicó una mitigación para desbloquear el build cuando falla la carga de pl
 
 Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `npm run build`. Como siguiente paso, cuando el entorno permita instalar dependencias sin restricciones, se recomienda restaurar pipeline Tailwind completo (plugin PostCSS + import de Tailwind) en un PR dedicado.
 
+## Cambios recientes de diseño
+- Se rediseñó la interfaz completa con dirección visual editorial, inspirada en estudios de diseño floral contemporáneo como referencia estética.
+- Se reemplazó el layout anterior por un shell con navegación tipo cápsula, fondos cálidos y jerarquía tipográfica más sofisticada.
+- Se unificó el sistema visual en componentes de tarjeta, paneles y formularios para mantener consistencia entre todas las rutas del sitio.
+
 ## Historial de cambios
 
 ## PR: Starter Next.js para florería elevada
@@ -81,6 +86,23 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 ### Impacto
 - Se elimina el bloqueo de compilación causado por resolución de plugin PostCSS no disponible.
 - Se deja documentado el camino de restauración de Tailwind completo para un siguiente PR.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+## PR: Rediseño editorial inspirado en referencia externa
+### ¿Qué cambia?
+- Se renueva la interfaz completa del sitio con estética editorial cálida y minimalista.
+- Se actualiza el `SiteShell` para incluir navegación refinada, CTA persistente y hero con mayor jerarquía visual.
+- Se rediseñan todas las páginas de servicio con nuevos bloques de contenido consistentes.
+
+### ¿Cómo se probó?
+- `npm run lint` para validar TypeScript/JSX y reglas de Next.js.
+- `npm run build` para verificar compilación de producción.
+
+### Impacto
+- Se mejora la percepción premium de la marca y la coherencia visual entre rutas clave de conversión.
 
 ### Documentación actualizada
 - AGENTS.md: Sí
