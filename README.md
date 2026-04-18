@@ -126,3 +126,22 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Menú hamburguesa para experiencia mobile
+### ¿Qué cambia?
+- Se convirtió la navegación del `SiteShell` en un menú hamburguesa para pantallas pequeñas, manteniendo navegación completa en desktop.
+- Se añadió un botón accesible con estado abierto/cerrado (`aria-expanded`, `aria-controls`) y animación de icono.
+- En mobile, los links y CTA quedan ocultos por defecto y se despliegan bajo demanda para mejorar legibilidad del header.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npm run build` (falló por bloqueo de red al descargar fuentes de Google Fonts).
+- Revisión manual de comportamiento esperado del estado del menú (abrir/cerrar + cierre al tocar links).
+
+### Impacto
+- El encabezado en mobile deja de verse saturado y mejora la jerarquía visual sin perder accesos clave.
+- Se preserva la estética editorial en desktop sin cambios de layout principal.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

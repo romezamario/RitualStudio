@@ -202,3 +202,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó que el cambio es visual y se dejó trazabilidad de limitaciones de pruebas por dependencias no instaladas.
+
+## PR: Menú hamburguesa para navegación mobile
+- Fecha: 2026-04-18
+- Objetivo: Mejorar la experiencia de navegación en pantallas pequeñas reemplazando el menú horizontal saturado por un patrón hamburguesa más limpio y usable.
+
+### Lo aprendido
+- En este diseño editorial, forzar navegación completa en una sola línea en mobile rompe legibilidad y compite con el branding del header.
+- Mantener el botón CTA dentro del panel desplegable reduce ruido visual inicial sin perder conversión.
+- Cerrar el menú al navegar evita estados abiertos accidentales entre rutas y mejora la sensación de control.
+
+### Decisiones técnicas
+- Se convirtió `SiteShell` en Client Component para manejar el estado `isMenuOpen` del menú hamburguesa.
+- Se implementó botón accesible con `aria-expanded`, `aria-controls` y etiquetas dinámicas abrir/cerrar.
+- Se resolvió el comportamiento responsive en `globals.css`: menú y acciones ocultas por defecto en mobile y visibles al activar estado `is-open`.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación manual estructurada.
+- Resultado: `npm run lint` pasa; `npm run build` falla por bloqueo de red al descargar fuentes de Google Fonts en este entorno. Además se validó lógicamente el flujo abrir/cerrar/click en links para cierre de menú.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npm run build` falla con `Failed to fetch font 'Inter'` y `Failed to fetch font 'Playfair Display'` desde `fonts.googleapis.com`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Cambio enfocado en UX mobile, sin alterar contenido ni rutas de negocio.
