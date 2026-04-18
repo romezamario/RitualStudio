@@ -1,79 +1,61 @@
 # RitualStudio
 
-## Propósito del repositorio
-Este repositorio documenta y mantiene la evolución del sitio. Cada cambio debe quedar respaldado por pruebas, aprendizaje y documentación actualizada.
+Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfocado en arreglos diseñados a la medida.
 
----
+## Estado actual del sitio
 
-## Estándar obligatorio para cada Pull Request
+### Stack base
+- Next.js (App Router) + TypeScript.
+- Tailwind CSS v4.
+- ESLint con configuración de Next.js.
+- Estructura con `src/` y alias `@/*`.
 
-Cada PR debe incluir obligatoriamente:
+### Módulos/páginas iniciales
+- ` / ` Inicio con propuesta de valor y CTAs.
+- ` /arreglos ` Colección inicial de arreglos signature.
+- ` /custom ` Flujo base de briefing para diseño a medida.
+- ` /eventos ` Servicio para bodas y activaciones.
+- ` /nosotros ` Narrativa de marca.
+- ` /contacto ` Canales de contacto.
 
-1. **Pruebas**
-   - Automatizadas cuando sea posible.
-   - Manuales estructuradas cuando no haya cobertura automática.
-   - Evidencia clara del resultado.
+## Flujo GitHub → Vercel
+1. Conectar repositorio en Vercel (New Project).
+2. Verificar que detecte framework **Next.js**.
+3. Definir rama `main` para producción.
+4. Usar PRs para obtener previews automáticas.
+5. Configurar dominio custom cuando el branding esté aprobado.
 
-2. **Actualización de `AGENTS.md`**
-   - Registrar aprendizaje, decisiones y riesgos del cambio.
+## Cómo correr localmente
 
-3. **Actualización de `README.md`**
-   - Reflejar cambios funcionales/técnicos aplicados al sitio.
-
----
-
-## Estructura evolutiva del README
-
-> Este README es vivo y debe crecer con cada PR.
-
-### 1) Estado actual del sitio
-- Funcionalidades disponibles
-- Módulos/componentes activos
-- Dependencias relevantes
-
-### 2) Historial de cambios
-- Resumen por PR de lo incorporado
-- Enlaces a PR o commits
-
-### 3) Guía de pruebas
-- Cómo ejecutar pruebas
-- Cobertura esperada
-- Criterios mínimos de aceptación
-
-### 4) Guía de despliegue/operación
-- Pasos de despliegue
-- Validaciones post-despliegue
-- Monitoreo básico
-
-### 5) Lecciones y mejoras continuas
-- Aprendizajes claves por iteración
-- Deuda técnica identificada
-- Próximas mejoras propuestas
-
----
-
-## Plantilla sugerida para registrar cambios por PR
-
-```md
-## PR: <id-o-título>
-### ¿Qué cambia?
-- 
-
-### ¿Cómo se probó?
-- 
-
-### Impacto
-- 
-
-### Documentación actualizada
-- AGENTS.md: Sí/No
-- README.md: Sí/No
+```bash
+npm install
+npm run dev
 ```
 
----
+Abrir `http://localhost:3000`.
 
-## Checklist mínimo por cambio
-- [ ] Se implementó el cambio.
-- [ ] Se ejecutaron y documentaron pruebas.
-- [ ] Se actualizó `AGENTS.md` con aprendizajes.
-- [ ] Se actualizó `README.md` con el cambio.
+## Pruebas y validaciones mínimas
+- `npm run lint`
+- `npm run build`
+
+> Si el entorno no tiene acceso a npm registry, registrar la evidencia como limitación de entorno y validar estructura de archivos/configuración.
+
+## Historial de cambios
+
+## PR: Starter Next.js para florería elevada
+### ¿Qué cambia?
+- Se crea la base técnica del sitio con Next.js + TypeScript + Tailwind.
+- Se incorporan páginas iniciales para lanzamiento rápido en Vercel.
+- Se define shell reutilizable con navegación superior.
+
+### ¿Cómo se probó?
+- Validación manual estructural de rutas y archivos generados.
+- Verificación sintáctica de archivos de configuración ejecutable con Node.
+- Se intentó bootstrap automático con `create-next-app`, bloqueado por política del registry en entorno.
+
+### Impacto
+- El proyecto queda listo para instalar dependencias, ejecutar local y conectar despliegue continuo en Vercel.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
