@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 const links = [
   { href: "/", label: "Inicio" },
@@ -17,6 +20,12 @@ type SiteShellProps = {
 };
 
 export default function SiteShell({ title, subtitle, eyebrow, children }: SiteShellProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <main className="site-root">
       <div className="ambient-orb ambient-orb-left" aria-hidden />
@@ -24,27 +33,44 @@ export default function SiteShell({ title, subtitle, eyebrow, children }: SiteSh
 
       <header className="site-header">
         <div className="container nav-wrap">
-          <Link href="/" className="brand" aria-label="Ritual Studio inicio">
+          <Link href="/" className="brand" aria-label="Ritual Studio inicio" onClick={closeMenu}>
             <span className="brand-main">Ritual Studio</span>
             <span className="brand-sub">by Sol</span>
           </Link>
 
-          <nav className="nav-links" aria-label="Navegación principal">
+          <button
+            type="button"
+            className={`menu-toggle ${isMenuOpen ? "is-open" : ""}`}
+            aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={isMenuOpen}
+            aria-controls="site-navigation"
+            onClick={() => setIsMenuOpen((current) => !current)}
+          >
+            <span aria-hidden />
+            <span aria-hidden />
+            <span aria-hidden />
+          </button>
+
+          <nav
+            id="site-navigation"
+            className={`nav-links ${isMenuOpen ? "is-open" : ""}`}
+            aria-label="Navegación principal"
+          >
             {links.map((link) => (
-              <Link key={link.href} href={link.href}>
+              <Link key={link.href} href={link.href} onClick={closeMenu}>
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          <div className="header-actions">
+          <div className={`header-actions ${isMenuOpen ? "is-open" : ""}`}>
             <span className="palette-swatch" aria-hidden>
               <i className="swatch swatch-1" />
               <i className="swatch swatch-2" />
               <i className="swatch swatch-3" />
               <i className="swatch swatch-4" />
             </span>
-            <Link href="/custom" className="btn btn-ghost">
+            <Link href="/custom" className="btn btn-ghost" onClick={closeMenu}>
               Reservar asesoría
             </Link>
           </div>
