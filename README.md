@@ -18,6 +18,56 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /nosotros ` Narrativa de marca.
 - ` /contacto ` Canales de contacto.
 
+
+## Estructura recomendada para imágenes
+
+Las imágenes del sitio ahora se organizan en `public/images` para facilitar carga, reemplazo y mantenimiento por tipo de contenido:
+
+```
+public/images/
+  home/
+    hero/
+    highlights/
+    testimonials/
+    banners/
+  arreglos/
+    catalogo/
+    temporada/
+    detalles/
+    thumbs/
+  nosotros/
+    equipo/
+    taller/
+    proceso/
+    historia/
+  eventos/
+    bodas/
+    corporativos/
+    sociales/
+    montajes/
+  custom/
+    inspiracion/
+    briefs/
+    referencias-clientes/
+  branding/
+    logo/
+    iconos/
+    paleta/
+  blog/
+    covers/
+    galerias/
+  testimonios/
+    clientes/
+    casos-exito/
+  seo/
+    og/
+    share/
+    favicons/
+  placeholders/
+```
+
+> Todas las carpetas incluyen `.gitkeep` para versionar la estructura aunque aún no haya assets cargados.
+
 ## Flujo GitHub → Vercel
 1. Conectar repositorio en Vercel (New Project).
 2. Verificar que detecte framework **Next.js**.
@@ -205,6 +255,25 @@ NEXT_PUBLIC_WHATSAPP_MESSAGE=Hola Ritual Studio, quiero cotizar un arreglo.
 ### Impacto
 - Al hacer clic en **Contáctanos**, se abre WhatsApp dirigido al número solicitado.
 - Se reduce riesgo de enlaces inválidos por uso de número local sin prefijo de país.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+
+## PR: Estructura de carpetas para gestión de imágenes
+### ¿Qué cambia?
+- Se creó una jerarquía de carpetas en `public/images` para separar assets por objetivo de negocio y secciones del sitio (home, arreglos, nosotros, eventos, etc.).
+- Se añadieron subcarpetas para distintos usos de contenido (hero, catálogo, detalles, equipo, montajes, SEO, placeholders).
+- Cada carpeta quedó versionada con `.gitkeep` para que el equipo pueda empezar a subir imágenes sin perder la estructura base en Git.
+
+### ¿Cómo se probó?
+- `find public/images -type d` para verificar creación completa de la jerarquía.
+- `npm run lint` para validar que el proyecto mantiene calidad estática tras el cambio.
+
+### Impacto
+- Mejora el orden operativo para carga de imágenes y evita mezclar assets de ventas, branding y contenido editorial.
+- Reduce fricción para escalar catálogo y piezas de marketing sin rehacer rutas de archivos.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

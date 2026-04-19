@@ -306,3 +306,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó explícitamente el número configurado y la normalización para formato internacional.
+
+## PR: Estructura de carpetas para imágenes del sitio
+- Fecha: 2026-04-19
+- Objetivo: Crear una estructura escalable en `public/images` para organizar carga de assets por sección y uso comercial/editorial del sitio.
+
+### Lo aprendido
+- Definir jerarquía de imágenes por contexto de negocio (ventas, branding, SEO, contenido institucional) reduce desorden al crecer el catálogo.
+- Mantener subcarpetas por tipo de uso (hero, thumbs, detalles, montajes) acelera integración en componentes sin renombrados constantes.
+- Versionar carpetas vacías con `.gitkeep` evita perder la estructura acordada en Git.
+
+### Decisiones técnicas
+- Se creó `public/images` como raíz única para servir archivos estáticos con rutas claras en Next.js.
+- Se dividieron carpetas por páginas/áreas clave: `home`, `arreglos`, `nosotros`, `eventos`, `custom`, `branding`, `blog`, `testimonios`, `seo` y `placeholders`.
+- Se añadieron subcarpetas específicas para casos de uso frecuentes en un sitio de florería (catálogo, temporada, equipo, montajes, og/share/favicons).
+
+### Pruebas
+- Tipo: Validación manual estructurada + prueba automatizada de calidad.
+- Resultado: La jerarquía quedó creada y versionada; lint del proyecto se mantiene sin errores.
+- Evidencia:
+  - `find public/images -type d` muestra todas las carpetas esperadas.
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye árbol recomendado para que el equipo suba imágenes con convención consistente.
