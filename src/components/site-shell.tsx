@@ -12,12 +12,24 @@ const links = [
   { href: "/contacto", label: "Contacto" }
 ];
 
-const rawWhatsAppNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "5210000000000";
-const sanitizedWhatsAppNumber = rawWhatsAppNumber.replace(/\D/g, "");
+const DEFAULT_WHATSAPP_NUMBER = "5520904940";
+const rawWhatsAppNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? DEFAULT_WHATSAPP_NUMBER;
+
+function toWhatsAppNumber(value: string) {
+  const digits = value.replace(/\D/g, "");
+
+  if (digits.length === 10) {
+    return `52${digits}`;
+  }
+
+  return digits;
+}
+
+const whatsappNumber = toWhatsAppNumber(rawWhatsAppNumber);
 const whatsappMessage = encodeURIComponent(
   process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ?? "Hola Ritual Studio, quiero más información."
 );
-const whatsappHref = `https://wa.me/${sanitizedWhatsAppNumber}?text=${whatsappMessage}`;
+const whatsappHref = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
 type SiteShellProps = {
   title: string;
