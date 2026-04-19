@@ -183,9 +183,28 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 Crear/editar `.env.local`:
 
 ```bash
-NEXT_PUBLIC_WHATSAPP_NUMBER=5215512345678
+NEXT_PUBLIC_WHATSAPP_NUMBER=5520904940
 NEXT_PUBLIC_WHATSAPP_MESSAGE=Hola Ritual Studio, quiero cotizar un arreglo.
 ```
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+
+## PR: Configuración de número fijo de WhatsApp (5520904940)
+### ¿Qué cambia?
+- Se configuró el CTA **"Contáctanos"** para usar por defecto el número `5520904940`.
+- Se añadió normalización del número para WhatsApp: si se captura en formato local de 10 dígitos, el enlace agrega prefijo `52` automáticamente (`wa.me/52...`).
+- Se mantiene soporte de `NEXT_PUBLIC_WHATSAPP_NUMBER` para sobreescribir el número sin tocar código.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Revisión manual de la transformación del número hacia formato WhatsApp (`5520904940` → `525520904940`).
+
+### Impacto
+- Al hacer clic en **Contáctanos**, se abre WhatsApp dirigido al número solicitado.
+- Se reduce riesgo de enlaces inválidos por uso de número local sin prefijo de país.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

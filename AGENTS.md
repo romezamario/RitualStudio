@@ -280,3 +280,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye guía de variables de entorno para cambiar número y mensaje sin tocar código.
+
+## PR: Configurar WhatsApp al número 5520904940
+- Fecha: 2026-04-19
+- Objetivo: Asegurar que el botón "Contáctanos" abra WhatsApp hacia el número solicitado por negocio sin depender de configuración externa inicial.
+
+### Lo aprendido
+- Para números de México, es común recibir el dato en formato local de 10 dígitos; `wa.me` requiere formato internacional para abrir correctamente en app/web.
+- Mantener un fallback funcional en código reduce fricción operativa cuando aún no se configuran variables de entorno en despliegue.
+- Normalizar con una regla acotada (10 dígitos => prefijo `52`) resuelve el caso actual sin complicar el flujo.
+
+### Decisiones técnicas
+- Se fijó `5520904940` como valor por defecto del número de WhatsApp.
+- Se implementó una función de normalización que elimina caracteres no numéricos y agrega `52` cuando detecta formato local de 10 dígitos.
+- Se conservó `NEXT_PUBLIC_WHATSAPP_NUMBER` para permitir reemplazo futuro sin cambio de código.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint sin errores y transformación correcta del número local a formato `wa.me` esperado.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual de URL generada: `5520904940` → `https://wa.me/525520904940?...`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó explícitamente el número configurado y la normalización para formato internacional.
