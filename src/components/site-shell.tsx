@@ -12,6 +12,13 @@ const links = [
   { href: "/contacto", label: "Contacto" }
 ];
 
+const rawWhatsAppNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "5210000000000";
+const sanitizedWhatsAppNumber = rawWhatsAppNumber.replace(/\D/g, "");
+const whatsappMessage = encodeURIComponent(
+  process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ?? "Hola Ritual Studio, quiero más información."
+);
+const whatsappHref = `https://wa.me/${sanitizedWhatsAppNumber}?text=${whatsappMessage}`;
+
 type SiteShellProps = {
   title: string;
   subtitle?: string;
@@ -70,9 +77,15 @@ export default function SiteShell({ title, subtitle, eyebrow, children }: SiteSh
               <i className="swatch swatch-3" />
               <i className="swatch swatch-4" />
             </span>
-            <Link href="/custom" className="btn btn-ghost" onClick={closeMenu}>
-              Reservar asesoría
-            </Link>
+            <a
+              href={whatsappHref}
+              className="btn btn-primary"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeMenu}
+            >
+              Contáctanos
+            </a>
           </div>
         </div>
       </header>
