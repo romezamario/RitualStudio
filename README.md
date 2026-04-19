@@ -164,3 +164,29 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Botón de WhatsApp configurable en cabecera
+### ¿Qué cambia?
+- Se reemplazó el CTA secundario del header por un botón **"Contáctanos"** que abre conversación de WhatsApp.
+- El número quedó configurable mediante variable de entorno pública `NEXT_PUBLIC_WHATSAPP_NUMBER`.
+- También se agregó `NEXT_PUBLIC_WHATSAPP_MESSAGE` para personalizar el mensaje prellenado.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Revisión manual del enlace generado (`https://wa.me/...`) y del comportamiento del botón en desktop/mobile.
+
+### Impacto
+- El sitio ahora tiene un canal directo de conversión por WhatsApp desde la navegación principal.
+- Cambiar el número ya no requiere tocar código, solo actualizar variables de entorno.
+
+### Configuración rápida
+Crear/editar `.env.local`:
+
+```bash
+NEXT_PUBLIC_WHATSAPP_NUMBER=5215512345678
+NEXT_PUBLIC_WHATSAPP_MESSAGE=Hola Ritual Studio, quiero cotizar un arreglo.
+```
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

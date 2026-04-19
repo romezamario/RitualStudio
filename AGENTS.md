@@ -254,3 +254,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documenta que las imágenes actuales son de referencia para diseño y pueden reemplazarse por fotografía propia en una iteración posterior.
+
+## PR: Botón de WhatsApp configurable
+- Fecha: 2026-04-19
+- Objetivo: Agregar un botón "Contáctanos" que abra WhatsApp y dejar el número configurable para cambios rápidos sin tocar código.
+
+### Lo aprendido
+- Un CTA único en cabecera hacia WhatsApp simplifica la intención de contacto y reduce fricción para leads móviles.
+- Usar variables `NEXT_PUBLIC_*` permite configuración operativa desde entorno (Vercel/local) sin redeploy de cambios de código por cada cambio de número.
+- Conviene sanitizar el número para tolerar formatos con espacios, guiones o paréntesis al construir `wa.me`.
+
+### Decisiones técnicas
+- Se reemplazó el botón secundario del header por un anchor externo a `https://wa.me/<numero>` con `target="_blank"` y `rel="noopener noreferrer"`.
+- Se definió `NEXT_PUBLIC_WHATSAPP_NUMBER` como fuente principal del número y fallback temporal para evitar romper build sin variable.
+- Se agregó `NEXT_PUBLIC_WHATSAPP_MESSAGE` para mensaje prellenado configurable.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint sin errores y generación correcta del enlace de WhatsApp con número saneado y mensaje URL-encoded.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual de construcción de URL `https://wa.me/...?...` en el botón del header.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye guía de variables de entorno para cambiar número y mensaje sin tocar código.
