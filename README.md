@@ -359,9 +359,33 @@ NEXT_PUBLIC_WHATSAPP_MESSAGE=Hola Ritual Studio, quiero cotizar un arreglo.
 ### Troubleshooting rápido (error de conexión con Supabase)
 1. Verifica que `NEXT_PUBLIC_SUPABASE_URL` tenga formato completo, por ejemplo:
    - `https://<tu-proyecto>.supabase.co`
-2. Verifica que `NEXT_PUBLIC_SUPABASE_ANON_KEY` exista y corresponda al mismo proyecto.
+2. Verifica que exista `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (recomendado por Supabase) o, en su defecto, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 3. Reinicia el servidor (`npm run dev`) tras cambiar `.env.local`.
 4. Confirma conectividad saliente del entorno hacia `*.supabase.co`.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+## PR: Compatibilidad con `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y normalización robusta de URL
+### ¿Qué cambia?
+- Se actualizó la utilidad de autenticación para aceptar como llave principal `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, manteniendo compatibilidad con `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Se endureció la normalización de `NEXT_PUBLIC_SUPABASE_URL` para tolerar errores comunes de configuración (por ejemplo usar `/auth/v1` o `/rest/v1` al final de la URL).
+- Se mejoró el mensaje de error de formato inválido para indicar explícitamente el patrón correcto: `https://<project-ref>.supabase.co`.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Reduce fricción al copiar credenciales desde Supabase, especialmente para equipos que ya usan nomenclatura `PUBLISHABLE_KEY`.
+- Disminuye falsos negativos de configuración en login/registro causados por URLs incompletas o con sufijos de endpoint.
+
+### Configuración recomendada de entorno (`.env.local`)
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
+```
 
 ### Documentación actualizada
 - AGENTS.md: Sí
