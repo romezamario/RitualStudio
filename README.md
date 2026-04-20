@@ -390,3 +390,30 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Mensajes de error accionables al crear cuenta con Supabase
+### ¿Qué cambia?
+- Se mejoró el parseo de errores en `signup/login` para leer múltiples campos de respuesta de Supabase Auth (`error_description`, `msg`, `error`, `message`, `details`, `hint`).
+- Se añadió el código HTTP al mensaje final para diagnóstico más rápido desde soporte/QA.
+- Se agregaron mensajes específicos para escenarios frecuentes: `429` (muchos intentos) y `5xx` (error interno de Supabase).
+- Se ajustó el mensaje de configuración faltante en UI para priorizar `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` con fallback a `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El usuario deja de ver únicamente el genérico “No fue posible crear la cuenta.” y recibe contexto concreto para resolver configuración, validación o límites de uso.
+- Se reduce tiempo de diagnóstico al incluir el estado HTTP directamente en el feedback mostrado por formulario.
+
+### Troubleshooting rápido de registro
+1. Si ves `HTTP 400` o `HTTP 422`, revisa formato de correo y política de contraseña del proyecto Supabase.
+2. Si ves `HTTP 429`, espera unos segundos y reintenta (rate limit temporal).
+3. Si ves `HTTP 500+`, suele ser incidente transitorio del proveedor; reintenta más tarde.
+4. Si aparece error de conectividad, valida:
+   - `NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable_key>` (o `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

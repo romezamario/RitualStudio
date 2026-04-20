@@ -7,6 +7,15 @@ type SupabaseAuthResult = {
   error: string | null;
 };
 
+type SupabaseErrorPayload = {
+  error_description?: string;
+  msg?: string;
+  error?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+};
+
 function getSupabaseConfig() {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(
@@ -49,6 +58,14 @@ function parseNetworkError(error: unknown) {
   return "No fue posible conectar con Supabase. Verifica URL, key y conectividad.";
 }
 
+function parseSupabaseError(data: SupabaseErrorPayload | null, fallbackError: string) {
+  if (!data) {
+    return fallbackError;
+  }
+
+  return data.error_description ?? data.msg ?? data.error ?? data.message ?? data.details ?? data.hint ?? fallbackError;
+}
+
 async function requestSupabaseAuth(endpoint: string, body: { email: string; password: string }, fallbackError: string) {
   try {
     const { supabaseUrl: url, supabaseAnonKey: anonKey } = getSupabaseConfig();
@@ -63,15 +80,25 @@ async function requestSupabaseAuth(endpoint: string, body: { email: string; pass
       body: JSON.stringify(body)
     });
 
-    const data = await response.json().catch(() => null);
+    const data = (await response.json().catch(() => null)) as SupabaseErrorPayload | null;
 
     if (!response.ok) {
+      const parsedError = parseSupabaseError(data, fallbackError);
+
+      if (response.status >= 500) {
+        return {
+          error: `Supabase devolvió un error interno (${response.status}). Intenta de nuevo en unos minutos.`
+        };
+      }
+
+      if (response.status === 429) {
+        return {
+          error: "Demasiados intentos en poco tiempo. Espera unos segundos y vuelve a intentarlo."
+        };
+      }
+
       return {
-        error:
-          data?.error_description ??
-          data?.msg ??
-          data?.error ??
-          fallbackError
+        error: `${parsedError} (HTTP ${response.status})`
       };
     }
 

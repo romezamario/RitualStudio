@@ -463,3 +463,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta variables recomendadas y el patrón exacto de URL esperado para Supabase.
+
+## PR: Mensajes de error accionables en registro de Supabase
+- Fecha: 2026-04-20
+- Objetivo: Evitar el mensaje genérico "No fue posible crear la cuenta." al registrar usuarios y mostrar contexto útil para diagnóstico.
+
+### Lo aprendido
+- Supabase puede responder errores de signup en distintos campos (`error_description`, `msg`, `error`, `message`, `details`, `hint`) y limitar el parseo a pocos campos degrada la trazabilidad del problema.
+- Agregar el código HTTP al mensaje acelera soporte operativo porque separa claramente errores de validación (4xx) de incidentes del proveedor (5xx).
+- Mensajes específicos para límites de tasa (429) y errores internos (5xx) reducen ambigüedad frente a un fallback único.
+
+### Decisiones técnicas
+- Se agregó un parser de payload de error para priorizar múltiples claves soportadas por respuestas de Supabase Auth.
+- Se añadieron mensajes dedicados para `429` y `5xx`, manteniendo fallback para los demás códigos no exitosos.
+- Se actualizó el mensaje de variables faltantes en UI para reflejar la convención actual (`PUBLISHABLE_KEY`) con fallback a `ANON_KEY`.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado: Lint y chequeo de tipos sin errores.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye sección de troubleshooting de signup con lectura de códigos HTTP frecuentes.
