@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import SiteShell from "@/components/site-shell";
 import { getMarketplaceProductBySlug, marketplaceProducts } from "@/data/marketplace-products";
+import ProductPurchaseActions from "@/components/product-purchase-actions";
 
 type ProductDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -74,9 +75,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             <Link href="/marketplace" className="btn btn-ghost">
               Volver al marketplace
             </Link>
-            <Link href="/contacto" className="btn btn-primary">
-              Solicitar este producto
-            </Link>
+            <ProductPurchaseActions product={product} />
           </div>
         </div>
       </article>

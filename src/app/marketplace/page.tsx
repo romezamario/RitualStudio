@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import SiteShell from "@/components/site-shell";
 import { marketplaceCategories, marketplaceProducts } from "@/data/marketplace-products";
+import ProductPurchaseActions from "@/components/product-purchase-actions";
 
 export default function MarketplacePage() {
   return (
@@ -41,9 +42,12 @@ export default function MarketplacePage() {
                   <h3>{product.name}</h3>
                   <p>{product.shortDescription}</p>
                   <strong className="price-tag">{product.price}</strong>
-                  <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
-                    Ver detalle
-                  </Link>
+                  <div className="marketplace-card-actions">
+                    <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
+                      Ver detalle
+                    </Link>
+                    <ProductPurchaseActions product={product} />
+                  </div>
                 </article>
               ))}
             </div>
