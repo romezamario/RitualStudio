@@ -21,7 +21,7 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /nosotros ` Narrativa de marca.
 - ` /contacto ` Canales de contacto.
 - ` /login ` Acceso con email/contraseña conectado a Supabase Auth (login + registro).
-- ` /aviso-de-privacidad ` Aviso de privacidad para tratamiento de datos personales (nombre, teléfono, correo y datos de cuenta) conforme a regulación mexicana.
+- ` /aviso-de-privacidad ` Aviso de privacidad para tratamiento de datos personales (nombre, teléfono, correo y datos de cuenta) conforme a regulación mexicana, enlazado desde el footer global.
 
 
 ## Estructura recomendada para imágenes
@@ -437,3 +437,19 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 - AGENTS.md: Sí
 - README.md: Sí
 
+## PR: Footer global con liga a Aviso de privacidad
+### ¿Qué cambia?
+- Se removió el enlace `Aviso de privacidad` de la navegación principal para evitar saturación del menú.
+- Se añadió un footer global en `SiteShell` con el enlace dedicado a `/aviso-de-privacidad`.
+- Se mantuvo la ruta legal activa y accesible desde todas las páginas, ahora al final del sitio.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Validación manual estructurada del flujo de navegación: abrir cualquier página y confirmar acceso al aviso desde el footer.
+
+### Impacto
+- Se mejora la jerarquía del header para priorizar rutas comerciales, sin perder cumplimiento ni accesibilidad al aviso legal.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
