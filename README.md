@@ -21,6 +21,7 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /nosotros ` Narrativa de marca.
 - ` /contacto ` Canales de contacto.
 - ` /login ` Acceso con email/contraseña conectado a Supabase Auth (login + registro).
+- ` /aviso-de-privacidad ` Aviso de privacidad para tratamiento de datos personales (nombre, teléfono, correo y datos de cuenta) conforme a regulación mexicana.
 
 
 ## Estructura recomendada para imágenes
@@ -417,3 +418,22 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Aviso de privacidad para registro de datos personales (México)
+### ¿Qué cambia?
+- Se creó la ruta `/aviso-de-privacidad` con un aviso de privacidad integral para el manejo de datos de clientes en la app.
+- El contenido cubre puntos clave para operación en México: responsable, tipos de datos, finalidades primarias/secundarias, limitación de uso, derechos ARCO, transferencias, cookies, seguridad y cambios al aviso.
+- Se agregó el enlace `Aviso de privacidad` en la navegación principal para acceso visible desde cualquier pantalla.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Validación manual estructurada de contenido legal y navegación (`/aviso-de-privacidad` desde menú principal).
+
+### Impacto
+- El proyecto queda con una base legal operativa para transparentar el tratamiento de nombre, teléfono, correo electrónico y datos de cuenta posteriores al login.
+- Se reduce riesgo de incumplimiento comunicacional al publicar en sitio un aviso de privacidad alineado al marco mexicano (LFPDPPP y su Reglamento).
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
