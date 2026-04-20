@@ -12,7 +12,8 @@ const links = [
   { href: "/custom", label: "Diseño a medida" },
   { href: "/eventos", label: "Eventos" },
   { href: "/nosotros", label: "Nosotros" },
-  { href: "/contacto", label: "Contacto" }
+  { href: "/contacto", label: "Contacto" },
+  { href: "/login", label: "Login" }
 ];
 
 const whatsappHref = getWhatsAppHref(process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ?? "Hola Ritual Studio, quiero más información.");

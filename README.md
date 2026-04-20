@@ -20,6 +20,7 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /eventos ` Servicio para bodas y activaciones.
 - ` /nosotros ` Narrativa de marca.
 - ` /contacto ` Canales de contacto.
+- ` /login ` Acceso con email/contraseña conectado a Supabase Auth (login + registro).
 
 
 ## Estructura recomendada para imágenes
@@ -317,6 +318,25 @@ NEXT_PUBLIC_WHATSAPP_MESSAGE=Hola Ritual Studio, quiero cotizar un arreglo.
 ### Impacto
 - El sitio pasa de catálogo informativo a experiencia base de compra asistida, permitiendo intención transaccional inmediata.
 - El equipo comercial obtiene un resumen rápido de productos seleccionados al recibir la solicitud por WhatsApp.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+
+## PR: Login base con Supabase Auth
+### ¿Qué cambia?
+- Se creó la ruta `/login` con un formulario de acceso inicial para autenticación por correo y contraseña.
+- El formulario soporta dos modos: **Iniciar sesión** y **Crear cuenta**.
+- Se implementó una utilidad de autenticación en `src/lib/supabase-client.ts` para consumir endpoints de Supabase Auth (`/auth/v1/token` y `/auth/v1/signup`) usando `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Se agregó el enlace `Login` en la navegación principal para acceso inmediato.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Validación manual estructurada del formulario: cambio de modo login/registro, validaciones requeridas y despliegue de mensajes de éxito/error.
+
+### Impacto
+- El proyecto ya tiene un punto de entrada real de autenticación para construir la siguiente fase: sesión persistente, protección de rutas, roles (`usuario`, `admin`, `superusuario`) y panel operativo.
 
 ### Documentación actualizada
 - AGENTS.md: Sí
