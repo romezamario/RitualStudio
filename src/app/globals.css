@@ -179,15 +179,19 @@ p {
   font-size: 0.78rem;
 }
 
-.user-menu-panel a,
+.user-menu-link,
 .user-menu-logout {
-  border-radius: 0.55rem;
+  align-items: center;
+  border-radius: 0.7rem;
+  display: inline-flex;
   font: inherit;
-  font-size: 0.88rem;
-  padding: 0.5rem 0.55rem;
+  font-size: 0.94rem;
+  min-height: 2.65rem;
+  padding: 0.68rem 0.75rem;
+  width: 100%;
 }
 
-.user-menu-panel a:hover,
+.user-menu-link:hover,
 .user-menu-logout:hover {
   background: color-mix(in srgb, var(--rose-mist) 55%, white);
 }
@@ -694,6 +698,61 @@ p {
   max-width: 550px;
 }
 
+
+.account-grid {
+  align-items: start;
+  grid-template-columns: 1fr 1fr;
+}
+
+.compact-form {
+  margin-top: 1rem;
+  max-width: 100%;
+}
+
+.two-columns {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.address-list {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+.address-item {
+  background: color-mix(in srgb, white 74%, var(--rose-mist));
+  border: 1px solid color-mix(in srgb, var(--smoke) 30%, white);
+  border-radius: 0.9rem;
+  display: grid;
+  gap: 0.9rem;
+  padding: 0.95rem;
+}
+
+.address-item p {
+  margin: 0.1rem 0;
+}
+
+.address-title {
+  font-weight: 700;
+}
+
+.default-chip {
+  background: color-mix(in srgb, var(--sandstone) 78%, white);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  margin-left: 0.35rem;
+  padding: 0.15rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.address-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 @media (max-width: 900px) {
   .nav-wrap {
     border-radius: 1rem;
@@ -790,7 +849,8 @@ p {
   .reference-grid,
   .product-detail,
   .product-meta-grid,
-  .cart-layout {
+  .cart-layout,
+  .two-columns {
     grid-template-columns: 1fr;
   }
 
