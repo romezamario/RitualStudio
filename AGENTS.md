@@ -541,3 +541,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta explícitamente que el enlace de aviso de privacidad vive ahora en el footer global.
+
+## PR: Validación de contraseña en vivo en crear usuario
+- Fecha: 2026-04-20
+- Objetivo: Validar en tiempo real que la contraseña de registro cumpla uso de mayúsculas, minúsculas, caracteres especiales y dígitos, con retroalimentación visual inmediata.
+
+### Lo aprendido
+- Mostrar criterios de contraseña en vivo reduce errores de registro y elimina ambigüedad frente a mensajes genéricos al enviar el formulario.
+- Mantener la validación en frontend antes de llamar a Supabase evita requests innecesarios cuando la contraseña aún no cumple políticas mínimas.
+- Reutilizar el mismo formulario para login/registro requiere condicionar claramente reglas UI para no introducir fricción en inicio de sesión.
+
+### Decisiones técnicas
+- Se añadieron validadores por regex para cuatro reglas independientes: mayúscula, minúscula, dígito y caracter especial.
+- Se implementó una lista de reglas con estado visual dinámico (`✅`/`⬜`) visible solo en modo `Crear cuenta`.
+- Se bloqueó el submit de `signup` cuando alguna regla no se cumple, mostrando un mensaje accionable.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + validación manual estructurada.
+- Resultado: Lint y chequeo de tipos sin errores; flujo de retroalimentación de contraseña disponible en vivo en modo registro.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - Revisión manual de reglas dinámicas en `/login` al escribir contraseña en `Crear cuenta`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documenta la política visible mínima de contraseña para registro y su validación previa al submit.

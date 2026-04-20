@@ -362,6 +362,27 @@ p {
   padding: 0.75rem 0.85rem;
 }
 
+.password-rules {
+  background: color-mix(in srgb, white 70%, var(--rose-mist));
+  border: 1px solid color-mix(in srgb, var(--smoke) 45%, white);
+  border-radius: 0.75rem;
+  display: grid;
+  gap: 0.35rem;
+  list-style: none;
+  margin: -0.2rem 0 0;
+  padding: 0.7rem 0.8rem;
+}
+
+.password-rule {
+  color: color-mix(in srgb, var(--ink) 78%, white);
+  font-size: 0.84rem;
+}
+
+.password-rule.is-valid {
+  color: #2f5132;
+  font-weight: 600;
+}
+
 .textarea {
   min-height: 8rem;
   resize: vertical;
