@@ -21,6 +21,9 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /nosotros ` Narrativa de marca.
 - ` /contacto ` Canales de contacto.
 - ` /login ` Acceso con email/contraseña conectado a Supabase Auth (login + registro).
+- ` /mi-cuenta/pedidos ` Vista base de seguimiento para pedidos del usuario autenticado.
+- ` /admin/pedidos ` Vista operativa para gestión de pedidos (rol administrador).
+- ` /admin/usuarios ` Vista operativa para gestión de usuarios y roles (rol administrador).
 - ` /aviso-de-privacidad ` Aviso de privacidad para tratamiento de datos personales (nombre, teléfono, correo y datos de cuenta) conforme a regulación mexicana, enlazado desde el footer global.
 
 
@@ -468,6 +471,27 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Impacto
 - Reduce intentos fallidos de registro por contraseñas débiles.
 - Mejora la experiencia del usuario al dar feedback inmediato antes de enviar el formulario.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+
+## PR: Menú de usuario autenticado con rutas por rol
+### ¿Qué cambia?
+- Se agregó un menú de usuario en la esquina superior derecha del header para mostrar el correo de la sesión activa y sus accesos disponibles.
+- Antes de iniciar sesión se muestra la acción **Crear usuario / Iniciar sesión**; después del login se conserva la visibilidad del usuario con opción de cierre de sesión.
+- Se diferenciaron opciones por rol: usuario normal (`/mi-cuenta/pedidos`) y administrador (además `/admin/pedidos` y `/admin/usuarios`).
+- El registro ahora permite seleccionar tipo de cuenta inicial y persiste sesión básica en `localStorage` para mantener estado entre recargas.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- `npm run build` (falló por bloqueo de red al descargar Google Fonts).
+
+### Impacto
+- Se habilita un patrón de navegación autenticada listo para crecer hacia permisos reales por página y funcionalidades de pedidos.
+- La UI ya comunica claramente qué usuario está activo y qué funciones tendrá según su rol.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

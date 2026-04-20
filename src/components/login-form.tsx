@@ -1,14 +1,17 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useAuth, type UserRole } from "@/components/auth-context";
 import { hasSupabaseConfig, signInWithPassword, signUpWithPassword } from "@/lib/supabase-client";
 
 type AuthMode = "login" | "signup";
 
 export function LoginForm() {
+  const { signIn } = useAuth();
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedRole, setSelectedRole] = useState<UserRole>("customer");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -41,22 +44,32 @@ export function LoginForm() {
 
     try {
       if (mode === "login") {
-        const { error } = await signInWithPassword(email, password);
+        const { error, user } = await signInWithPassword(email, password);
 
         if (error) {
           setErrorMessage(error);
         } else {
-          setSuccessMessage("Inicio de sesión exitoso. Ya puedes avanzar a rutas protegidas en el siguiente paso.");
+          signIn({
+            email: user?.email ?? email,
+            role: user?.role ?? "customer",
+          });
+          setSuccessMessage("Inicio de sesión exitoso. Ya puedes navegar a tus funciones desde el menú de usuario.");
         }
       }
 
       if (mode === "signup") {
-        const { error } = await signUpWithPassword(email, password);
+        const { error, user } = await signUpWithPassword(email, password, selectedRole);
 
         if (error) {
           setErrorMessage(error);
         } else {
-          setSuccessMessage("Cuenta creada. Revisa tu correo para confirmar el registro si tu proyecto tiene confirmación por email activada.");
+          signIn({
+            email: user?.email ?? email,
+            role: user?.role ?? selectedRole,
+          });
+          setSuccessMessage(
+            "Cuenta creada. Revisa tu correo para confirmar el registro si aplica, y usa el menú de usuario para acceder a tus funciones."
+          );
         }
       }
     } catch {
@@ -113,20 +126,34 @@ export function LoginForm() {
           />
         </label>
         {mode === "signup" ? (
-          <ul className="password-rules" aria-live="polite">
-            <li className={`password-rule ${passwordChecks.hasUppercase ? "is-valid" : ""}`}>
-              {passwordChecks.hasUppercase ? "✅" : "⬜"} Al menos una mayúscula
-            </li>
-            <li className={`password-rule ${passwordChecks.hasLowercase ? "is-valid" : ""}`}>
-              {passwordChecks.hasLowercase ? "✅" : "⬜"} Al menos una minúscula
-            </li>
-            <li className={`password-rule ${passwordChecks.hasDigit ? "is-valid" : ""}`}>
-              {passwordChecks.hasDigit ? "✅" : "⬜"} Al menos un dígito
-            </li>
-            <li className={`password-rule ${passwordChecks.hasSpecialCharacter ? "is-valid" : ""}`}>
-              {passwordChecks.hasSpecialCharacter ? "✅" : "⬜"} Al menos un caracter especial
-            </li>
-          </ul>
+          <>
+            <label>
+              Tipo de cuenta inicial
+              <select
+                className="input"
+                value={selectedRole}
+                onChange={(event) => setSelectedRole(event.target.value as UserRole)}
+              >
+                <option value="customer">Usuario normal</option>
+                <option value="admin">Administrador</option>
+              </select>
+            </label>
+
+            <ul className="password-rules" aria-live="polite">
+              <li className={`password-rule ${passwordChecks.hasUppercase ? "is-valid" : ""}`}>
+                {passwordChecks.hasUppercase ? "✅" : "⬜"} Al menos una mayúscula
+              </li>
+              <li className={`password-rule ${passwordChecks.hasLowercase ? "is-valid" : ""}`}>
+                {passwordChecks.hasLowercase ? "✅" : "⬜"} Al menos una minúscula
+              </li>
+              <li className={`password-rule ${passwordChecks.hasDigit ? "is-valid" : ""}`}>
+                {passwordChecks.hasDigit ? "✅" : "⬜"} Al menos un dígito
+              </li>
+              <li className={`password-rule ${passwordChecks.hasSpecialCharacter ? "is-valid" : ""}`}>
+                {passwordChecks.hasSpecialCharacter ? "✅" : "⬜"} Al menos un caracter especial
+              </li>
+            </ul>
+          </>
         ) : null}
 
         <button type="submit" className="btn btn-primary" disabled={isLoading}>

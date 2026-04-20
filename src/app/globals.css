@@ -148,6 +148,58 @@ p {
   gap: 0.65rem;
 }
 
+.user-menu {
+  position: relative;
+}
+
+.user-menu-trigger {
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-menu-panel {
+  background: color-mix(in srgb, white 80%, var(--rose-mist));
+  border: 1px solid color-mix(in srgb, var(--smoke) 35%, white);
+  border-radius: 0.9rem;
+  box-shadow: 0 12px 28px rgba(74, 74, 74, 0.12);
+  display: grid;
+  gap: 0.45rem;
+  min-width: 220px;
+  padding: 0.7rem;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 30;
+}
+
+.user-menu-role {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.user-menu-panel a,
+.user-menu-logout {
+  border-radius: 0.55rem;
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 0.5rem 0.55rem;
+}
+
+.user-menu-panel a:hover,
+.user-menu-logout:hover {
+  background: color-mix(in srgb, var(--rose-mist) 55%, white);
+}
+
+.user-menu-logout {
+  background: transparent;
+  border: 0;
+  color: #732f2f;
+  cursor: pointer;
+  text-align: left;
+}
+
 .palette-swatch {
   display: inline-flex;
   gap: 0.28rem;
@@ -715,6 +767,20 @@ p {
 
   .header-actions .btn {
     justify-content: center;
+    width: 100%;
+  }
+
+  .user-menu {
+    width: 100%;
+  }
+
+  .user-menu-trigger {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .user-menu-panel {
+    position: static;
     width: 100%;
   }
 

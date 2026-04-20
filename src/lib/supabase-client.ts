@@ -5,6 +5,10 @@ const supabaseAnonKey =
 
 type SupabaseAuthResult = {
   error: string | null;
+  user: {
+    email: string;
+    role: "customer" | "admin";
+  } | null;
 };
 
 type SupabaseErrorPayload = {
@@ -14,6 +18,22 @@ type SupabaseErrorPayload = {
   message?: string;
   details?: string;
   hint?: string;
+};
+
+type SupabaseUserPayload = {
+  email?: string;
+  app_metadata?: {
+    role?: string;
+    user_role?: string;
+  };
+  user_metadata?: {
+    role?: string;
+    user_role?: string;
+  };
+};
+
+type SupabaseSuccessPayload = {
+  user?: SupabaseUserPayload;
 };
 
 function getSupabaseConfig() {
@@ -66,7 +86,34 @@ function parseSupabaseError(data: SupabaseErrorPayload | null, fallbackError: st
   return data.error_description ?? data.msg ?? data.error ?? data.message ?? data.details ?? data.hint ?? fallbackError;
 }
 
-async function requestSupabaseAuth(endpoint: string, body: { email: string; password: string }, fallbackError: string) {
+function normalizeUserRole(value: string | undefined) {
+  const lowered = value?.toLowerCase();
+
+  if (lowered === "admin" || lowered === "administrator") {
+    return "admin" as const;
+  }
+
+  return "customer" as const;
+}
+
+function parseSupabaseUser(data: SupabaseSuccessPayload | null) {
+  const user = data?.user;
+
+  if (!user?.email) {
+    return null;
+  }
+
+  return {
+    email: user.email,
+    role: normalizeUserRole(user.app_metadata?.role ?? user.app_metadata?.user_role ?? user.user_metadata?.role ?? user.user_metadata?.user_role),
+  };
+}
+
+async function requestSupabaseAuth(
+  endpoint: string,
+  body: { email: string; password: string; options?: { data?: { role: "customer" | "admin" } } },
+  fallbackError: string
+) {
   try {
     const { supabaseUrl: url, supabaseAnonKey: anonKey } = getSupabaseConfig();
 
@@ -80,32 +127,39 @@ async function requestSupabaseAuth(endpoint: string, body: { email: string; pass
       body: JSON.stringify(body)
     });
 
-    const data = (await response.json().catch(() => null)) as SupabaseErrorPayload | null;
+    const data = (await response.json().catch(() => null)) as (SupabaseErrorPayload & SupabaseSuccessPayload) | null;
 
     if (!response.ok) {
       const parsedError = parseSupabaseError(data, fallbackError);
 
       if (response.status >= 500) {
         return {
-          error: `Supabase devolvió un error interno (${response.status}). Intenta de nuevo en unos minutos.`
+          error: `Supabase devolvió un error interno (${response.status}). Intenta de nuevo en unos minutos.`,
+          user: null,
         };
       }
 
       if (response.status === 429) {
         return {
-          error: "Demasiados intentos en poco tiempo. Espera unos segundos y vuelve a intentarlo."
+          error: "Demasiados intentos en poco tiempo. Espera unos segundos y vuelve a intentarlo.",
+          user: null,
         };
       }
 
       return {
-        error: `${parsedError} (HTTP ${response.status})`
+        error: `${parsedError} (HTTP ${response.status})`,
+        user: null,
       };
     }
 
-    return { error: null };
+    return {
+      error: null,
+      user: parseSupabaseUser(data),
+    };
   } catch (error) {
     return {
-      error: parseNetworkError(error)
+      error: parseNetworkError(error),
+      user: null,
     };
   }
 }
@@ -114,8 +168,24 @@ export async function signInWithPassword(email: string, password: string): Promi
   return requestSupabaseAuth("/auth/v1/token?grant_type=password", { email, password }, "No fue posible iniciar sesión.");
 }
 
-export async function signUpWithPassword(email: string, password: string): Promise<SupabaseAuthResult> {
-  return requestSupabaseAuth("/auth/v1/signup", { email, password }, "No fue posible crear la cuenta.");
+export async function signUpWithPassword(
+  email: string,
+  password: string,
+  role: "customer" | "admin" = "customer"
+): Promise<SupabaseAuthResult> {
+  return requestSupabaseAuth(
+    "/auth/v1/signup",
+    {
+      email,
+      password,
+      options: {
+        data: {
+          role,
+        },
+      },
+    },
+    "No fue posible crear la cuenta."
+  );
 }
 
 export function hasSupabaseConfig() {
