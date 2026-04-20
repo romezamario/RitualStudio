@@ -672,3 +672,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se dejó documentada la nueva ruta de direcciones y el alcance actual (persistencia local por usuario).
+
+## PR: Confirmación de correo Supabase con callback productivo
+- Fecha: 2026-04-20
+- Objetivo: Implementar un flujo robusto de confirmación de correo con Supabase usando `token_hash` + verificación OTP, evitando redirecciones a localhost y mostrando páginas amigables de éxito/error.
+
+### Lo aprendido
+- Separar la verificación de email en una ruta dedicada (`/auth/callback`) mejora trazabilidad y evita que el usuario termine en páginas crudas o estados ambiguos.
+- En un frontend sin SDK de Supabase, se puede mantener un flujo sólido consumiendo `POST /auth/v1/verify` con headers `apikey` + `Authorization` y luego redirigir a una experiencia visual del sitio.
+- Para despliegues multi-entorno, definir `NEXT_PUBLIC_SITE_URL` como fuente canónica de callback elimina hardcodes a localhost y mantiene compatibilidad con previews/producción.
+
+### Decisiones técnicas
+- Se creó un route handler en App Router (`src/app/auth/callback/route.ts`) para leer `token_hash`, `type` y `next`, validar parámetros y redirigir según resultado.
+- Se amplió la utilidad de auth (`src/lib/supabase-client.ts`) para soportar verificación OTP y para incluir `emailRedirectTo` dinámico durante signup.
+- Se añadieron páginas visuales `/correo-confirmado` y `/auth/error` siguiendo el sistema visual existente (`SiteShell` + `studio-card`), incluyendo sincronización de sesión local cuando Supabase devuelve tokens.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado: Lint y chequeo de tipos sin errores tras incorporar callback, verificación OTP y nuevas páginas de estado.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta rutas nuevas de confirmación y variables necesarias (`NEXT_PUBLIC_SITE_URL`) para evitar redirecciones a localhost.
