@@ -515,3 +515,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incorpora la nueva ruta legal y su alcance de cumplimiento para datos personales en la app.
+
+## PR: Footer global para acceso a aviso de privacidad
+- Fecha: 2026-04-20
+- Objetivo: Mover el acceso al aviso de privacidad desde el menú principal hacia un footer global para limpiar la navegación superior sin perder acceso legal.
+
+### Lo aprendido
+- Un enlace legal en footer mantiene cumplimiento y accesibilidad sin competir con rutas comerciales en el header.
+- Centralizar el footer en `SiteShell` asegura consistencia automática en todas las rutas existentes y futuras.
+- En mobile, el footer reduce ruido en el menú hamburguesa y mejora escaneo de opciones principales.
+
+### Decisiones técnicas
+- Se removió `Aviso de privacidad` del arreglo `links` del menú principal.
+- Se añadió un `footer` global en `SiteShell` con enlace único a `/aviso-de-privacidad` y año dinámico.
+- Se incorporaron estilos reutilizables (`site-footer`, `site-footer-inner`) con ajuste responsive en `globals.css`.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint sin errores y navegación legal disponible desde footer en todas las páginas.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual del flujo: header sin enlace legal + acceso a `/aviso-de-privacidad` desde footer.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta explícitamente que el enlace de aviso de privacidad vive ahora en el footer global.

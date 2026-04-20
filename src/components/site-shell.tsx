@@ -13,7 +13,6 @@ const links = [
   { href: "/eventos", label: "Eventos" },
   { href: "/nosotros", label: "Nosotros" },
   { href: "/contacto", label: "Contacto" },
-  { href: "/aviso-de-privacidad", label: "Aviso de privacidad" },
   { href: "/login", label: "Login" }
 ];
 
@@ -103,6 +102,13 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
         {subtitle ? <p className="lead">{subtitle}</p> : null}
         {children}
       </section>
+
+      <footer className="site-footer">
+        <div className="container site-footer-inner">
+          <p>© {new Date().getFullYear()} Ritual Studio.</p>
+          <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>
+        </div>
+      </footer>
     </main>
   );
 }
