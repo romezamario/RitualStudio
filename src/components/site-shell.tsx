@@ -29,6 +29,7 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { totalItems } = useCart();
   const { isAuthenticated, user, signOut } = useAuth();
+  const userDisplayName = user?.fullName ?? user?.username ?? user?.email;
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -107,7 +108,7 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
                   aria-controls="user-menu-panel"
                   onClick={() => setIsUserMenuOpen((current) => !current)}
                 >
-                  {user?.email}
+                  {userDisplayName}
                 </button>
                 {isUserMenuOpen ? (
                   <div id="user-menu-panel" className="user-menu-panel">

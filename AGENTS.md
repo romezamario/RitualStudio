@@ -619,3 +619,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documenta este ajuste como cambio editorial de navegación sin alteración de rutas internas.
+
+## PR: Registro con campos de usuario y nombre completo
+- Fecha: 2026-04-20
+- Objetivo: Ampliar el formulario de crear cuenta para capturar también usuario y nombre completo, y conservar esos datos en la sesión visible del header.
+
+### Lo aprendido
+- Pedir `usuario` y `nombre completo` desde el alta reduce pasos posteriores de perfil y mejora contexto del menú autenticado.
+- Supabase puede devolver metadata de usuario en distintas claves (`user_metadata` y `raw_user_meta_data`), por lo que conviene parsear ambas para robustez.
+- Mantener estos campos opcionales en el modelo de sesión evita romper usuarios existentes que iniciaron sesión antes de este cambio.
+
+### Decisiones técnicas
+- Se agregaron los inputs `Usuario` y `Nombre completo` únicamente en modo `Crear cuenta`, con validación previa al submit.
+- Se extendió `signUpWithPassword` para enviar metadata (`username` y `full_name`) en `options.data` hacia Supabase Auth.
+- Se actualizó el contexto de autenticación para persistir `username/fullName` y priorizarlos como etiqueta visible del usuario en el menú del header.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado: Lint y chequeo de tipos sin errores tras la ampliación de formulario y tipos de sesión.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye este ajuste en historial para operación de registro con metadata básica de perfil.

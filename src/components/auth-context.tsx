@@ -7,6 +7,8 @@ export type UserRole = "customer" | "admin";
 export type AuthUser = {
   email: string;
   role: UserRole;
+  username?: string;
+  fullName?: string;
 };
 
 type AuthContextValue = {
