@@ -8,8 +8,7 @@ import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const links = [
   { href: "/", label: "Inicio" },
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/arreglos", label: "Arreglos" },
+  { href: "/marketplace", label: "Tienda" },
   { href: "/custom", label: "Diseño a medida" },
   { href: "/eventos", label: "Eventos" },
   { href: "/nosotros", label: "Nosotros" },

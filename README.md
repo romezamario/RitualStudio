@@ -12,7 +12,7 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 
 ### Módulos/páginas iniciales
 - ` / ` Inicio con propuesta de valor y CTAs.
-- ` /marketplace ` Marketplace con exploración por scroll, categorización y acciones de compra (`Agregar al carrito` / `Comprar ahora`).
+- ` /marketplace ` Tienda con exploración por scroll, categorización y acciones de compra (`Agregar al carrito` / `Comprar ahora`).
 - ` /marketplace/[slug] ` Página de detalle por producto con ficha ampliada y acciones de carrito/compra directa.
 - ` /carrito ` Vista de carrito de compras con resumen de productos agregados y checkout por WhatsApp.
 - ` /arreglos ` Colección inicial de arreglos signature.
@@ -492,6 +492,23 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Impacto
 - Se habilita un patrón de navegación autenticada listo para crecer hacia permisos reales por página y funcionalidades de pedidos.
 - La UI ya comunica claramente qué usuario está activo y qué funciones tendrá según su rol.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+
+## PR: Ajuste de navegación (Arreglos fuera de menú y Marketplace → Tienda)
+### ¿Qué cambia?
+- Se removió el enlace `Arreglos` del menú principal para simplificar la navegación comercial alrededor del catálogo transaccional.
+- Se renombró la etiqueta del enlace `/marketplace` de `Marketplace` a `Tienda` en header (desktop y mobile, ya que comparten el mismo arreglo de links).
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Revisión manual del arreglo `links` en `SiteShell` para confirmar que solo queda `Tienda` como acceso al catálogo desde navegación principal.
+
+### Impacto
+- La navegación prioriza un único punto de entrada al catálogo y elimina duplicidad conceptual entre `Arreglos` y `Marketplace`.
 
 ### Documentación actualizada
 - AGENTS.md: Sí
