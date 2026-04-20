@@ -19,7 +19,9 @@ export function LoginForm() {
     setSuccessMessage(null);
 
     if (!hasSupabaseConfig()) {
-      setErrorMessage("Faltan variables de entorno de Supabase. Configura NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+      setErrorMessage(
+        "Faltan variables de entorno de Supabase. Configura NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY)."
+      );
       return;
     }
 
