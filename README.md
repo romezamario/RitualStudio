@@ -12,6 +12,8 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 
 ### Módulos/páginas iniciales
 - ` / ` Inicio con propuesta de valor y CTAs.
+- ` /marketplace ` Marketplace con exploración por scroll y categorización por tipo de producto.
+- ` /marketplace/[slug] ` Página de detalle por producto con ficha ampliada.
 - ` /arreglos ` Colección inicial de arreglos signature.
 - ` /custom ` Flujo base de briefing para diseño a medida.
 - ` /eventos ` Servicio para bodas y activaciones.
@@ -274,6 +276,26 @@ NEXT_PUBLIC_WHATSAPP_MESSAGE=Hola Ritual Studio, quiero cotizar un arreglo.
 ### Impacto
 - Mejora el orden operativo para carga de imágenes y evita mezclar assets de ventas, branding y contenido editorial.
 - Reduce fricción para escalar catálogo y piezas de marketing sin rehacer rutas de archivos.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+## PR: Marketplace con categorías y detalle de producto
+### ¿Qué cambia?
+- Se creó la ruta `/marketplace` con un catálogo navegable por scroll, agrupado por categorías (`Ramos`, `Centros de mesa`, `Eventos`, `Regalos`).
+- Se añadió navegación rápida por chips de categoría con anclas internas para saltar entre secciones del marketplace.
+- Se implementó la ruta dinámica `/marketplace/[slug]` para mostrar detalle completo del producto (descripción, tamaño, flores, usos sugeridos y entrega).
+- Se incorporó un dataset central (`src/data/marketplace-products.ts`) para evitar duplicación y facilitar mantenimiento del catálogo.
+- Se agregó el enlace `Marketplace` a la navegación principal.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Revisión manual estructurada del flujo: listado por categorías → clic en “Ver detalle” → navegación al detalle de producto.
+
+### Impacto
+- El sitio pasa de un catálogo estático a una base de marketplace escalable con arquitectura lista para crecer en número de productos.
+- Se mejora la experiencia de descubrimiento al permitir scroll continuo y segmentación clara por intención de compra.
 
 ### Documentación actualizada
 - AGENTS.md: Sí
