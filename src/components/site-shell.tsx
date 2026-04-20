@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { AuthProvider, useAuth } from "@/components/auth-context";
 import { CartProvider, useCart } from "@/components/cart-context";
 import { getWhatsAppHref } from "@/lib/whatsapp";
 
@@ -12,8 +13,7 @@ const links = [
   { href: "/custom", label: "Diseño a medida" },
   { href: "/eventos", label: "Eventos" },
   { href: "/nosotros", label: "Nosotros" },
-  { href: "/contacto", label: "Contacto" },
-  { href: "/login", label: "Login" }
+  { href: "/contacto", label: "Contacto" }
 ];
 
 const whatsappHref = getWhatsAppHref(process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ?? "Hola Ritual Studio, quiero más información.");
@@ -27,11 +27,23 @@ type SiteShellProps = {
 
 function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { totalItems } = useCart();
+  const { isAuthenticated, user, signOut } = useAuth();
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+    setIsUserMenuOpen(false);
   };
+
+  const userMenuLinks =
+    user?.role === "admin"
+      ? [
+          { href: "/mi-cuenta/pedidos", label: "Mis pedidos" },
+          { href: "/admin/pedidos", label: "Gestión de pedidos" },
+          { href: "/admin/usuarios", label: "Gestión de usuarios" },
+        ]
+      : [{ href: "/mi-cuenta/pedidos", label: "Mis pedidos" }];
 
   return (
     <main className="site-root">
@@ -83,6 +95,43 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
             <Link href="/carrito" className="btn btn-ghost" onClick={closeMenu}>
               Ver carrito{totalItems > 0 ? ` (${totalItems})` : ""}
             </Link>
+            {!isAuthenticated ? (
+              <Link href="/login" className="btn btn-ghost" onClick={closeMenu}>
+                Crear usuario / Iniciar sesión
+              </Link>
+            ) : (
+              <div className="user-menu">
+                <button
+                  type="button"
+                  className="btn btn-ghost user-menu-trigger"
+                  aria-expanded={isUserMenuOpen}
+                  aria-controls="user-menu-panel"
+                  onClick={() => setIsUserMenuOpen((current) => !current)}
+                >
+                  {user?.email}
+                </button>
+                {isUserMenuOpen ? (
+                  <div id="user-menu-panel" className="user-menu-panel">
+                    <p className="user-menu-role">Rol: {user?.role === "admin" ? "Administrador" : "Usuario"}</p>
+                    {userMenuLinks.map((menuLink) => (
+                      <Link key={menuLink.href} href={menuLink.href} onClick={closeMenu}>
+                        {menuLink.label}
+                      </Link>
+                    ))}
+                    <button
+                      type="button"
+                      className="user-menu-logout"
+                      onClick={() => {
+                        signOut();
+                        closeMenu();
+                      }}
+                    >
+                      Cerrar sesión
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            )}
             <a
               href={whatsappHref}
               className="btn btn-primary"
@@ -115,10 +164,12 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
 
 export default function SiteShell({ title, subtitle, eyebrow, children }: SiteShellProps) {
   return (
-    <CartProvider>
-      <SiteShellFrame title={title} subtitle={subtitle} eyebrow={eyebrow}>
-        {children}
-      </SiteShellFrame>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <SiteShellFrame title={title} subtitle={subtitle} eyebrow={eyebrow}>
+          {children}
+        </SiteShellFrame>
+      </CartProvider>
+    </AuthProvider>
   );
 }

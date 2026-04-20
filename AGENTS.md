@@ -568,3 +568,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documenta la política visible mínima de contraseña para registro y su validación previa al submit.
+
+## PR: Menú de usuario autenticado con opciones por rol
+- Fecha: 2026-04-20
+- Objetivo: Mostrar en el header una entrada de crear usuario/login y, tras autenticación, mantener visible el usuario con un menú de funciones diferenciadas para usuario normal y administrador.
+
+### Lo aprendido
+- Persistir un estado de sesión liviano en `localStorage` permite mantener visible el usuario autenticado entre recargas sin bloquear por una capa backend adicional en esta fase.
+- Incluir el rol dentro del menú visible reduce ambigüedad operativa y deja clara la diferencia de accesos entre cuentas normales y administradoras.
+- Centralizar el estado de autenticación en un contexto compartido simplifica sincronizar login, header y logout sin duplicar lógica.
+
+### Decisiones técnicas
+- Se creó `AuthProvider` + `useAuth` para almacenar y exponer usuario/rol autenticado en toda la UI que utiliza `SiteShell`.
+- Se actualizó el formulario de login/signup para guardar sesión al autenticar y permitir selección de tipo de cuenta inicial en registro.
+- Se añadió menú desplegable de usuario en la esquina superior derecha con rutas base por rol (`/mi-cuenta/pedidos`, `/admin/pedidos`, `/admin/usuarios`).
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + validación manual estructurada.
+- Resultado: Lint y chequeo de tipos sin errores; build de producción bloqueado por restricción de red al descargar Google Fonts.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - `npm run build` falla con `Failed to fetch font 'Inter'` y `Failed to fetch font 'Playfair Display'` desde `fonts.googleapis.com`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó el comportamiento del menú autenticado y la separación inicial de funciones por rol para próximas iteraciones de permisos.
