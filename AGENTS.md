@@ -411,3 +411,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documenta que esta iteración cubre login base y registro; próxima fase recomendada: persistencia de sesión, guard de rutas y modelo de roles para admin/superadmin/cliente.
+
+## PR: Robustez de registro/login con Supabase (headers + validación de URL)
+- Fecha: 2026-04-20
+- Objetivo: Corregir el error al registrar usuario cuando la conexión a Supabase falla por configuración de URL o request incompleto, y mostrar mensajes más accionables.
+
+### Lo aprendido
+- En llamadas directas a Supabase Auth desde frontend, enviar también `Authorization: Bearer <anon_key>` junto con `apikey` reduce fallas de autorización/intermediarios en algunos entornos.
+- Normalizar `NEXT_PUBLIC_SUPABASE_URL` (trim + quitar slash final) evita endpoints mal formados como dobles barras o URLs inválidas.
+- Conviene manejar explícitamente errores de red (`Failed to fetch`) y parseo de respuesta para no ocultar la causa real al usuario.
+
+### Decisiones técnicas
+- Se centralizó la lógica de auth en un helper `requestSupabaseAuth` para compartir headers, parseo de respuesta y manejo de errores entre login y signup.
+- Se agregó validación de formato URL en `getSupabaseConfig` para fallar con mensaje claro cuando la variable está mal configurada.
+- Se mantuvo el contrato de retorno `{ error: string | null }` para no romper el formulario actual.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado: Lint del proyecto sin errores; TypeScript de la utilidad de Supabase sin errores de compilación.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se añadió guía de troubleshooting para el error de conectividad con Supabase en login/registro.

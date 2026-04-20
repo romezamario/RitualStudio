@@ -341,3 +341,28 @@ NEXT_PUBLIC_WHATSAPP_MESSAGE=Hola Ritual Studio, quiero cotizar un arreglo.
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Robustez de login/registro con Supabase
+### ¿Qué cambia?
+- Se reforzó la integración de Auth para `login` y `signup` enviando headers `apikey` + `Authorization: Bearer <anon_key>`.
+- Se normaliza y valida `NEXT_PUBLIC_SUPABASE_URL` antes de construir endpoints (`trim`, remoción de `/` final y validación de formato URL).
+- Se centralizó el manejo de errores de red/respuesta para devolver mensajes más claros al usuario cuando falla la conexión.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Mejora la confiabilidad del flujo de registro/inicio de sesión y la diagnóstica de errores de configuración de Supabase.
+- Reduce falsos mensajes genéricos cuando existe un problema específico en variables de entorno o URL inválida.
+
+### Troubleshooting rápido (error de conexión con Supabase)
+1. Verifica que `NEXT_PUBLIC_SUPABASE_URL` tenga formato completo, por ejemplo:
+   - `https://<tu-proyecto>.supabase.co`
+2. Verifica que `NEXT_PUBLIC_SUPABASE_ANON_KEY` exista y corresponda al mismo proyecto.
+3. Reinicia el servidor (`npm run dev`) tras cambiar `.env.local`.
+4. Confirma conectividad saliente del entorno hacia `*.supabase.co`.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
