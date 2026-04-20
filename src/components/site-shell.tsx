@@ -40,10 +40,14 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
     user?.role === "admin"
       ? [
           { href: "/mi-cuenta/pedidos", label: "Mis pedidos" },
+          { href: "/mi-cuenta/direcciones", label: "Mis direcciones" },
           { href: "/admin/pedidos", label: "Gestión de pedidos" },
           { href: "/admin/usuarios", label: "Gestión de usuarios" },
         ]
-      : [{ href: "/mi-cuenta/pedidos", label: "Mis pedidos" }];
+      : [
+          { href: "/mi-cuenta/pedidos", label: "Mis pedidos" },
+          { href: "/mi-cuenta/direcciones", label: "Mis direcciones" },
+        ];
 
   return (
     <main className="site-root">
@@ -114,7 +118,7 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
                   <div id="user-menu-panel" className="user-menu-panel">
                     <p className="user-menu-role">Rol: {user?.role === "admin" ? "Administrador" : "Usuario"}</p>
                     {userMenuLinks.map((menuLink) => (
-                      <Link key={menuLink.href} href={menuLink.href} onClick={closeMenu}>
+                      <Link key={menuLink.href} href={menuLink.href} onClick={closeMenu} className="user-menu-link">
                         {menuLink.label}
                       </Link>
                     ))}

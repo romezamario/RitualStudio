@@ -22,6 +22,7 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /contacto ` Canales de contacto.
 - ` /login ` Acceso con email/contraseña conectado a Supabase Auth (login + registro).
 - ` /mi-cuenta/pedidos ` Vista base de seguimiento para pedidos del usuario autenticado.
+- ` /mi-cuenta/direcciones ` Gestión de direcciones de entrega del usuario (guardar, marcar principal y eliminar).
 - ` /admin/pedidos ` Vista operativa para gestión de pedidos (rol administrador).
 - ` /admin/usuarios ` Vista operativa para gestión de usuarios y roles (rol administrador).
 - ` /aviso-de-privacidad ` Aviso de privacidad para tratamiento de datos personales (nombre, teléfono, correo y datos de cuenta) conforme a regulación mexicana, enlazado desde el footer global.
@@ -528,6 +529,28 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Impacto
 - El flujo de registro queda más completo para operación comercial y administración posterior de cuentas.
 - Mejora la personalización visible del usuario autenticado sin introducir cambios de backend adicionales.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+
+## PR: Mejoras de clic en menú de usuario + direcciones de entrega
+### ¿Qué cambia?
+- Se mejoró la zona clicable del menú de usuario autenticado para que cada opción tenga mayor alto, padding y ancho completo, mejorando usabilidad en desktop y mobile.
+- Se agregó la ruta ` /mi-cuenta/direcciones ` para que clientes registren direcciones de entrega con datos completos (alias, contacto y ubicación).
+- Se implementó persistencia local por usuario (clave por email en `localStorage`) con acciones para marcar dirección principal y eliminar direcciones.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- Validación manual estructurada:
+  - Login → abrir menú de usuario → navegación a `Mis direcciones`.
+  - Alta de dirección → marcar principal → eliminar dirección.
+
+### Impacto
+- Se reduce fricción en la navegación del menú de usuario al tener botones más fáciles de pulsar.
+- Se habilita una base funcional para checkout asistido con direcciones persistentes del cliente en futuras iteraciones.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

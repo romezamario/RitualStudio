@@ -645,3 +645,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye este ajuste en historial para operación de registro con metadata básica de perfil.
+
+## PR: Mejora de clic en menú de usuario + direcciones de entrega
+- Fecha: 2026-04-20
+- Objetivo: Hacer más usable el menú de usuario autenticado y habilitar el registro de direcciones de entrega para pedidos.
+
+### Lo aprendido
+- Aumentar altura y ancho de los links del dropdown de usuario mejora de forma inmediata la usabilidad táctil y reduce clics fallidos.
+- Guardar direcciones por cuenta usando una clave de `localStorage` basada en email permite un MVP funcional sin bloquear por backend.
+- Marcar una dirección principal dentro del mismo flujo ayuda a preparar una futura integración de checkout sin pedir selección repetida.
+
+### Decisiones técnicas
+- Se ajustaron estilos del menú de usuario (`user-menu-link` y `user-menu-logout`) para ampliar área clicable en desktop/mobile.
+- Se creó la ruta `/mi-cuenta/direcciones` con un componente cliente dedicado para alta/listado/eliminación de direcciones.
+- Se implementó persistencia local y acciones de dirección principal, manteniendo una estructura simple y compatible con iteraciones futuras.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + validación manual estructurada.
+- Resultado: Lint y chequeo de tipos sin errores; menú de usuario con mejor interacción y flujo de direcciones operativo.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - Revisión manual: login → menú usuario → `Mis direcciones` → guardar dirección → marcar principal → eliminar.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se dejó documentada la nueva ruta de direcciones y el alcance actual (persistencia local por usuario).
