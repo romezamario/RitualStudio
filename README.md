@@ -21,6 +21,9 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /nosotros ` Narrativa de marca.
 - ` /contacto ` Canales de contacto.
 - ` /login ` Acceso con email/contraseña conectado a Supabase Auth (login + registro).
+- ` /auth/callback ` Callback de confirmación de correo para Supabase (`token_hash` + `type`) con redirección amigable.
+- ` /correo-confirmado ` Página de éxito visual para confirmación de correo.
+- ` /auth/error ` Página de error amigable cuando el enlace de confirmación es inválido o expiró.
 - ` /mi-cuenta/pedidos ` Vista base de seguimiento para pedidos del usuario autenticado.
 - ` /mi-cuenta/direcciones ` Gestión de direcciones de entrega del usuario (guardar, marcar principal y eliminar).
 - ` /admin/pedidos ` Vista operativa para gestión de pedidos (rol administrador).
@@ -98,6 +101,24 @@ Abrir `http://localhost:3000`.
 - `npm run build`
 
 > Si el entorno no tiene acceso a npm registry, registrar la evidencia como limitación de entorno y validar estructura de archivos/configuración.
+
+## Configuración de Supabase para confirmación de correo
+
+Para que el flujo de confirmación funcione sin redirigir a `localhost`, configura estas variables:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
+# opcional (fallback retrocompatible)
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<tu_anon_key>
+# recomendado para producción y previews
+NEXT_PUBLIC_SITE_URL=https://tu-dominio.com
+```
+
+Notas operativas:
+- El template **Confirm sign up** de Supabase debe apuntar a `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email`.
+- El registro (`signUp`) ahora envía `emailRedirectTo` usando `NEXT_PUBLIC_SITE_URL` y, si no existe, usa el `origin` actual del navegador.
+- Si la confirmación crea sesión, el usuario se sincroniza automáticamente en la app al llegar a `/correo-confirmado`.
 
 ## Nota técnica (build en Vercel)
 Se aplicó una mitigación para desbloquear el build cuando falla la carga de plugins de PostCSS (`@tailwindcss/postcss`) en instalación remota:

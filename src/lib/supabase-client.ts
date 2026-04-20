@@ -2,6 +2,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ??
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+const publicSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 
 type SupabaseAuthResult = {
   error: string | null;
@@ -11,6 +12,7 @@ type SupabaseAuthResult = {
     username?: string;
     fullName?: string;
   } | null;
+  sessionCreated: boolean;
 };
 
 type SupabaseErrorPayload = {
@@ -45,7 +47,22 @@ type SupabaseUserPayload = {
 };
 
 type SupabaseSuccessPayload = {
+  access_token?: string;
+  refresh_token?: string;
   user?: SupabaseUserPayload;
+};
+
+type SupabaseVerifyOtpType = "signup" | "invite" | "magiclink" | "recovery" | "email_change" | "email";
+
+type SupabaseVerifyOtpResult = {
+  error: string | null;
+  user: {
+    email: string;
+    role: "customer" | "admin";
+    username?: string;
+    fullName?: string;
+  } | null;
+  sessionCreated: boolean;
 };
 
 function getSupabaseConfig() {
@@ -127,15 +144,37 @@ function parseSupabaseUser(data: SupabaseSuccessPayload | null) {
   };
 }
 
+function hasSessionTokens(data: SupabaseSuccessPayload | null) {
+  return Boolean(data?.access_token && data?.refresh_token);
+}
+
+function resolveEmailRedirectTo() {
+  const callbackPath = "/auth/callback";
+  const candidateUrl = publicSiteUrl?.length ? publicSiteUrl : (typeof window !== "undefined" ? window.location.origin : null);
+
+  if (!candidateUrl) {
+    return undefined;
+  }
+
+  try {
+    return new URL(callbackPath, candidateUrl).toString();
+  } catch {
+    return undefined;
+  }
+}
+
 async function requestSupabaseAuth(
   endpoint: string,
   body: {
     email: string;
     password: string;
-    options?: { data?: { role: "customer" | "admin"; username?: string; full_name?: string } };
+    options?: {
+      emailRedirectTo?: string;
+      data?: { role: "customer" | "admin"; username?: string; full_name?: string };
+    };
   },
   fallbackError: string
-) {
+): Promise<SupabaseAuthResult> {
   try {
     const { supabaseUrl: url, supabaseAnonKey: anonKey } = getSupabaseConfig();
 
@@ -158,6 +197,7 @@ async function requestSupabaseAuth(
         return {
           error: `Supabase devolvió un error interno (${response.status}). Intenta de nuevo en unos minutos.`,
           user: null,
+          sessionCreated: false,
         };
       }
 
@@ -165,23 +205,27 @@ async function requestSupabaseAuth(
         return {
           error: "Demasiados intentos en poco tiempo. Espera unos segundos y vuelve a intentarlo.",
           user: null,
+          sessionCreated: false,
         };
       }
 
       return {
         error: `${parsedError} (HTTP ${response.status})`,
         user: null,
+        sessionCreated: false,
       };
     }
 
     return {
       error: null,
       user: parseSupabaseUser(data),
+      sessionCreated: hasSessionTokens(data),
     };
   } catch (error) {
     return {
       error: parseNetworkError(error),
       user: null,
+      sessionCreated: false,
     };
   }
 }
@@ -201,6 +245,7 @@ export async function signUpWithPassword(
 ): Promise<SupabaseAuthResult> {
   const normalizedUsername = profile?.username.trim();
   const normalizedFullName = profile?.fullName.trim();
+  const emailRedirectTo = resolveEmailRedirectTo();
 
   return requestSupabaseAuth(
     "/auth/v1/signup",
@@ -208,6 +253,7 @@ export async function signUpWithPassword(
       email,
       password,
       options: {
+        ...(emailRedirectTo ? { emailRedirectTo } : {}),
         data: {
           role,
           ...(normalizedUsername ? { username: normalizedUsername } : {}),
@@ -217,6 +263,51 @@ export async function signUpWithPassword(
     },
     "No fue posible crear la cuenta."
   );
+}
+
+export async function verifyOtpToken(params: {
+  tokenHash: string;
+  type: SupabaseVerifyOtpType;
+}): Promise<SupabaseVerifyOtpResult> {
+  try {
+    const { supabaseUrl: url, supabaseAnonKey: anonKey } = getSupabaseConfig();
+
+    const response = await fetch(`${url}/auth/v1/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`
+      },
+      body: JSON.stringify({
+        token_hash: params.tokenHash,
+        type: params.type,
+      }),
+      cache: "no-store",
+    });
+
+    const data = (await response.json().catch(() => null)) as (SupabaseErrorPayload & SupabaseSuccessPayload) | null;
+
+    if (!response.ok) {
+      return {
+        error: parseSupabaseError(data, "No fue posible confirmar el correo."),
+        user: null,
+        sessionCreated: false,
+      };
+    }
+
+    return {
+      error: null,
+      user: parseSupabaseUser(data),
+      sessionCreated: hasSessionTokens(data),
+    };
+  } catch (error) {
+    return {
+      error: parseNetworkError(error),
+      user: null,
+      sessionCreated: false,
+    };
+  }
 }
 
 export function hasSupabaseConfig() {

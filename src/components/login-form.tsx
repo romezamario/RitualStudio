@@ -67,22 +67,24 @@ export function LoginForm() {
       }
 
       if (mode === "signup") {
-        const { error, user } = await signUpWithPassword(email, password, selectedRole, {
+        const { error, user, sessionCreated } = await signUpWithPassword(email, password, selectedRole, {
           username,
           fullName,
         });
 
         if (error) {
           setErrorMessage(error);
-        } else {
+        } else if (sessionCreated) {
           signIn({
             email: user?.email ?? email,
             role: user?.role ?? selectedRole,
             username: user?.username ?? username.trim(),
             fullName: user?.fullName ?? fullName.trim(),
           });
+          setSuccessMessage("Cuenta creada e iniciada correctamente. Ya puedes usar el menú de usuario.");
+        } else {
           setSuccessMessage(
-            "Cuenta creada. Revisa tu correo para confirmar el registro si aplica, y usa el menú de usuario para acceder a tus funciones."
+            "Cuenta creada. Revisa tu correo y confirma tu registro para completar el acceso a Ritual Studio."
           );
         }
       }
