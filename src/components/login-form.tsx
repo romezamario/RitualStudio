@@ -11,6 +11,8 @@ export function LoginForm() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole>("customer");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -40,6 +42,11 @@ export function LoginForm() {
       return;
     }
 
+    if (mode === "signup" && (!username.trim() || !fullName.trim())) {
+      setErrorMessage("Para crear cuenta completa los campos de usuario y nombre.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -52,13 +59,18 @@ export function LoginForm() {
           signIn({
             email: user?.email ?? email,
             role: user?.role ?? "customer",
+            username: user?.username,
+            fullName: user?.fullName,
           });
           setSuccessMessage("Inicio de sesión exitoso. Ya puedes navegar a tus funciones desde el menú de usuario.");
         }
       }
 
       if (mode === "signup") {
-        const { error, user } = await signUpWithPassword(email, password, selectedRole);
+        const { error, user } = await signUpWithPassword(email, password, selectedRole, {
+          username,
+          fullName,
+        });
 
         if (error) {
           setErrorMessage(error);
@@ -66,6 +78,8 @@ export function LoginForm() {
           signIn({
             email: user?.email ?? email,
             role: user?.role ?? selectedRole,
+            username: user?.username ?? username.trim(),
+            fullName: user?.fullName ?? fullName.trim(),
           });
           setSuccessMessage(
             "Cuenta creada. Revisa tu correo para confirmar el registro si aplica, y usa el menú de usuario para acceder a tus funciones."
@@ -127,6 +141,32 @@ export function LoginForm() {
         </label>
         {mode === "signup" ? (
           <>
+            <label>
+              Usuario
+              <input
+                className="input"
+                type="text"
+                autoComplete="username"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="ritual.usuario"
+                required
+              />
+            </label>
+
+            <label>
+              Nombre completo
+              <input
+                className="input"
+                type="text"
+                autoComplete="name"
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
+                placeholder="Tu nombre"
+                required
+              />
+            </label>
+
             <label>
               Tipo de cuenta inicial
               <select

@@ -8,6 +8,8 @@ type SupabaseAuthResult = {
   user: {
     email: string;
     role: "customer" | "admin";
+    username?: string;
+    fullName?: string;
   } | null;
 };
 
@@ -29,6 +31,16 @@ type SupabaseUserPayload = {
   user_metadata?: {
     role?: string;
     user_role?: string;
+    username?: string;
+    full_name?: string;
+    fullName?: string;
+  };
+  raw_user_meta_data?: {
+    role?: string;
+    user_role?: string;
+    username?: string;
+    full_name?: string;
+    fullName?: string;
   };
 };
 
@@ -106,12 +118,22 @@ function parseSupabaseUser(data: SupabaseSuccessPayload | null) {
   return {
     email: user.email,
     role: normalizeUserRole(user.app_metadata?.role ?? user.app_metadata?.user_role ?? user.user_metadata?.role ?? user.user_metadata?.user_role),
+    username: user.user_metadata?.username ?? user.raw_user_meta_data?.username,
+    fullName:
+      user.user_metadata?.full_name ??
+      user.user_metadata?.fullName ??
+      user.raw_user_meta_data?.full_name ??
+      user.raw_user_meta_data?.fullName,
   };
 }
 
 async function requestSupabaseAuth(
   endpoint: string,
-  body: { email: string; password: string; options?: { data?: { role: "customer" | "admin" } } },
+  body: {
+    email: string;
+    password: string;
+    options?: { data?: { role: "customer" | "admin"; username?: string; full_name?: string } };
+  },
   fallbackError: string
 ) {
   try {
@@ -171,8 +193,15 @@ export async function signInWithPassword(email: string, password: string): Promi
 export async function signUpWithPassword(
   email: string,
   password: string,
-  role: "customer" | "admin" = "customer"
+  role: "customer" | "admin" = "customer",
+  profile?: {
+    username: string;
+    fullName: string;
+  }
 ): Promise<SupabaseAuthResult> {
+  const normalizedUsername = profile?.username.trim();
+  const normalizedFullName = profile?.fullName.trim();
+
   return requestSupabaseAuth(
     "/auth/v1/signup",
     {
@@ -181,6 +210,8 @@ export async function signUpWithPassword(
       options: {
         data: {
           role,
+          ...(normalizedUsername ? { username: normalizedUsername } : {}),
+          ...(normalizedFullName ? { full_name: normalizedFullName } : {}),
         },
       },
     },

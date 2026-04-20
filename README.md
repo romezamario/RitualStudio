@@ -513,3 +513,22 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Registro con campos de usuario y nombre completo
+### ¿Qué cambia?
+- El modo **Crear cuenta** en `/login` ahora solicita también `Usuario` y `Nombre completo`, además de correo/contraseña.
+- Se agregó validación previa para evitar enviar el registro si faltan esos dos campos.
+- En signup, estos datos se envían como metadata a Supabase Auth (`username`, `full_name`) para dejar perfil básico desde el alta.
+- La sesión local (`AuthContext`) ahora conserva `username/fullName` y el menú autenticado del header prioriza mostrar ese nombre en lugar de solo correo cuando esté disponible.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El flujo de registro queda más completo para operación comercial y administración posterior de cuentas.
+- Mejora la personalización visible del usuario autenticado sin introducir cambios de backend adicionales.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
