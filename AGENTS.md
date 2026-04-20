@@ -489,3 +489,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye sección de troubleshooting de signup con lectura de códigos HTTP frecuentes.
+
+## PR: Aviso de privacidad para registro de datos personales (México)
+- Fecha: 2026-04-20
+- Objetivo: Implementar una página de aviso de privacidad para el tratamiento de datos personales de clientes (nombre, teléfono y correo) en procesos posteriores al login, conforme al marco mexicano aplicable.
+
+### Lo aprendido
+- Publicar el aviso de privacidad como ruta de primer nivel mejora trazabilidad legal y facilita compartirlo en onboarding/soporte.
+- Estructurar el texto por bloques funcionales (responsable, finalidades, ARCO, transferencias, seguridad) hace más mantenible el contenido frente a futuras actualizaciones regulatorias.
+- Mantener visible el acceso desde navegación principal reduce fricción para cumplimiento de transparencia.
+
+### Decisiones técnicas
+- Se creó la ruta dedicada `/aviso-de-privacidad` en App Router para centralizar el contenido legal.
+- Se usó `SiteShell` y componentes visuales existentes (`studio-card`) para conservar consistencia editorial del sitio.
+- Se agregó enlace directo `Aviso de privacidad` en menú principal para accesibilidad transversal.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint del proyecto sin errores y navegación funcional hacia el aviso desde el header.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual de secciones legales y de navegación a `/aviso-de-privacidad`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incorpora la nueva ruta legal y su alcance de cumplimiento para datos personales en la app.
