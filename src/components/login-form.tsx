@@ -12,6 +12,13 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const passwordChecks = {
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasDigit: /\d/.test(password),
+    hasSpecialCharacter: /[^A-Za-z0-9]/.test(password),
+  };
+  const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -22,6 +29,11 @@ export function LoginForm() {
       setErrorMessage(
         "Faltan variables de entorno de Supabase. Configura NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY)."
       );
+      return;
+    }
+
+    if (mode === "signup" && !isPasswordStrong) {
+      setErrorMessage("La contraseña debe incluir mayúsculas, minúsculas, dígitos y caracteres especiales.");
       return;
     }
 
@@ -100,6 +112,22 @@ export function LoginForm() {
             required
           />
         </label>
+        {mode === "signup" ? (
+          <ul className="password-rules" aria-live="polite">
+            <li className={`password-rule ${passwordChecks.hasUppercase ? "is-valid" : ""}`}>
+              {passwordChecks.hasUppercase ? "✅" : "⬜"} Al menos una mayúscula
+            </li>
+            <li className={`password-rule ${passwordChecks.hasLowercase ? "is-valid" : ""}`}>
+              {passwordChecks.hasLowercase ? "✅" : "⬜"} Al menos una minúscula
+            </li>
+            <li className={`password-rule ${passwordChecks.hasDigit ? "is-valid" : ""}`}>
+              {passwordChecks.hasDigit ? "✅" : "⬜"} Al menos un dígito
+            </li>
+            <li className={`password-rule ${passwordChecks.hasSpecialCharacter ? "is-valid" : ""}`}>
+              {passwordChecks.hasSpecialCharacter ? "✅" : "⬜"} Al menos un caracter especial
+            </li>
+          </ul>
+        ) : null}
 
         <button type="submit" className="btn btn-primary" disabled={isLoading}>
           {isLoading ? "Procesando..." : mode === "login" ? "Iniciar sesión" : "Crear cuenta"}

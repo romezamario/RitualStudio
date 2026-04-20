@@ -453,3 +453,22 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Validación de contraseña en vivo durante registro
+### ¿Qué cambia?
+- Se agregó validación en tiempo real en la pantalla de `/login` cuando el usuario está en modo **Crear cuenta**.
+- Ahora se muestran 4 reglas de contraseña con estado en vivo: mayúscula, minúscula, dígito y caracter especial.
+- El envío de registro se bloquea si no se cumplen todas las reglas, mostrando un mensaje claro para corregir.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- Validación manual del flujo de UI en `/login` alternando entre `Ya tengo cuenta` y `Crear cuenta`.
+
+### Impacto
+- Reduce intentos fallidos de registro por contraseñas débiles.
+- Mejora la experiencia del usuario al dar feedback inmediato antes de enviar el formulario.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
