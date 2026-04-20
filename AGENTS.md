@@ -595,3 +595,27 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó el comportamiento del menú autenticado y la separación inicial de funciones por rol para próximas iteraciones de permisos.
+
+## PR: Ajuste de navegación (quitar Arreglos del menú y renombrar Marketplace a Tienda)
+- Fecha: 2026-04-20
+- Objetivo: Simplificar la navegación principal eliminando la opción Arreglos del header y unificar el acceso al catálogo bajo la etiqueta Tienda.
+
+### Lo aprendido
+- Cuando el catálogo principal ya vive en `/marketplace`, mantener además `Arreglos` en menú genera redundancia de navegación y puede dividir la intención de compra.
+- Renombrar solo la etiqueta del link (sin cambiar la ruta) permite un ajuste editorial rápido sin impacto técnico en rutas existentes.
+
+### Decisiones técnicas
+- Se actualizó el arreglo `links` de `SiteShell` para remover `Arreglos` y cambiar `Marketplace` por `Tienda`.
+- Se mantuvo la ruta `/arreglos` publicada para compatibilidad con enlaces existentes y posible uso secundario fuera del menú principal.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint sin errores y navegación principal actualizada con `Tienda` como entrada de catálogo.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual de `src/components/site-shell.tsx` (arreglo `links`) confirmando ausencia de `Arreglos` y presencia de `Tienda`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documenta este ajuste como cambio editorial de navegación sin alteración de rutas internas.
