@@ -385,3 +385,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documenta alcance actual del carrito (persistencia local, sin pasarela de pago) y el uso de WhatsApp como checkout asistido.
+
+## PR: Login base con Supabase Auth
+- Fecha: 2026-04-20
+- Objetivo: Implementar el primer flujo de autenticación (login/registro) conectado a Supabase para habilitar la base del sistema de usuarios y roles del sitio.
+
+### Lo aprendido
+- Aun sin instalar SDK adicional, se puede integrar un login funcional de Supabase consumiendo directamente sus endpoints de Auth desde frontend con la `anon key`.
+- Para una primera iteración, separar la lógica de autenticación en una utilidad (`supabase-client.ts`) evita duplicar requests y simplifica futuros cambios hacia manejo de sesión/refresh token.
+- Incluir en UI mensajes de error/éxito acelera validación operativa cuando el equipo configura variables en Vercel.
+
+### Decisiones técnicas
+- Se creó la ruta `/login` como pantalla inicial de autenticación con dos modos: `Iniciar sesión` y `Crear cuenta`.
+- Se usaron los endpoints `POST /auth/v1/token?grant_type=password` y `POST /auth/v1/signup` de Supabase Auth en lugar de depender de paquetes externos (bloqueados por política de registry en este entorno).
+- Se añadió enlace `Login` al menú principal para que el acceso esté disponible desde cualquier página.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint del proyecto pasa y el formulario queda operativo a nivel de flujo UI (modos, campos requeridos y feedback).
+- Evidencia:
+  - `npm run lint` OK.
+  - `npm install @supabase/supabase-js` falla con `E403 Forbidden` en este entorno, por lo que se aplicó integración vía endpoints HTTP de Supabase Auth.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documenta que esta iteración cubre login base y registro; próxima fase recomendada: persistencia de sesión, guard de rutas y modelo de roles para admin/superadmin/cliente.
