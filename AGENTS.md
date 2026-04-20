@@ -437,3 +437,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se añadió guía de troubleshooting para el error de conectividad con Supabase en login/registro.
+
+## PR: Compatibilidad con publishable key y formato flexible de URL en Supabase
+- Fecha: 2026-04-20
+- Objetivo: Evitar errores de configuración al usar la nomenclatura actual de Supabase (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) y tolerar URLs pegadas con sufijos de endpoint.
+
+### Lo aprendido
+- Supabase está promoviendo `publishable key` en guías recientes, por lo que mantener solo `ANON_KEY` en código genera fricción innecesaria al configurar entornos nuevos.
+- Un error común es pegar la URL con `/auth/v1` o `/rest/v1`; normalizar esos sufijos en cliente reduce tickets de “URL inválida”.
+- Mensajes de error con ejemplo concreto de formato aceleran resolución operativa en Vercel/local.
+
+### Decisiones técnicas
+- Se definió prioridad de lectura: `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y fallback a `NEXT_PUBLIC_SUPABASE_ANON_KEY` para compatibilidad retroactiva.
+- Se amplió la normalización de `NEXT_PUBLIC_SUPABASE_URL` para remover `/`, `/auth/v1` y `/rest/v1` al final antes de validar.
+- Se actualizó el mensaje de configuración faltante para incluir explícitamente ambos nombres de variable soportados.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado: Lint y chequeo de tipos sin errores.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta variables recomendadas y el patrón exacto de URL esperado para Supabase.
