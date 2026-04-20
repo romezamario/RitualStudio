@@ -332,3 +332,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye árbol recomendado para que el equipo suba imágenes con convención consistente.
+
+## PR: Marketplace con scroll, categorías y detalle por producto
+- Fecha: 2026-04-20
+- Objetivo: Crear una experiencia base de marketplace para explorar el catálogo por scroll, con categorización visible y una ficha de detalle por producto al hacer clic.
+
+### Lo aprendido
+- Un dataset centralizado para productos evita inconsistencias entre la vista de listado y la vista de detalle cuando el catálogo crece.
+- Las anclas por categoría en la misma página (chips + `id`) dan una navegación rápida sin agregar complejidad de estado en frontend.
+- Separar “preview corto” y “detalle completo” de cada producto mejora la jerarquía de información y reduce saturación del listado principal.
+
+### Decisiones técnicas
+- Se creó `src/data/marketplace-products.ts` como fuente única con tipado para productos y helpers de acceso por `slug`.
+- Se implementó `/marketplace` con render por categorías y CTA `Ver detalle` hacia `/marketplace/[slug]`.
+- Se agregó `generateStaticParams` en la ruta dinámica para dejar predefinidos los slugs del catálogo en build.
+- Se añadió el enlace `Marketplace` en la navegación principal para accesibilidad inmediata desde cualquier página.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint del proyecto sin errores; flujo de navegación verificado a nivel de estructura (listado por categoría y ruta de detalle por slug).
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual del flujo: `/marketplace` → clic en `Ver detalle` → `/marketplace/[slug]`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incorpora nuevas rutas y resumen del cambio de marketplace para operación y mantenimiento.

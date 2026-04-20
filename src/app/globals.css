@@ -401,6 +401,91 @@ p {
   padding: 0.75rem 0.85rem 0.9rem;
 }
 
+.marketplace-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 2rem;
+}
+
+.chip-link {
+  background: color-mix(in srgb, white 55%, var(--rose-mist));
+  border: 1px solid color-mix(in srgb, var(--smoke) 45%, white);
+  border-radius: 999px;
+  font-size: 0.84rem;
+  letter-spacing: 0.04em;
+  padding: 0.4rem 0.85rem;
+}
+
+.chip-link:hover {
+  background: white;
+}
+
+.scroll-hint {
+  color: var(--muted);
+  margin-top: 1rem;
+}
+
+.marketplace-section {
+  margin-top: 2.4rem;
+  scroll-margin-top: 1.2rem;
+}
+
+.marketplace-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.marketplace-card h3 {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.product-detail {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: 1fr 1.1fr;
+  margin-top: 2rem;
+}
+
+.product-detail-image-wrap {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.product-detail-image {
+  display: block;
+  height: 100%;
+  min-height: 460px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.product-detail-content {
+  display: grid;
+  gap: 1rem;
+}
+
+.product-detail-content h2 {
+  font-size: 2rem;
+}
+
+.product-meta-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.product-detail ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.product-detail li {
+  margin-bottom: 0.35rem;
+}
+
 @media (max-width: 900px) {
   .nav-wrap {
     border-radius: 1rem;
@@ -480,7 +565,13 @@ p {
   .feature-grid,
   .split-panel,
   .contact-grid,
-  .reference-grid {
+  .reference-grid,
+  .product-detail,
+  .product-meta-grid {
     grid-template-columns: 1fr;
+  }
+
+  .product-detail-image {
+    min-height: 320px;
   }
 }
