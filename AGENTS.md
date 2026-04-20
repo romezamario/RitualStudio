@@ -359,3 +359,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incorpora nuevas rutas y resumen del cambio de marketplace para operación y mantenimiento.
+
+## PR: Carrito de compras y compra directa en marketplace
+- Fecha: 2026-04-20
+- Objetivo: Permitir que usuarios agreguen productos al carrito desde marketplace/detalle, compren directamente por producto y consulten un carrito consolidado.
+
+### Lo aprendido
+- Para una experiencia comercial rápida en Next.js, un carrito basado en `localStorage` + contexto cliente cubre el flujo de selección sin bloquear por backend de pagos en una primera versión.
+- Mantener una utilidad central para construir enlaces de WhatsApp evita duplicar lógica de sanitización/formato de número entre header, compra directa y checkout del carrito.
+- Exponer el acceso a carrito en la navegación mejora descubribilidad y evita que el usuario pierda visibilidad de los productos seleccionados.
+
+### Decisiones técnicas
+- Se implementó `CartProvider` con hook `useCart` para concentrar operaciones `add/remove/clear` y contador total.
+- Se creó `ProductPurchaseActions` reutilizable para no duplicar botones de compra en listado y detalle de producto.
+- Se añadió la ruta `/carrito` con resumen y CTA final por WhatsApp con productos concatenados en el mensaje.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint del proyecto sin errores; flujo de carrito y compra directa validado a nivel de comportamiento esperado en componentes.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual del flujo: `/marketplace` → `Agregar al carrito` → `/carrito` → `Quitar` / `Vaciar carrito` / `Comprar por WhatsApp`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documenta alcance actual del carrito (persistencia local, sin pasarela de pago) y el uso de WhatsApp como checkout asistido.

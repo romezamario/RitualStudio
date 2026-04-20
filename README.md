@@ -12,8 +12,9 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 
 ### Módulos/páginas iniciales
 - ` / ` Inicio con propuesta de valor y CTAs.
-- ` /marketplace ` Marketplace con exploración por scroll y categorización por tipo de producto.
-- ` /marketplace/[slug] ` Página de detalle por producto con ficha ampliada.
+- ` /marketplace ` Marketplace con exploración por scroll, categorización y acciones de compra (`Agregar al carrito` / `Comprar ahora`).
+- ` /marketplace/[slug] ` Página de detalle por producto con ficha ampliada y acciones de carrito/compra directa.
+- ` /carrito ` Vista de carrito de compras con resumen de productos agregados y checkout por WhatsApp.
 - ` /arreglos ` Colección inicial de arreglos signature.
 - ` /custom ` Flujo base de briefing para diseño a medida.
 - ` /eventos ` Servicio para bodas y activaciones.
@@ -296,6 +297,26 @@ NEXT_PUBLIC_WHATSAPP_MESSAGE=Hola Ritual Studio, quiero cotizar un arreglo.
 ### Impacto
 - El sitio pasa de un catálogo estático a una base de marketplace escalable con arquitectura lista para crecer en número de productos.
 - Se mejora la experiencia de descubrimiento al permitir scroll continuo y segmentación clara por intención de compra.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+
+## PR: Carrito de compras y compra directa desde marketplace
+### ¿Qué cambia?
+- Se agregó flujo de carrito para productos de marketplace con persistencia en `localStorage` (agregar, quitar y vaciar).
+- Se implementaron acciones de compra en cada producto: **Agregar al carrito** y **Comprar ahora** (directo a WhatsApp).
+- Se creó la ruta `/carrito` con listado de productos agregados y CTA para finalizar compra por WhatsApp.
+- Se añadió acceso visible de **Ver carrito** en navegación para consultar productos desde cualquier pantalla.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Revisión manual de flujo esperado: `/marketplace` → agregar productos → `/carrito` → quitar/vaciar/comprar por WhatsApp.
+
+### Impacto
+- El sitio pasa de catálogo informativo a experiencia base de compra asistida, permitiendo intención transaccional inmediata.
+- El equipo comercial obtiene un resumen rápido de productos seleccionados al recibir la solicitud por WhatsApp.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

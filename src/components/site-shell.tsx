@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { CartProvider, useCart } from "@/components/cart-context";
+import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const links = [
   { href: "/", label: "Inicio" },
@@ -13,24 +15,7 @@ const links = [
   { href: "/contacto", label: "Contacto" }
 ];
 
-const DEFAULT_WHATSAPP_NUMBER = "5520904940";
-const rawWhatsAppNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? DEFAULT_WHATSAPP_NUMBER;
-
-function toWhatsAppNumber(value: string) {
-  const digits = value.replace(/\D/g, "");
-
-  if (digits.length === 10) {
-    return `52${digits}`;
-  }
-
-  return digits;
-}
-
-const whatsappNumber = toWhatsAppNumber(rawWhatsAppNumber);
-const whatsappMessage = encodeURIComponent(
-  process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ?? "Hola Ritual Studio, quiero más información."
-);
-const whatsappHref = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+const whatsappHref = getWhatsAppHref(process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ?? "Hola Ritual Studio, quiero más información.");
 
 type SiteShellProps = {
   title: string;
@@ -39,8 +24,9 @@ type SiteShellProps = {
   children?: React.ReactNode;
 };
 
-export default function SiteShell({ title, subtitle, eyebrow, children }: SiteShellProps) {
+function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { totalItems } = useCart();
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -81,6 +67,9 @@ export default function SiteShell({ title, subtitle, eyebrow, children }: SiteSh
                 {link.label}
               </Link>
             ))}
+            <Link href="/carrito" onClick={closeMenu} className="cart-link">
+              Ver carrito{totalItems > 0 ? ` (${totalItems})` : ""}
+            </Link>
           </nav>
 
           <div className={`header-actions ${isMenuOpen ? "is-open" : ""}`}>
@@ -90,6 +79,9 @@ export default function SiteShell({ title, subtitle, eyebrow, children }: SiteSh
               <i className="swatch swatch-3" />
               <i className="swatch swatch-4" />
             </span>
+            <Link href="/carrito" className="btn btn-ghost" onClick={closeMenu}>
+              Ver carrito{totalItems > 0 ? ` (${totalItems})` : ""}
+            </Link>
             <a
               href={whatsappHref}
               className="btn btn-primary"
@@ -110,5 +102,15 @@ export default function SiteShell({ title, subtitle, eyebrow, children }: SiteSh
         {children}
       </section>
     </main>
+  );
+}
+
+export default function SiteShell({ title, subtitle, eyebrow, children }: SiteShellProps) {
+  return (
+    <CartProvider>
+      <SiteShellFrame title={title} subtitle={subtitle} eyebrow={eyebrow}>
+        {children}
+      </SiteShellFrame>
+    </CartProvider>
   );
 }
