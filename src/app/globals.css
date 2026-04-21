@@ -361,6 +361,17 @@ p {
   color: color-mix(in srgb, var(--ink) 82%, white);
 }
 
+.text-link {
+  color: var(--charcoal);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.text-link:hover {
+  color: color-mix(in srgb, var(--charcoal) 84%, black);
+}
+
 .card-image-wrap {
   border-radius: 0.85rem;
   overflow: hidden;

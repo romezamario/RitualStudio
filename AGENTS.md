@@ -818,3 +818,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Cambio visual/UX mobile sin impacto funcional en rutas ni autenticación.
+
+## PR: Redirección post-login a dashboard de usuario
+- Fecha: 2026-04-21
+- Objetivo: Redirigir automáticamente al usuario autenticado a un dashboard de cuenta para evitar que permanezca en la pantalla de login.
+
+### Lo aprendido
+- Un flujo de autenticación se percibe incompleto si no existe un destino claro después del login; redirigir a un hub de cuenta mejora orientación del usuario.
+- Un dashboard de entrada reduce fricción porque concentra accesos frecuentes (pedidos, direcciones y perfil) sin depender del menú desplegable.
+- Permitir `?redirect=` controlado (solo rutas internas) mantiene flexibilidad para futuros flujos protegidos sin abrir riesgos de redirección externa.
+
+### Decisiones técnicas
+- Se integró `useRouter` en `login-form` para ejecutar `router.push("/mi-cuenta")` al autenticar correctamente (login y signup con sesión activa).
+- Se creó la ruta `/mi-cuenta` con un dashboard cliente que muestra datos básicos de cuenta y accesos directos.
+- Se añadió el enlace `Dashboard` al menú de usuario autenticado para navegación recurrente.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada de flujo.
+- Resultado: Lint sin errores y redirección post-login implementada hacia dashboard de cuenta.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual del flujo esperado: `/login` → autenticación exitosa → `/mi-cuenta`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó la nueva ruta de dashboard y el nuevo comportamiento de redirección posterior a autenticación.

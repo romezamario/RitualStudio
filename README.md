@@ -21,6 +21,7 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /nosotros ` Narrativa de marca.
 - ` /contacto ` Canales de contacto.
 - ` /login ` Acceso con email/contraseña conectado a Supabase Auth (login + registro).
+- ` /mi-cuenta ` Dashboard del usuario autenticado con acceso centralizado a perfil, pedidos, direcciones y accesos administrativos (si aplica).
 - ` /auth/callback ` Callback de confirmación de correo para Supabase (`token_hash` + `type`) con redirección amigable.
 - ` /correo-confirmado ` Página de éxito visual para confirmación de correo.
 - ` /auth/error ` Página de error amigable cuando el enlace de confirmación es inválido o expiró.
@@ -666,6 +667,24 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 
 ### Impacto
 - Mejora de UX en mobile: el menú de usuario queda visualmente contenido en el header, sin interferir con el texto editorial de la página.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+## PR: Redirección post-login a dashboard de usuario
+### ¿Qué cambia?
+- Se agregó la ruta ` /mi-cuenta ` como dashboard principal del usuario autenticado.
+- Al iniciar sesión (y al crear cuenta con sesión activa), ahora se redirige automáticamente a ` /mi-cuenta `.
+- El menú de usuario incorpora acceso directo a `Dashboard` para volver rápidamente al panel principal.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Validación manual estructurada del flujo: `/login` → `Iniciar sesión` → redirección a `/mi-cuenta`.
+
+### Impacto
+- El usuario ya no se queda en pantalla de login después de autenticarse.
+- La experiencia de cuenta queda más clara al centralizar accesos a pedidos y direcciones desde un dashboard.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

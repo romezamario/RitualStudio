@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth, type UserRole } from "@/components/auth-context";
 import { hasSupabaseConfig, signInWithPassword, signUpWithPassword } from "@/lib/supabase-client";
 
@@ -9,6 +9,7 @@ type AuthMode = "login" | "signup";
 
 export function LoginForm() {
   const { signIn } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialMode = searchParams.get("mode") === "signup" ? "signup" : "login";
   const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -20,6 +21,9 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const redirectPath = searchParams.get("redirect");
+  const postLoginPath =
+    redirectPath && redirectPath.startsWith("/") && !redirectPath.startsWith("//") ? redirectPath : "/mi-cuenta";
   const passwordChecks = {
     hasUppercase: /[A-Z]/.test(password),
     hasLowercase: /[a-z]/.test(password),
@@ -65,7 +69,7 @@ export function LoginForm() {
             username: user?.username,
             fullName: user?.fullName,
           });
-          setSuccessMessage("Inicio de sesión exitoso. Ya puedes navegar a tus funciones desde el menú de usuario.");
+          router.push(postLoginPath);
         }
       }
 
@@ -84,7 +88,7 @@ export function LoginForm() {
             username: user?.username ?? username.trim(),
             fullName: user?.fullName ?? fullName.trim(),
           });
-          setSuccessMessage("Cuenta creada e iniciada correctamente. Ya puedes usar el menú de usuario.");
+          router.push(postLoginPath);
         } else {
           setSuccessMessage(
             "Cuenta creada. Revisa tu correo y confirma tu registro para completar el acceso a Ritual Studio."

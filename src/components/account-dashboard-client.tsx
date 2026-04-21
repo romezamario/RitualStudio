@@ -1,0 +1,57 @@
+"use client";
+
+import Link from "next/link";
+import { useAuth } from "@/components/auth-context";
+
+export default function AccountDashboardClient() {
+  const { user } = useAuth();
+  const fullName = user?.fullName?.trim();
+  const username = user?.username?.trim();
+
+  return (
+    <div className="feature-grid account-dashboard-grid">
+      <article className="studio-card">
+        <p className="card-label">Perfil</p>
+        <h2>{fullName || username || "Tu cuenta en Ritual Studio"}</h2>
+        <p>
+          Correo registrado: <strong>{user?.email ?? "Sin correo disponible"}</strong>
+        </p>
+        <p>Rol actual: {user?.role === "admin" ? "Administrador" : "Usuario"}.</p>
+      </article>
+
+      <article className="studio-card">
+        <p className="card-label">Pedidos</p>
+        <h2>Historial y seguimiento</h2>
+        <p>Consulta el estado de tus compras, fechas de entrega y notas de preparación.</p>
+        <Link href="/mi-cuenta/pedidos" className="text-link">
+          Ver mis pedidos
+        </Link>
+      </article>
+
+      <article className="studio-card">
+        <p className="card-label">Direcciones</p>
+        <h2>Direcciones de entrega</h2>
+        <p>Guarda ubicaciones frecuentes para comprar más rápido en siguientes pedidos.</p>
+        <Link href="/mi-cuenta/direcciones" className="text-link">
+          Administrar direcciones
+        </Link>
+      </article>
+
+      {user?.role === "admin" ? (
+        <article className="studio-card">
+          <p className="card-label">Administración</p>
+          <h2>Accesos de operación</h2>
+          <p>Gestiona pedidos del estudio y cuentas de usuarios con permisos administrativos.</p>
+          <div className="cta-row">
+            <Link href="/admin/pedidos" className="btn btn-ghost">
+              Pedidos admin
+            </Link>
+            <Link href="/admin/usuarios" className="btn btn-ghost">
+              Usuarios admin
+            </Link>
+          </div>
+        </article>
+      ) : null}
+    </div>
+  );
+}
