@@ -65,6 +65,21 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
           </Link>
 
           <div className="header-right">
+            <Link
+              href="/carrito"
+              className="cart-access"
+              aria-label={totalItems > 0 ? `Ver carrito con ${totalItems} productos` : "Ver carrito"}
+              onClick={closeMenu}
+            >
+              <CartIcon />
+              <span className="sr-only">Ver carrito</span>
+              {totalItems > 0 ? (
+                <span className="cart-access-badge" aria-label={`${totalItems} productos en el carrito`}>
+                  {totalItems}
+                </span>
+              ) : null}
+            </Link>
+
             <div className="user-menu account-access">
               <button
                 type="button"
@@ -148,9 +163,6 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
                 {link.label}
               </Link>
             ))}
-            <Link href="/carrito" onClick={closeMenu} className="cart-link">
-              Ver carrito{totalItems > 0 ? ` (${totalItems})` : ""}
-            </Link>
           </nav>
 
           <div className={`header-actions ${isMenuOpen ? "is-open" : ""}`}>
@@ -160,9 +172,6 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
               <i className="swatch swatch-3" />
               <i className="swatch swatch-4" />
             </span>
-            <Link href="/carrito" className="btn btn-ghost" onClick={closeMenu}>
-              Ver carrito{totalItems > 0 ? ` (${totalItems})` : ""}
-            </Link>
             <a
               href={whatsappHref}
               className="btn btn-primary"
@@ -215,6 +224,17 @@ function UserIcon() {
     <svg viewBox="0 0 24 24" className="user-icon" aria-hidden>
       <path
         d="M12 12.75a5.25 5.25 0 1 0 0-10.5 5.25 5.25 0 0 0 0 10.5Zm0 2.25c-4.83 0-8.75 2.69-8.75 6v.75h17.5V21c0-3.31-3.92-6-8.75-6Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="cart-icon" aria-hidden>
+      <path
+        d="M3 4.25h1.67c.33 0 .62.23.69.55l.33 1.45h12.55a.75.75 0 0 1 .72.96l-1.34 4.7a2.75 2.75 0 0 1-2.64 1.99H9.31a2.75 2.75 0 0 1-2.67-2.09L5.22 5.74h-2.2a.75.75 0 0 1 0-1.5Zm4.89 7.23c.16.66.74 1.12 1.42 1.12h6.67c.68 0 1.27-.46 1.43-1.12l1.06-3.73H6.83l1.06 3.73ZM8.75 17.5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5Zm7.5 0a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5Z"
         fill="currentColor"
       />
     </svg>
