@@ -844,3 +844,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó la nueva ruta de dashboard y el nuevo comportamiento de redirección posterior a autenticación.
+
+## PR: Ícono de carrito fijo fuera del menú hamburguesa
+- Fecha: 2026-04-21
+- Objetivo: Mostrar el acceso al carrito siempre visible en header como ícono, fuera del menú hamburguesa, incluyendo badge con número de productos agregados.
+
+### Lo aprendido
+- Separar accesos transaccionales (carrito) de la navegación colapsable mejora descubribilidad de compra en mobile.
+- Un badge numérico pequeño sobre el ícono comunica estado del carrito sin ocupar espacio textual en el header.
+
+### Decisiones técnicas
+- Se reutilizó `totalItems` de `CartProvider` para renderizar la notificación del carrito en tiempo real.
+- Se agregó un nuevo trigger visual (`cart-access`) en `SiteShell` junto al acceso de cuenta, y se removieron enlaces duplicados de carrito del menú hamburguesa/acciones.
+- Se incorporó un ícono SVG inline para evitar dependencias externas de librerías de íconos.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + validación manual estructurada.
+- Resultado: Lint y typecheck pasan sin errores; el ícono de carrito queda visible fuera del menú hamburguesa y el badge refleja la cantidad de productos.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - Revisión manual del flujo esperado: agregar productos al carrito y verificar actualización del contador en el ícono.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Cambio centrado en UX de navegación comercial; sin cambios de rutas ni lógica de checkout.

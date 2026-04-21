@@ -132,6 +132,46 @@ p {
   gap: 0.65rem;
 }
 
+.cart-access {
+  align-items: center;
+  background: color-mix(in srgb, white 60%, var(--rose-mist));
+  border: 1px solid color-mix(in srgb, var(--smoke) 45%, white);
+  border-radius: 999px;
+  color: var(--charcoal);
+  display: inline-flex;
+  height: 2.4rem;
+  justify-content: center;
+  position: relative;
+  width: 2.4rem;
+}
+
+.cart-access:hover {
+  background: white;
+}
+
+.cart-icon {
+  height: 1.05rem;
+  width: 1.05rem;
+}
+
+.cart-access-badge {
+  align-items: center;
+  background: #8d2a2a;
+  border: 1px solid color-mix(in srgb, #8d2a2a 74%, white);
+  border-radius: 999px;
+  color: white;
+  display: inline-flex;
+  font-size: 0.67rem;
+  font-weight: 700;
+  height: 1.1rem;
+  justify-content: center;
+  min-width: 1.1rem;
+  padding: 0 0.25rem;
+  position: absolute;
+  right: -0.3rem;
+  top: -0.25rem;
+}
+
 .nav-links {
   display: flex;
   flex-wrap: wrap;
@@ -688,11 +728,6 @@ p {
 
 .product-detail li {
   margin-bottom: 0.35rem;
-}
-
-
-.cart-link {
-  font-weight: 600;
 }
 
 .marketplace-card-actions {

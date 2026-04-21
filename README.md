@@ -689,3 +689,23 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Ícono de carrito fijo fuera del menú hamburguesa
+### ¿Qué cambia?
+- Se movió el acceso al carrito fuera del menú hamburguesa para que quede siempre visible en el header.
+- Se reemplazó el texto `Ver carrito` por un ícono de carrito dedicado.
+- Se añadió una burbuja de notificación sobre el ícono que muestra el número de productos cuando `totalItems > 0`.
+- Se removió el acceso duplicado de carrito dentro del menú mobile y de las acciones colapsables.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- Validación manual estructurada del flujo esperado: agregar productos y confirmar que el contador en el ícono se actualiza.
+
+### Impacto
+- El acceso al carrito queda más visible y consistente en mobile/desktop.
+- Se reduce fricción de compra al no depender de abrir el menú hamburguesa para revisar carrito.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
