@@ -584,6 +584,25 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
   - Si no hay sesión: muestra ícono de usuario y, al hacer clic, abre opciones `Iniciar sesión` y `Crear usuario`.
   - Si hay sesión activa: muestra un círculo con iniciales del usuario y, al hacer clic, abre el menú de cuenta (pedidos, direcciones, opciones admin y cerrar sesión).
 - Se agregó soporte a `?mode=signup` en `/login` para abrir directamente el formulario en modo crear cuenta.
+## SEO técnico implementado (abril 2026)
+- Metadata global reforzada en App Router: `title` con plantilla, `description`, `keywords`, `robots`, Open Graph y Twitter Cards.
+- Canonical tags en Home, Marketplace y detalle dinámico por producto.
+- Datos estructurados JSON-LD:
+  - `Florist`/organización a nivel global.
+  - `Product` en cada URL de detalle de marketplace.
+- Archivos SEO automáticos:
+  - `src/app/sitemap.ts` con rutas estáticas y productos del catálogo.
+  - `src/app/robots.ts` permitiendo indexación pública y bloqueando áreas privadas (`/admin`, `/mi-cuenta`).
+
+### Recomendaciones operativas SEO
+- Configurar `NEXT_PUBLIC_SITE_URL` con el dominio final de producción para canónicos, `robots.txt` y `sitemap.xml` correctos.
+- Reemplazar/crear imágenes OG definitivas en `public/images/seo/og/` para mejorar CTR en redes.
+
+## PR: SEO técnico base (metadata, sitemap, robots y schema)
+### ¿Qué cambia?
+- Se fortalece la capa SEO global del sitio con metadata semántica completa para motores de búsqueda y redes sociales.
+- Se agregan `sitemap.xml` y `robots.txt` dinámicos usando el catálogo del marketplace.
+- Se añaden datos estructurados (`Florist` y `Product`) para mejorar elegibilidad de rich results.
 
 ### ¿Cómo se probó?
 - `npm run lint`.
@@ -596,6 +615,10 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Impacto
 - El acceso de cuenta se vuelve más consistente y visible en mobile/desktop sin mezclarlo con la navegación principal.
 - La señal visual de sesión activa mejora (avatar con iniciales), facilitando reconocer estado autenticado.
+
+### Impacto
+- Mejora la indexabilidad técnica del sitio y la calidad de snippets al compartir enlaces.
+- Deja preparada la base SEO para escalar contenido (blog/categorías) sin rehacer infraestructura.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

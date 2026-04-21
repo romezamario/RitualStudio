@@ -721,8 +721,29 @@ Un PR se considera terminado solo si:
   - `npm run lint` OK.
   - `npx tsc --noEmit` OK.
   - Revisión manual del flujo: estado anónimo (ícono + opciones login/signup) y estado autenticado (avatar con iniciales + menú de usuario).
+## PR: SEO técnico base para mejorar posicionamiento orgánico
+- Fecha: 2026-04-21
+- Objetivo: Reforzar la base técnica SEO del sitio para mejorar indexación, relevancia semántica y calidad de snippets en buscadores/redes.
+
+### Lo aprendido
+- En Next.js App Router, centralizar metadata en `layout.tsx` y complementar metadata por ruta ofrece cobertura SEO consistente sin duplicar lógica.
+- Generar `sitemap.xml` desde el dataset real del marketplace evita URLs huérfanas y facilita descubrimiento de productos.
+- Incluir JSON-LD (`Florist` y `Product`) ayuda a expresar explícitamente el tipo de negocio y catálogo para buscadores.
+
+### Decisiones técnicas
+- Se implementó metadata global con `metadataBase`, plantilla de títulos, Open Graph, Twitter y `robots`.
+- Se agregaron `src/app/sitemap.ts` y `src/app/robots.ts` con bloqueo explícito a rutas privadas (`/admin`, `/mi-cuenta`).
+- Se añadió `generateMetadata` en `/marketplace/[slug]` para canónicos y metadatos dinámicos por producto.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación estática de TypeScript.
+- Resultado: Lint y typecheck pasan sin errores.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
 
 ### Documentación
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye resumen del nuevo patrón de acceso a cuenta y su comportamiento por estado de sesión.
+- Notas: Se documentó la nueva capa SEO técnica y la recomendación de configurar `NEXT_PUBLIC_SITE_URL` con dominio productivo.
