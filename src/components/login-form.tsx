@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth-context";
-import { hasSupabaseConfig, signInWithPassword, signUpWithPassword } from "@/lib/supabase-client";
+import { hasSupabaseConfig, requestPasswordRecovery, signInWithPassword, signUpWithPassword } from "@/lib/supabase-client";
 
 type AuthMode = "login" | "signup";
 
@@ -32,6 +32,8 @@ export function LoginForm() {
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isRecoveryLoading, setIsRecoveryLoading] = useState(false);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const redirectPath = searchParams.get("redirect");
@@ -107,20 +109,60 @@ export function LoginForm() {
     }
   };
 
+  const handlePasswordRecovery = async () => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    if (!hasSupabaseConfig()) {
+      setErrorMessage(
+        "Faltan variables de entorno de Supabase. Configura NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY)."
+      );
+      return;
+    }
+
+    if (!email.trim()) {
+      setErrorMessage("Ingresa tu correo para enviarte el enlace de recuperación.");
+      return;
+    }
+
+    setIsRecoveryLoading(true);
+
+    try {
+      const { error } = await requestPasswordRecovery(email.trim());
+
+      if (error) {
+        setErrorMessage(error);
+      } else {
+        setSuccessMessage(
+          "Te enviamos un enlace para recuperar tu contraseña. Revisa tu correo y sigue el enlace para crear una nueva."
+        );
+        setIsRecoveryMode(false);
+      }
+    } finally {
+      setIsRecoveryLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="cta-row">
         <button
           type="button"
           className={`btn ${mode === "login" ? "btn-primary" : "btn-ghost"}`}
-          onClick={() => setMode("login")}
+          onClick={() => {
+            setMode("login");
+            setIsRecoveryMode(false);
+          }}
         >
           Ya tengo cuenta
         </button>
         <button
           type="button"
           className={`btn ${mode === "signup" ? "btn-primary" : "btn-ghost"}`}
-          onClick={() => setMode("signup")}
+          onClick={() => {
+            setMode("signup");
+            setIsRecoveryMode(false);
+          }}
         >
           Crear cuenta
         </button>
@@ -140,19 +182,21 @@ export function LoginForm() {
           />
         </label>
 
-        <label>
-          Contraseña
-          <input
-            className="input"
-            type="password"
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Mínimo 6 caracteres"
-            minLength={6}
-            required
-          />
-        </label>
+        {!isRecoveryMode ? (
+          <label>
+            Contraseña
+            <input
+              className="input"
+              type="password"
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Mínimo 6 caracteres"
+              minLength={6}
+              required
+            />
+          </label>
+        ) : null}
         {mode === "signup" ? (
           <>
             <label>
@@ -198,9 +242,43 @@ export function LoginForm() {
           </>
         ) : null}
 
-        <button type="submit" className="btn btn-primary" disabled={isLoading}>
-          {isLoading ? "Procesando..." : mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
-        </button>
+        {isRecoveryMode && mode === "login" ? (
+          <div className="cta-row">
+            <button type="button" className="btn btn-primary" disabled={isRecoveryLoading} onClick={handlePasswordRecovery}>
+              {isRecoveryLoading ? "Enviando..." : "Enviar enlace de recuperación"}
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => {
+                setIsRecoveryMode(false);
+                setErrorMessage(null);
+                setSuccessMessage(null);
+              }}
+            >
+              Volver al login
+            </button>
+          </div>
+        ) : (
+          <>
+            <button type="submit" className="btn btn-primary" disabled={isLoading}>
+              {isLoading ? "Procesando..." : mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
+            </button>
+            {mode === "login" ? (
+              <button
+                type="button"
+                className="btn btn-link"
+                onClick={() => {
+                  setIsRecoveryMode(true);
+                  setErrorMessage(null);
+                  setSuccessMessage(null);
+                }}
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            ) : null}
+          </>
+        )}
       </form>
 
       {errorMessage ? <p className="auth-feedback auth-feedback-error">{errorMessage}</p> : null}

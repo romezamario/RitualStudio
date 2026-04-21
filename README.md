@@ -21,6 +21,7 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /nosotros ` Narrativa de marca.
 - ` /contacto ` Canales de contacto.
 - ` /login ` Acceso con email/contraseña conectado a Supabase Auth (login + registro).
+- ` /actualizar-contrasena ` Paso final de recuperación para definir nueva contraseña después del enlace enviado por correo.
 - ` /mi-cuenta ` Dashboard del usuario autenticado con acceso centralizado a perfil, pedidos, direcciones y accesos administrativos (si aplica).
 - ` /auth/callback ` Callback de confirmación de correo para Supabase (`token_hash` + `type`) con redirección amigable.
 - ` /correo-confirmado ` Página de éxito visual para confirmación de correo.
@@ -152,7 +153,9 @@ NEXT_PUBLIC_SITE_URL=https://tu-dominio.com
 
 Notas operativas:
 - El template **Confirm sign up** de Supabase debe apuntar a `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email`.
+- El template **Reset password** de Supabase debe apuntar a `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery&next=/actualizar-contrasena`.
 - El registro (`signUp`) ahora envía `emailRedirectTo` usando `NEXT_PUBLIC_SITE_URL` y, si no existe, usa el `origin` actual del navegador.
+- La recuperación de contraseña (`recover`) también envía `emailRedirectTo` para aterrizar en `/actualizar-contrasena`.
 - Si la confirmación crea sesión, el usuario se sincroniza automáticamente en la app al llegar a `/correo-confirmado`.
 
 ## Nota técnica (build en Vercel)
@@ -187,6 +190,28 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 ### Impacto
 - Se mejora la jerarquía de navegación y se hace más claro el acceso transaccional en desktop y mobile.
 - Se reduce ruido visual del menú mobile, manteniendo contacto por WhatsApp siempre accesible desde el header.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+## PR: Recuperación de contraseña (forgot password + nueva contraseña)
+### ¿Qué cambia?
+- Se agregó la opción **¿Olvidaste tu contraseña?** en `/login` para enviar un enlace de recuperación a correo desde Supabase Auth.
+- Se creó la pantalla `/actualizar-contrasena` para capturar y validar la nueva contraseña con reglas visibles en tiempo real.
+- Se agregó `POST /api/auth/password` para actualizar la contraseña con sesión de recuperación validada en cookie segura (`httpOnly`) tras el callback.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- Revisión manual estructurada del flujo esperado:
+  - `/login` → `¿Olvidaste tu contraseña?` → enviar correo;
+  - enlace de recuperación → `/auth/callback?...type=recovery&next=/actualizar-contrasena`;
+  - `/actualizar-contrasena` → guardar nueva contraseña.
+
+### Impacto
+- Mejora UX/autonomía del usuario al permitir recuperar acceso sin soporte manual.
+- Mantiene seguridad al no exponer tokens en frontend y al actualizar contraseña vía endpoint server-side.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

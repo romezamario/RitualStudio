@@ -922,3 +922,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Cambio concentrado en UX/UI del header, sin modificaciones de rutas ni lógica de carrito/autenticación.
+
+## PR: Recuperación de contraseña para usuarios con acceso perdido
+- Fecha: 2026-04-21
+- Objetivo: Permitir que un usuario solicite recuperación de contraseña desde login y complete el cambio con un flujo guiado al regresar desde correo.
+
+### Lo aprendido
+- Un flujo de recuperación usable requiere dos pasos claros: solicitud de enlace desde login y pantalla dedicada para definir nueva contraseña al volver desde email.
+- Reutilizar el callback OTP existente (`/auth/callback`) permite mantener tokens en cookies seguras y evita exponer credenciales en query params de frontend.
+- Al actualizar contraseña por endpoint server-side con sesión de recuperación, se conserva coherencia con el modelo actual de seguridad basado en cookies `httpOnly`.
+
+### Decisiones técnicas
+- Se agregó modo `¿Olvidaste tu contraseña?` en `LoginForm` para enviar recovery email con Supabase (`/auth/v1/recover`) y mensaje de éxito/error en la misma vista.
+- Se creó la ruta `/actualizar-contrasena` con validación visual de reglas (mayúscula, minúscula, dígito, especial y mínimo de longitud) y confirmación de contraseña.
+- Se implementó `POST /api/auth/password` para ejecutar `PUT /auth/v1/user` usando el access token de cookie y así persistir la nueva contraseña de forma segura.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + validación manual estructurada de flujo.
+- Resultado: Lint y typecheck sin errores; flujo de recuperación listo de extremo a extremo a nivel de integración UI/API.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - Revisión manual del flujo esperado: `/login` → `¿Olvidaste tu contraseña?` → enlace de correo → `/actualizar-contrasena` → actualización exitosa.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta la nueva ruta y la configuración recomendada del template de recuperación en Supabase.
