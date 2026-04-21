@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { AuthProvider, useAuth } from "@/components/auth-context";
-import { CartProvider, useCart } from "@/components/cart-context";
+import { useAuth } from "@/components/auth-context";
+import { useCart } from "@/components/cart-context";
 import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const links = [
@@ -319,12 +319,8 @@ function DraggableWhatsAppButton() {
 
 export default function SiteShell({ title, subtitle, eyebrow, children }: SiteShellProps) {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <SiteShellFrame title={title} subtitle={subtitle} eyebrow={eyebrow}>
-          {children}
-        </SiteShellFrame>
-      </CartProvider>
-    </AuthProvider>
+    <SiteShellFrame title={title} subtitle={subtitle} eyebrow={eyebrow}>
+      {children}
+    </SiteShellFrame>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
+import { AppProviders } from "@/components/app-providers";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -97,7 +98,7 @@ export default function RootLayout({
             __html: JSON.stringify(organizationJsonLd)
           }}
         />
-        {children}
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

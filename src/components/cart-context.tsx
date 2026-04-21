@@ -26,11 +26,13 @@ const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     const rawCart = window.localStorage.getItem(CART_STORAGE_KEY);
 
     if (!rawCart) {
+      setIsHydrated(true);
       return;
     }
 
@@ -39,12 +41,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setItems(parsed);
     } catch {
       setItems([]);
+    } finally {
+      setIsHydrated(true);
     }
   }, []);
 
   useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  }, [isHydrated, items]);
 
   const value = useMemo<CartContextValue>(
     () => ({
