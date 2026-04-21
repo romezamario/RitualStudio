@@ -5,7 +5,7 @@ export default function ContactoPage() {
     <SiteShell
       eyebrow="Contacto"
       title="Hablemos de tu próximo arreglo"
-      subtitle="Atendemos solicitudes para regalos, interior styling y eventos. Cobertura principal en CDMX y área metropolitana."
+      subtitle="Atendemos solicitudes para regalos, interior styling y eventos en distintas ciudades, sujeto a disponibilidad."
     >
       <div className="contact-grid">
         <article className="studio-card">
