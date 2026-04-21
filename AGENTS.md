@@ -949,3 +949,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta la nueva ruta y la configuración recomendada del template de recuperación en Supabase.
+
+## PR: Ajuste del menú de usuario para evitar empalme con el contenido
+- Fecha: 2026-04-21
+- Objetivo: Corregir la superposición del dropdown de usuario con la estructura principal del sitio para mejorar legibilidad y navegación.
+
+### Lo aprendido
+- En layouts con hero tipográfico grande, un dropdown absoluto en header puede invadir el contenido y romper la lectura de títulos principales.
+- Para menús de cuenta con varios links (perfil + opciones admin), integrar el panel al flujo del encabezado evita solapamientos sin introducir lógica JS adicional.
+- Una corrección de UX visual puede resolverse con cambios de layout CSS sin afectar rutas, estado de auth ni lógica de permisos.
+
+### Decisiones técnicas
+- Se convirtió `.user-menu` en contenedor de columna (`display: flex; flex-direction: column; align-items: flex-end`) para alojar trigger y panel en flujo vertical.
+- Se cambió `.user-menu-panel` de `position: absolute` a `position: static` y se agregó `margin-top` para separación visual controlada.
+- Se mantuvo la estructura del componente `SiteShell` sin cambios funcionales para limitar el alcance al problema de empalme visual.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint sin errores y menú de usuario ya no se superpone sobre el contenido principal al desplegarse.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual del header con menú de usuario desplegado sobre páginas de cuenta.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Cambio exclusivamente visual de layout en header para mejorar UX desktop/móvil sin alterar lógica de autenticación.

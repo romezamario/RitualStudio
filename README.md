@@ -173,6 +173,24 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 
 ## Historial de cambios
 
+## PR: Ajuste del menú de usuario para evitar empalme con contenido
+### ¿Qué cambia?
+- Se ajustó el layout del bloque de cuenta en el header para que el panel de opciones de usuario forme parte del flujo del encabezado.
+- El dropdown de usuario dejó de posicionarse en absoluto y ahora se renderiza en estático con separación vertical controlada.
+- Se evitó el solapamiento del menú con el contenido principal (ej. títulos grandes del dashboard de cuenta).
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Revisión manual del header al abrir el menú de usuario en vistas con hero/encabezado amplio.
+
+### Impacto
+- Mejora la legibilidad del contenido y la percepción de orden visual al abrir el menú de usuario.
+- El ajuste no modifica rutas ni lógica de autenticación/autorización; es una corrección de UI/CSS.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
 ## PR: Reordenar header (menú a la izquierda + accesos rápidos a la derecha)
 ### ¿Qué cambia?
 - Se movieron las opciones de navegación para priorizar su alineación al lado izquierdo del header, junto al branding.
