@@ -40,12 +40,14 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
   const userMenuLinks =
     user?.role === "admin"
       ? [
+          { href: "/mi-cuenta", label: "Dashboard" },
           { href: "/mi-cuenta/pedidos", label: "Mis pedidos" },
           { href: "/mi-cuenta/direcciones", label: "Mis direcciones" },
           { href: "/admin/pedidos", label: "Gestión de pedidos" },
           { href: "/admin/usuarios", label: "Gestión de usuarios" },
         ]
       : [
+          { href: "/mi-cuenta", label: "Dashboard" },
           { href: "/mi-cuenta/pedidos", label: "Mis pedidos" },
           { href: "/mi-cuenta/direcciones", label: "Mis direcciones" },
         ];
