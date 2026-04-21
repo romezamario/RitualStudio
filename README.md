@@ -833,3 +833,21 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Optimización de providers globales y persistencia de carrito
+### ¿Qué cambia?
+- Se movieron `AuthProvider` y `CartProvider` al `RootLayout` mediante `AppProviders`, para evitar re-montajes innecesarios al navegar entre rutas.
+- `SiteShell` ahora consume contexto global sin envolver providers en cada render de página.
+- Se mejoró la hidratación del carrito para evitar escrituras prematuras a `localStorage` antes de cargar el estado persistido.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Menos trabajo repetido en cliente (menos inicializaciones de auth/carrito por navegación).
+- Persistencia de carrito más robusta en el primer render al no sobreescribir almacenamiento antes de hidratar.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

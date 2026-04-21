@@ -1002,3 +1002,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Cambio centrado en UX de navegación y contacto, sin alterar rutas de negocio ni flujo de checkout.
+
+## PR: Optimización de performance base (providers globales + hidratación de carrito)
+- Fecha: 2026-04-21
+- Objetivo: Reducir trabajo repetido en navegación y evitar sobrescritura temprana del carrito persistido.
+
+### Lo aprendido
+- Montar providers de estado global dentro de un shell reutilizado por página puede disparar efectos repetitivos (por ejemplo, fetch de sesión) al navegar; moverlos al `RootLayout` estabiliza el ciclo de vida.
+- En carritos con `localStorage`, escribir inmediatamente en el primer render puede pisar el estado persistido si aún no termina la hidratación.
+- Mantener la capa de providers separada (`AppProviders`) mejora mantenibilidad y hace explícita la frontera cliente/servidor en App Router.
+
+### Decisiones técnicas
+- Se creó `src/components/app-providers.tsx` para centralizar `AuthProvider` + `CartProvider` en un único wrapper cliente.
+- Se integró `AppProviders` en `src/app/layout.tsx` para que sesión y carrito vivan a nivel de árbol de aplicación, no por página.
+- Se simplificó `SiteShell` removiendo wrappers redundantes de contexto.
+- Se añadió guard de hidratación en `cart-context` (`isHydrated`) para escribir en `localStorage` solo después de cargar estado inicial.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado: Lint y typecheck sin errores tras refactor.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó el objetivo de performance y el patrón recomendado de providers globales para futuras iteraciones.
