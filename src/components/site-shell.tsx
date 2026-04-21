@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AuthProvider, useAuth } from "@/components/auth-context";
 import { CartProvider, useCart } from "@/components/cart-context";
 import { getWhatsAppHref } from "@/lib/whatsapp";
@@ -58,24 +58,39 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
 
       <header className="site-header">
         <div className="container nav-wrap">
-          <Link href="/" className="brand" aria-label="Ritual Studio inicio" onClick={closeMenu}>
-            <span className="brand-main">Ritual Studio</span>
-            <span className="brand-sub">by Sol</span>
-          </Link>
+          <div className="header-primary-row">
+            <Link href="/" className="brand" aria-label="Ritual Studio inicio" onClick={closeMenu}>
+              <span className="brand-main">Ritual Studio</span>
+              <span className="brand-sub">by Sol</span>
+            </Link>
 
-          <div className="header-right">
-            <a
-              href={whatsappHref}
-              className="whatsapp-access"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Contactar por WhatsApp"
-              onClick={closeMenu}
+            <button
+              type="button"
+              className={`menu-toggle ${isMenuOpen ? "is-open" : ""}`}
+              aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+              aria-expanded={isMenuOpen}
+              aria-controls="site-navigation"
+              onClick={() => setIsMenuOpen((current) => !current)}
             >
-              <WhatsAppIcon />
-              <span className="sr-only">WhatsApp</span>
-            </a>
+              <span aria-hidden />
+              <span aria-hidden />
+              <span aria-hidden />
+            </button>
+          </div>
 
+          <nav
+            id="site-navigation"
+            className={`nav-links ${isMenuOpen ? "is-open" : ""}`}
+            aria-label="Navegación principal"
+          >
+            {links.map((link) => (
+              <Link key={link.href} href={link.href} onClick={closeMenu}>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="header-secondary-row">
             <Link
               href="/carrito"
               className="cart-access"
@@ -149,32 +164,7 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
                 </div>
               ) : null}
             </div>
-
-            <button
-              type="button"
-              className={`menu-toggle ${isMenuOpen ? "is-open" : ""}`}
-              aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
-              aria-expanded={isMenuOpen}
-              aria-controls="site-navigation"
-              onClick={() => setIsMenuOpen((current) => !current)}
-            >
-              <span aria-hidden />
-              <span aria-hidden />
-              <span aria-hidden />
-            </button>
           </div>
-
-          <nav
-            id="site-navigation"
-            className={`nav-links ${isMenuOpen ? "is-open" : ""}`}
-            aria-label="Navegación principal"
-          >
-            {links.map((link) => (
-              <Link key={link.href} href={link.href} onClick={closeMenu}>
-                {link.label}
-              </Link>
-            ))}
-          </nav>
         </div>
       </header>
 
@@ -191,6 +181,8 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
           <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>
         </div>
       </footer>
+
+      <DraggableWhatsAppButton />
     </main>
   );
 }
@@ -242,6 +234,86 @@ function WhatsAppIcon() {
         fill="currentColor"
       />
     </svg>
+  );
+}
+
+function DraggableWhatsAppButton() {
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const dragPointerId = useRef<number | null>(null);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const movedDuringDrag = useRef(false);
+
+  useEffect(() => {
+    const setDefaultPosition = () => {
+      const buttonSize = 56;
+      const margin = 16;
+      setPosition({
+        x: window.innerWidth - buttonSize - margin,
+        y: window.innerHeight - buttonSize - margin,
+      });
+    };
+
+    setDefaultPosition();
+    window.addEventListener("resize", setDefaultPosition);
+
+    return () => window.removeEventListener("resize", setDefaultPosition);
+  }, []);
+
+  const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+  if (!position) {
+    return null;
+  }
+
+  return (
+    <a
+      href={whatsappHref}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="whatsapp-floating"
+      aria-label="Contactar por WhatsApp"
+      style={{ left: `${position.x}px`, top: `${position.y}px` }}
+      onPointerDown={(event) => {
+        dragPointerId.current = event.pointerId;
+        movedDuringDrag.current = false;
+        dragOffset.current = {
+          x: event.clientX - position.x,
+          y: event.clientY - position.y,
+        };
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={(event) => {
+        if (dragPointerId.current !== event.pointerId) {
+          return;
+        }
+
+        const buttonSize = 56;
+        const margin = 8;
+        const nextX = clamp(event.clientX - dragOffset.current.x, margin, window.innerWidth - buttonSize - margin);
+        const nextY = clamp(event.clientY - dragOffset.current.y, margin, window.innerHeight - buttonSize - margin);
+
+        if (Math.abs(nextX - position.x) > 2 || Math.abs(nextY - position.y) > 2) {
+          movedDuringDrag.current = true;
+        }
+
+        setPosition({ x: nextX, y: nextY });
+      }}
+      onPointerUp={(event) => {
+        if (dragPointerId.current === event.pointerId) {
+          dragPointerId.current = null;
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+      }}
+      onClick={(event) => {
+        if (movedDuringDrag.current) {
+          event.preventDefault();
+          movedDuringDrag.current = false;
+        }
+      }}
+    >
+      <WhatsAppIcon />
+      <span className="sr-only">WhatsApp</span>
+    </a>
   );
 }
 

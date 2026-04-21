@@ -975,3 +975,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Cambio exclusivamente visual de layout en header para mejorar UX desktop/móvil sin alterar lógica de autenticación.
+
+## PR: Header en 2 secciones y WhatsApp flotante movible
+- Fecha: 2026-04-21
+- Objetivo: Reorganizar el encabezado para separar navegación y accesos transaccionales, y mover el contacto de WhatsApp a un botón flotante que el usuario pueda arrastrar.
+
+### Lo aprendido
+- Separar el header por bloques funcionales (navegación vs. acciones de cuenta/compra) mejora legibilidad inmediata en pantallas reducidas.
+- Un CTA flotante de WhatsApp puede mantener visibilidad alta sin competir con elementos críticos del header si se permite reposicionarlo por drag.
+- Para evitar clics accidentales al arrastrar, conviene bloquear la navegación del enlace cuando se detectó movimiento real durante el gesto.
+
+### Decisiones técnicas
+- Se dividió `nav-wrap` en `header-primary-row` (marca + hamburguesa), `nav-links` colapsable y `header-secondary-row` (carrito + usuario).
+- Se eliminó el acceso de WhatsApp del header y se creó `DraggableWhatsAppButton` como anchor fijo con eventos de pointer para arrastre y límites dentro del viewport.
+- Se mantuvo la URL de WhatsApp centralizada con `getWhatsAppHref` para no duplicar lógica de contacto.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + validación manual estructurada.
+- Resultado: Lint y typecheck sin errores; estructura del header actualizada y botón flotante preparado para clic/arrastre.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - Revisión manual esperada del flujo: header en 2 secciones + botón WhatsApp flotante movible.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Cambio centrado en UX de navegación y contacto, sin alterar rutas de negocio ni flujo de checkout.
