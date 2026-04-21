@@ -896,3 +896,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README agrega guía operativa de roles, RLS, promoción de primer admin y patrón para extender policies a tablas sensibles.
+
+## PR: Reordenar header con menú a la izquierda y accesos rápidos a la derecha
+- Fecha: 2026-04-21
+- Objetivo: Mejorar la jerarquía del encabezado moviendo la navegación principal al lado izquierdo, dejando WhatsApp/carrito/usuario como accesos rápidos en el lado derecho y simplificando el menú hamburguesa.
+
+### Lo aprendido
+- Cuando el logo ya regresa a la home, mantener `Inicio` como link adicional en el menú añade redundancia y ocupa espacio de navegación útil.
+- Un CTA de contacto convertido a ícono persistente (WhatsApp) funciona mejor para mobile que un botón textual escondido dentro del menú colapsable.
+- Reducir elementos decorativos en el menú hamburguesa mejora claridad y evita saturación visual al abrir navegación en pantallas pequeñas.
+
+### Decisiones técnicas
+- Se removió `Inicio` del arreglo `links` y se mantuvo el comportamiento del logo como acceso principal a `/`.
+- Se eliminó el bloque `header-actions` (paleta + botón de contacto) y se agregó un acceso `whatsapp-access` junto a carrito y usuario en `header-right`.
+- Se ajustó CSS para alinear los links del menú a la izquierda (`justify-content: flex-start`) y mantener en mobile únicamente links de navegación dentro del menú hamburguesa.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint sin errores y header actualizado según requerimiento (sin `Inicio`, sin paleta en hamburguesa, WhatsApp junto a carrito/usuario).
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual del flujo visual del header en desktop/mobile.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Cambio concentrado en UX/UI del header, sin modificaciones de rutas ni lógica de carrito/autenticación.

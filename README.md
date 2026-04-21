@@ -170,6 +170,28 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 
 ## Historial de cambios
 
+## PR: Reordenar header (menú a la izquierda + accesos rápidos a la derecha)
+### ¿Qué cambia?
+- Se movieron las opciones de navegación para priorizar su alineación al lado izquierdo del header, junto al branding.
+- Se retiró la opción `Inicio` del menú principal porque el logo `Ritual Studio` ya funciona como acceso a `/`.
+- Se reemplazó el botón textual de contacto por un ícono de WhatsApp fijo en header y se agrupó con los íconos de carrito y usuario.
+- Se eliminó la paleta de colores del menú hamburguesa para simplificar la navegación mobile.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Revisión manual del layout esperado en header:
+  - navegación visible sin opción `Inicio`;
+  - accesos rápidos (WhatsApp, carrito, usuario) alineados a la derecha;
+  - menú hamburguesa sin paleta ni botón de contacto textual.
+
+### Impacto
+- Se mejora la jerarquía de navegación y se hace más claro el acceso transaccional en desktop y mobile.
+- Se reduce ruido visual del menú mobile, manteniendo contacto por WhatsApp siempre accesible desde el header.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
 ## PR: Starter Next.js para florería elevada
 ### ¿Qué cambia?
 - Se crea la base técnica del sitio con Next.js + TypeScript + Tailwind.
