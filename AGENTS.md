@@ -792,3 +792,29 @@ Un PR se considera terminado solo si:
 - AGENTS actualizado: Sí
 - Notas: Se agregó registro del fix de compatibilidad con Next.js 15/Vercel para referencia futura.
 - Notas: Se alineó el discurso comercial y SEO para no restringir el servicio a Ciudad de México.
+
+## PR: Fix superposición del menú de usuario en mobile
+- Fecha: 2026-04-21
+- Objetivo: Corregir la superposición del panel de usuario sobre el contenido del hero en pantallas pequeñas.
+
+### Lo aprendido
+- En mobile, un dropdown con `position: absolute` dentro del header puede invadir contenido crítico si no se reserva espacio en flujo.
+- Convertir el panel a `position: static` únicamente en breakpoint móvil permite mantener el comportamiento desktop sin regresiones.
+- Ajustar la estructura del contenedor derecho del header (`header-right`) a un layout vertical mejora la estabilidad visual cuando aparecen paneles contextuales.
+
+### Decisiones técnicas
+- Se mantuvo el patrón actual del menú de usuario y se resolvió el problema en CSS responsive, evitando refactor de lógica React.
+- Se agregó ancho responsivo controlado al bloque de cuenta para prevenir desbordes en pantallas angostas.
+- Se priorizó un cambio acotado en `globals.css` para minimizar riesgo y facilitar rollback.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado: Lint sin errores y menú de usuario mobile desplegado sin tapar el texto del hero.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual del flujo en mobile: abrir menú de usuario y confirmar que el panel ocupa espacio dentro del header.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Cambio visual/UX mobile sin impacto funcional en rutas ni autenticación.

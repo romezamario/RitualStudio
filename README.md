@@ -653,3 +653,20 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Ajuste del menú de usuario en mobile para evitar superposición con el contenido
+### ¿Qué cambia?
+- Se ajustó el layout responsive del header para que, en mobile, el panel del menú de usuario se renderice en flujo dentro del encabezado y no se superponga sobre el texto del hero.
+- Se actualizó la alineación de `header-right` para soportar correctamente el despliegue vertical del botón de cuenta y su panel.
+- Se definió un ancho máximo responsivo para el bloque de acceso de cuenta, mejorando legibilidad del menú en pantallas pequeñas.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Validación manual estructurada del caso reportado: abrir menú de usuario en vista mobile y verificar que el panel no tape el contenido principal.
+
+### Impacto
+- Mejora de UX en mobile: el menú de usuario queda visualmente contenido en el header, sin interferir con el texto editorial de la página.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
