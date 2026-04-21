@@ -32,6 +32,40 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /aviso-de-privacidad ` Aviso de privacidad para tratamiento de datos personales (nombre, teléfono, correo y datos de cuenta) conforme a regulación mexicana, enlazado desde el footer global.
 
 
+
+## Control de roles con Supabase (RLS)
+
+Se implementó control real de roles (`user` / `admin`) con seguridad en base de datos y protección server-side en App Router.
+
+### Incluye
+- Migración SQL en `supabase/migrations/20260421_roles_profiles_rls.sql` con:
+  - tabla `public.profiles` enlazada a `auth.users`;
+  - función `public.is_admin()` reusable;
+  - trigger para `updated_at`;
+  - trigger de alta automática de perfil al crear usuario en `auth.users`;
+  - políticas RLS para lectura/actualización propia y lectura global para admins.
+- Protección de rutas administrativas en `src/app/admin/layout.tsx`:
+  - sin sesión -> redirección a `/login?redirect=/admin`;
+  - con sesión pero sin rol admin -> redirección a `/unauthorized`.
+- Utilidades server-side de auth/perfil en `src/lib/supabase/server.ts` usando validación confiable por token (`/auth/v1/user`) y lectura de `public.profiles`.
+- Endpoint `GET /api/auth/me` para hidratar UI condicional basada en perfil real y no en estado local manipulable.
+
+### Cómo crear el primer admin
+1. Ejecuta la migración SQL en Supabase.
+2. Registra un usuario normal en la app.
+3. Ejecuta manualmente en SQL Editor (operador autorizado):
+
+```sql
+update public.profiles
+set role = 'admin'
+where email = 'correo@dominio.com';
+```
+
+> No uses `service_role` en frontend. Mantén llaves privilegiadas solo en backend seguro.
+
+### Cómo extender a otras tablas
+Usa `public.is_admin()` en policies RLS de tablas sensibles para permitir solo escrituras administrativas. La migración ya incluye un bloque ejemplo para `public.orders` y `public.products` que se aplica solo si existen.
+
 ## Estructura recomendada para imágenes
 
 Las imágenes del sitio ahora se organizan en `public/images` para facilitar carga, reemplazo y mantenimiento por tipo de contenido:

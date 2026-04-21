@@ -5,14 +5,12 @@ import { useAuth } from "@/components/auth-context";
 
 export default function AccountDashboardClient() {
   const { user } = useAuth();
-  const fullName = user?.fullName?.trim();
-  const username = user?.username?.trim();
 
   return (
     <div className="feature-grid account-dashboard-grid">
       <article className="studio-card">
         <p className="card-label">Perfil</p>
-        <h2>{fullName || username || "Tu cuenta en Ritual Studio"}</h2>
+        <h2>{user?.email ?? "Tu cuenta en Ritual Studio"}</h2>
         <p>
           Correo registrado: <strong>{user?.email ?? "Sin correo disponible"}</strong>
         </p>

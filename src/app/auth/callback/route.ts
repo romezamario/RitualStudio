@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyOtpToken } from "@/lib/supabase-client";
+import { sessionCookieNames } from "@/lib/supabase/server";
 
 type VerifyType = "signup" | "invite" | "magiclink" | "recovery" | "email_change" | "email";
 
@@ -50,24 +51,29 @@ export async function GET(request: NextRequest) {
 
   const successUrl = new URL("/correo-confirmado", request.url);
 
-  if (verification.user?.email) {
-    successUrl.searchParams.set("email", verification.user.email);
-    successUrl.searchParams.set("role", verification.user.role);
-
-    if (verification.user.username) {
-      successUrl.searchParams.set("username", verification.user.username);
-    }
-
-    if (verification.user.fullName) {
-      successUrl.searchParams.set("full_name", verification.user.fullName);
-    }
-  }
-
-  successUrl.searchParams.set("session", verification.sessionCreated ? "1" : "0");
-
   if (nextPath) {
     successUrl.searchParams.set("next", nextPath);
   }
 
-  return NextResponse.redirect(successUrl);
+  const response = NextResponse.redirect(successUrl);
+
+  if (verification.session) {
+    response.cookies.set(sessionCookieNames.access, verification.session.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    response.cookies.set(sessionCookieNames.refresh, verification.session.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+  }
+
+  return response;
 }

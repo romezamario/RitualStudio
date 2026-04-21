@@ -29,7 +29,7 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { totalItems } = useCart();
   const { isAuthenticated, user, signOut } = useAuth();
-  const userDisplayName = user?.fullName ?? user?.username ?? user?.email;
+  const userDisplayName = user?.email;
   const userInitials = getUserInitials(userDisplayName);
 
   const closeMenu = () => {
@@ -117,8 +117,8 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
                       <button
                         type="button"
                         className="user-menu-logout"
-                        onClick={() => {
-                          signOut();
+                        onClick={async () => {
+                          await signOut();
                           closeMenu();
                         }}
                       >

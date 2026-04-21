@@ -2,13 +2,27 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth, type UserRole } from "@/components/auth-context";
+import { useAuth } from "@/components/auth-context";
 import { hasSupabaseConfig, signInWithPassword, signUpWithPassword } from "@/lib/supabase-client";
 
 type AuthMode = "login" | "signup";
 
+async function persistServerSession(session: { accessToken: string; refreshToken: string }) {
+  const response = await fetch("/api/auth/session", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(session),
+  });
+
+  if (!response.ok) {
+    throw new Error("No fue posible guardar la sesión segura.");
+  }
+}
+
 export function LoginForm() {
-  const { signIn } = useAuth();
+  const { refreshAuth } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialMode = searchParams.get("mode") === "signup" ? "signup" : "login";
@@ -17,7 +31,6 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
-  const [selectedRole, setSelectedRole] = useState<UserRole>("customer");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -58,36 +71,28 @@ export function LoginForm() {
 
     try {
       if (mode === "login") {
-        const { error, user } = await signInWithPassword(email, password);
+        const { error, session } = await signInWithPassword(email, password);
 
         if (error) {
           setErrorMessage(error);
-        } else {
-          signIn({
-            email: user?.email ?? email,
-            role: user?.role ?? "customer",
-            username: user?.username,
-            fullName: user?.fullName,
-          });
+        } else if (session) {
+          await persistServerSession(session);
+          await refreshAuth();
           router.push(postLoginPath);
         }
       }
 
       if (mode === "signup") {
-        const { error, user, sessionCreated } = await signUpWithPassword(email, password, selectedRole, {
+        const { error, sessionCreated, session } = await signUpWithPassword(email, password, {
           username,
           fullName,
         });
 
         if (error) {
           setErrorMessage(error);
-        } else if (sessionCreated) {
-          signIn({
-            email: user?.email ?? email,
-            role: user?.role ?? selectedRole,
-            username: user?.username ?? username.trim(),
-            fullName: user?.fullName ?? fullName.trim(),
-          });
+        } else if (sessionCreated && session) {
+          await persistServerSession(session);
+          await refreshAuth();
           router.push(postLoginPath);
         } else {
           setSuccessMessage(
@@ -174,18 +179,6 @@ export function LoginForm() {
                 placeholder="Tu nombre"
                 required
               />
-            </label>
-
-            <label>
-              Tipo de cuenta inicial
-              <select
-                className="input"
-                value={selectedRole}
-                onChange={(event) => setSelectedRole(event.target.value as UserRole)}
-              >
-                <option value="customer">Usuario normal</option>
-                <option value="admin">Administrador</option>
-              </select>
             </label>
 
             <ul className="password-rules" aria-live="polite">
