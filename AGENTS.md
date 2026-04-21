@@ -748,6 +748,26 @@ Un PR se considera terminado solo si:
 - Notas: README incluye resumen del nuevo patrón de acceso a cuenta y su comportamiento por estado de sesión.
 - Notas: Se documentó la nueva capa SEO técnica y la recomendación de configurar `NEXT_PUBLIC_SITE_URL` con dominio productivo.
 
+## PR: Fix de build en Vercel por `useSearchParams` en `/login`
+- Fecha: 2026-04-21
+- Objetivo: Corregir el error de prerender en Next.js 15 al usar `useSearchParams()` en la vista de login durante `next build` en Vercel.
+
+### Lo aprendido
+- En App Router con render estático, `useSearchParams()` en componentes cliente debe renderizarse dentro de un límite de `Suspense` para evitar el error `missing-suspense-with-csr-bailout`.
+- Aunque el componente sea cliente, la página que lo contiene puede fallar en prerender si no se declara explícitamente el boundary.
+- Un fallback simple de texto es suficiente para cumplir el requisito sin alterar el flujo funcional del formulario.
+
+### Decisiones técnicas
+- Se envolvió `LoginForm` en `Suspense` dentro de `src/app/login/page.tsx`.
+- Se mantuvo intacta la lógica de autenticación/registro para limitar el cambio al problema de build reportado.
+- Se usó un fallback liviano (`auth-feedback`) coherente con el sistema visual existente.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + build de producción.
+- Resultado: Lint y build completan correctamente tras agregar `Suspense`.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npm run build` OK.
 ## PR: Eliminación de referencias a Ciudad de México en contenido comercial
 - Fecha: 2026-04-21
 - Objetivo: Quitar referencias de CDMX/Ciudad de México en el contenido comercial y metadatos para comunicar cobertura en múltiples ciudades.
@@ -770,4 +790,5 @@ Un PR se considera terminado solo si:
 ### Documentación
 - README actualizado: Sí
 - AGENTS actualizado: Sí
+- Notas: Se agregó registro del fix de compatibilidad con Next.js 15/Vercel para referencia futura.
 - Notas: Se alineó el discurso comercial y SEO para no restringir el servicio a Ciudad de México.
