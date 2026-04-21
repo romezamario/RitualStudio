@@ -870,3 +870,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Cambio centrado en UX de navegación comercial; sin cambios de rutas ni lógica de checkout.
+
+## PR: Control de roles con Supabase (RLS + protección server-side)
+- Fecha: 2026-04-21
+- Objetivo: Implementar un esquema confiable de roles `user/admin` con seguridad real en Supabase (RLS), protección de rutas admin del lado servidor y UI condicional basada en perfil verificado.
+
+### Lo aprendido
+- Confiar en estado de sesión del cliente (por ejemplo `localStorage`) no es suficiente para autorización: la validación de privilegios debe resolverse en servidor contra `auth.getUser()`/token + tabla `profiles`.
+- Separar autenticación (tokens) y autorización (rol en `public.profiles`) hace más mantenible la evolución de permisos por módulo.
+- Un layout protegido en App Router (`/admin/layout.tsx`) simplifica aplicar control de acceso transversal a todo el árbol administrativo.
+
+### Decisiones técnicas
+- Se creó una migración única `supabase/migrations/20260421_roles_profiles_rls.sql` con tabla `profiles`, función `is_admin()`, triggers y policies RLS.
+- Se retiró la selección de rol en UI de registro para evitar escalamiento de privilegios desde frontend.
+- Se movió la sesión a cookies httpOnly (`/api/auth/session`) para permitir verificación server-side del usuario autenticado en rutas protegidas.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado: Lint y typecheck sin errores tras incorporar migración SQL, endpoints de sesión y protección admin.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README agrega guía operativa de roles, RLS, promoción de primer admin y patrón para extender policies a tablas sensibles.

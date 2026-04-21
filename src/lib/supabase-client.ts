@@ -1,18 +1,23 @@
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-const supabaseAnonKey =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ??
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+import { getSupabaseConfig, hasSupabaseConfig } from "@/lib/supabase/config";
+
 const publicSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+
+type Role = "user" | "admin";
 
 type SupabaseAuthResult = {
   error: string | null;
   user: {
+    id?: string;
     email: string;
-    role: "customer" | "admin";
+    role: Role;
     username?: string;
     fullName?: string;
   } | null;
   sessionCreated: boolean;
+  session: {
+    accessToken: string;
+    refreshToken: string;
+  } | null;
 };
 
 type SupabaseErrorPayload = {
@@ -25,6 +30,7 @@ type SupabaseErrorPayload = {
 };
 
 type SupabaseUserPayload = {
+  id?: string;
   email?: string;
   app_metadata?: {
     role?: string;
@@ -54,46 +60,7 @@ type SupabaseSuccessPayload = {
 
 type SupabaseVerifyOtpType = "signup" | "invite" | "magiclink" | "recovery" | "email_change" | "email";
 
-type SupabaseVerifyOtpResult = {
-  error: string | null;
-  user: {
-    email: string;
-    role: "customer" | "admin";
-    username?: string;
-    fullName?: string;
-  } | null;
-  sessionCreated: boolean;
-};
-
-function getSupabaseConfig() {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      "Faltan variables de Supabase. Configura NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY)."
-    );
-  }
-
-  const normalizedUrl = supabaseUrl
-    .replace(/\/+$/, "")
-    .replace(/\/auth\/v1$/i, "")
-    .replace(/\/rest\/v1$/i, "");
-
-  try {
-    const parsedUrl = new URL(normalizedUrl);
-
-    if (!parsedUrl.protocol.startsWith("http")) {
-      throw new Error();
-    }
-  } catch {
-    throw new Error(
-      "NEXT_PUBLIC_SUPABASE_URL no tiene un formato válido. Debe verse como: https://<project-ref>.supabase.co"
-    );
-  }
-
-  return {
-    supabaseUrl: normalizedUrl,
-    supabaseAnonKey
-  };
-}
+type SupabaseVerifyOtpResult = SupabaseAuthResult;
 
 function parseNetworkError(error: unknown) {
   if (error instanceof Error && error.message) {
@@ -115,14 +82,14 @@ function parseSupabaseError(data: SupabaseErrorPayload | null, fallbackError: st
   return data.error_description ?? data.msg ?? data.error ?? data.message ?? data.details ?? data.hint ?? fallbackError;
 }
 
-function normalizeUserRole(value: string | undefined) {
+function normalizeUserRole(value: string | undefined): Role {
   const lowered = value?.toLowerCase();
 
   if (lowered === "admin" || lowered === "administrator") {
-    return "admin" as const;
+    return "admin";
   }
 
-  return "customer" as const;
+  return "user";
 }
 
 function parseSupabaseUser(data: SupabaseSuccessPayload | null) {
@@ -133,6 +100,7 @@ function parseSupabaseUser(data: SupabaseSuccessPayload | null) {
   }
 
   return {
+    id: user.id,
     email: user.email,
     role: normalizeUserRole(user.app_metadata?.role ?? user.app_metadata?.user_role ?? user.user_metadata?.role ?? user.user_metadata?.user_role),
     username: user.user_metadata?.username ?? user.raw_user_meta_data?.username,
@@ -144,13 +112,20 @@ function parseSupabaseUser(data: SupabaseSuccessPayload | null) {
   };
 }
 
-function hasSessionTokens(data: SupabaseSuccessPayload | null) {
-  return Boolean(data?.access_token && data?.refresh_token);
+function parseSession(data: SupabaseSuccessPayload | null) {
+  if (!data?.access_token || !data?.refresh_token) {
+    return null;
+  }
+
+  return {
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+  };
 }
 
 function resolveEmailRedirectTo() {
   const callbackPath = "/auth/callback";
-  const candidateUrl = publicSiteUrl?.length ? publicSiteUrl : (typeof window !== "undefined" ? window.location.origin : null);
+  const candidateUrl = publicSiteUrl?.length ? publicSiteUrl : typeof window !== "undefined" ? window.location.origin : null;
 
   if (!candidateUrl) {
     return undefined;
@@ -170,22 +145,22 @@ async function requestSupabaseAuth(
     password: string;
     options?: {
       emailRedirectTo?: string;
-      data?: { role: "customer" | "admin"; username?: string; full_name?: string };
+      data?: { username?: string; full_name?: string };
     };
   },
   fallbackError: string
 ): Promise<SupabaseAuthResult> {
   try {
-    const { supabaseUrl: url, supabaseAnonKey: anonKey } = getSupabaseConfig();
+    const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
 
-    const response = await fetch(`${url}${endpoint}`, {
+    const response = await fetch(`${supabaseUrl}${endpoint}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     const data = (await response.json().catch(() => null)) as (SupabaseErrorPayload & SupabaseSuccessPayload) | null;
@@ -198,6 +173,7 @@ async function requestSupabaseAuth(
           error: `Supabase devolvió un error interno (${response.status}). Intenta de nuevo en unos minutos.`,
           user: null,
           sessionCreated: false,
+          session: null,
         };
       }
 
@@ -206,6 +182,7 @@ async function requestSupabaseAuth(
           error: "Demasiados intentos en poco tiempo. Espera unos segundos y vuelve a intentarlo.",
           user: null,
           sessionCreated: false,
+          session: null,
         };
       }
 
@@ -213,19 +190,24 @@ async function requestSupabaseAuth(
         error: `${parsedError} (HTTP ${response.status})`,
         user: null,
         sessionCreated: false,
+        session: null,
       };
     }
+
+    const session = parseSession(data);
 
     return {
       error: null,
       user: parseSupabaseUser(data),
-      sessionCreated: hasSessionTokens(data),
+      sessionCreated: Boolean(session),
+      session,
     };
   } catch (error) {
     return {
       error: parseNetworkError(error),
       user: null,
       sessionCreated: false,
+      session: null,
     };
   }
 }
@@ -237,7 +219,6 @@ export async function signInWithPassword(email: string, password: string): Promi
 export async function signUpWithPassword(
   email: string,
   password: string,
-  role: "customer" | "admin" = "customer",
   profile?: {
     username: string;
     fullName: string;
@@ -255,7 +236,6 @@ export async function signUpWithPassword(
       options: {
         ...(emailRedirectTo ? { emailRedirectTo } : {}),
         data: {
-          role,
           ...(normalizedUsername ? { username: normalizedUsername } : {}),
           ...(normalizedFullName ? { full_name: normalizedFullName } : {}),
         },
@@ -270,14 +250,14 @@ export async function verifyOtpToken(params: {
   type: SupabaseVerifyOtpType;
 }): Promise<SupabaseVerifyOtpResult> {
   try {
-    const { supabaseUrl: url, supabaseAnonKey: anonKey } = getSupabaseConfig();
+    const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
 
-    const response = await fetch(`${url}/auth/v1/verify`, {
+    const response = await fetch(`${supabaseUrl}/auth/v1/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
       },
       body: JSON.stringify({
         token_hash: params.tokenHash,
@@ -293,23 +273,26 @@ export async function verifyOtpToken(params: {
         error: parseSupabaseError(data, "No fue posible confirmar el correo."),
         user: null,
         sessionCreated: false,
+        session: null,
       };
     }
+
+    const session = parseSession(data);
 
     return {
       error: null,
       user: parseSupabaseUser(data),
-      sessionCreated: hasSessionTokens(data),
+      sessionCreated: Boolean(session),
+      session,
     };
   } catch (error) {
     return {
       error: parseNetworkError(error),
       user: null,
       sessionCreated: false,
+      session: null,
     };
   }
 }
 
-export function hasSupabaseConfig() {
-  return Boolean(supabaseUrl && supabaseAnonKey);
-}
+export { hasSupabaseConfig };
