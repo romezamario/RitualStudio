@@ -173,6 +173,31 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 
 ## Historial de cambios
 
+## PR: Header en 2 secciones + WhatsApp flotante y movible
+### ¿Qué cambia?
+- Se separó el header en dos secciones claras:
+  - **Sección 1:** nombre del sitio + botón de menú hamburguesa.
+  - **Sección 2:** accesos rápidos de **carrito** y **usuario**.
+- Se removió el botón de contacto de WhatsApp del header para evitar saturación visual.
+- Se agregó un botón de **WhatsApp flotante** fijo en pantalla, con soporte de arrastre (drag) para que el usuario pueda moverlo si estorba en la visualización.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- Revisión manual esperada del flujo visual:
+  - header dividido en dos bloques;
+  - menú hamburguesa en bloque superior;
+  - carrito/usuario en bloque inferior;
+  - botón WhatsApp flotante que permite clic y también reposicionamiento por arrastre.
+
+### Impacto
+- Mejora la jerarquía visual del encabezado en mobile/desktop y reduce ruido en la navegación principal.
+- Mantiene el canal de contacto por WhatsApp siempre disponible, pero ahora no bloquea contenido gracias al comportamiento movible.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
 ## PR: Ajuste del menú de usuario para evitar empalme con contenido
 ### ¿Qué cambia?
 - Se ajustó el layout del bloque de cuenta en el header para que el panel de opciones de usuario forme parte del flujo del encabezado.
