@@ -768,8 +768,27 @@ Un PR se considera terminado solo si:
 - Evidencia:
   - `npm run lint` OK.
   - `npm run build` OK.
+## PR: Eliminación de referencias a Ciudad de México en contenido comercial
+- Fecha: 2026-04-21
+- Objetivo: Quitar referencias de CDMX/Ciudad de México en el contenido comercial y metadatos para comunicar cobertura en múltiples ciudades.
+
+### Lo aprendido
+- Las menciones geográficas rígidas en metadata y fichas de producto pueden limitar la percepción comercial aunque la operación real tenga mayor alcance.
+- Reemplazar ciudad fija por mensajes de cobertura por disponibilidad mantiene claridad operativa sin sobreprometer tiempos universales.
+
+### Decisiones técnicas
+- Se actualizaron textos SEO globales y copys de páginas clave (`home`, `contacto`, `marketplace`) para eliminar referencias directas a CDMX.
+- Se ajustaron mensajes de entrega del dataset de marketplace hacia una redacción por cobertura logística según ciudad/zona.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado: Lint y typecheck sin errores.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
 
 ### Documentación
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se agregó registro del fix de compatibilidad con Next.js 15/Vercel para referencia futura.
+- Notas: Se alineó el discurso comercial y SEO para no restringir el servicio a Ciudad de México.

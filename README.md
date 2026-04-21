@@ -637,6 +637,18 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Impacto
 - El build de producción deja de fallar en Vercel al generar la ruta `/login`.
 - Se mantiene el flujo actual de login/registro sin cambios funcionales de negocio.
+## PR: Eliminación de referencias a Ciudad de México en contenido comercial
+### ¿Qué cambia?
+- Se removieron menciones explícitas a `CDMX` y `Ciudad de México` en metadatos SEO globales, home, contacto y marketplace para reflejar cobertura en múltiples ciudades.
+- Se ajustó el contenido de entrega del catálogo para hablar de cobertura por ciudad/zona según disponibilidad logística, evitando limitar el servicio a una sola ciudad.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El posicionamiento y el copy comercial ahora comunican una operación más amplia y escalable fuera de una única ciudad.
+- Se reduce fricción comercial para leads fuera de Ciudad de México.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

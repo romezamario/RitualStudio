@@ -28,11 +28,10 @@ const organizationJsonLd = {
   "@type": "Florist",
   name: siteName,
   url: metadataBase.origin,
-  areaServed: "CDMX",
+  areaServed: "MX",
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Ciudad de México",
-    addressCountry: "MX"
+        addressCountry: "MX"
   },
   sameAs: ["https://wa.me/525520904940"]
 };
@@ -40,13 +39,13 @@ const organizationJsonLd = {
 export const metadata: Metadata = {
   metadataBase,
   title: {
-    default: "Ritual Studio | Arreglos florales premium en CDMX",
+    default: "Ritual Studio | Arreglos florales premium",
     template: `%s | ${siteName}`
   },
   description:
-    "Diseño floral editorial en CDMX: ramos premium, arreglos personalizados, eventos y compra por WhatsApp.",
+    "Diseño floral editorial: ramos premium, arreglos personalizados, eventos y compra por WhatsApp.",
   keywords: [
-    "florería en CDMX",
+    "florería premium",
     "arreglos florales premium",
     "ramos a domicilio",
     "flores para eventos",
@@ -57,9 +56,9 @@ export const metadata: Metadata = {
     canonical: "/"
   },
   openGraph: {
-    title: "Ritual Studio | Arreglos florales premium en CDMX",
+    title: "Ritual Studio | Arreglos florales premium",
     description:
-      "Creamos arreglos florales personalizados para regalos, eventos y espacios con dirección artística en Ciudad de México.",
+      "Creamos arreglos florales personalizados para regalos, eventos y espacios con dirección artística para distintas ciudades.",
     url: "/",
     siteName,
     locale: "es_MX",
@@ -67,8 +66,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ritual Studio | Arreglos florales premium en CDMX",
-    description: "Ramos, centros y eventos con diseño floral editorial en Ciudad de México."
+    title: "Ritual Studio | Arreglos florales premium",
+    description: "Ramos, centros y eventos con diseño floral editorial para distintas ciudades."
   },
   robots: {
     index: true,
