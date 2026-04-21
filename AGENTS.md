@@ -699,6 +699,28 @@ Un PR se considera terminado solo si:
 - AGENTS actualizado: Sí
 - Notas: README documenta rutas nuevas de confirmación y variables necesarias (`NEXT_PUBLIC_SITE_URL`) para evitar redirecciones a localhost.
 
+## PR: Menú de cuenta fuera del hamburguesa + avatar con iniciales
+- Fecha: 2026-04-21
+- Objetivo: Sacar el acceso de login/registro del menú hamburguesa y moverlo a un acceso fijo en la esquina derecha, usando ícono de usuario en estado no autenticado y avatar circular con iniciales cuando el usuario ya inició sesión.
+
+### Lo aprendido
+- Separar la navegación principal del acceso a cuenta mejora claridad UX en mobile: el usuario reconoce más rápido dónde iniciar sesión sin abrir el menú completo.
+- Un avatar con iniciales comunica estado autenticado de forma inmediata y reduce dependencia de etiquetas textuales largas en header.
+- Mantener el dropdown de cuenta en la misma posición para ambos estados (anónimo/autenticado) reduce cambios de patrón mental al usuario.
+
+### Decisiones técnicas
+- Se creó un trigger de cuenta persistente en `SiteShell` (siempre visible), independiente del bloque de acciones que se despliega con hamburguesa.
+- En estado no autenticado, el dropdown muestra dos rutas explícitas: `Iniciar sesión` y `Crear usuario`.
+- En estado autenticado, el trigger cambia a círculo con iniciales calculadas desde `fullName/username/email` y conserva el menú por rol existente.
+- Se agregó soporte a `?mode=signup` en `/login` para que la opción `Crear usuario` abra directamente ese modo en el formulario.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + validación manual estructurada.
+- Resultado: Lint y tipos sin errores; navegación de cuenta separada del hamburguesa y comportamiento esperado de ícono/avatar implementado.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - Revisión manual del flujo: estado anónimo (ícono + opciones login/signup) y estado autenticado (avatar con iniciales + menú de usuario).
 ## PR: SEO técnico base para mejorar posicionamiento orgánico
 - Fecha: 2026-04-21
 - Objetivo: Reforzar la base técnica SEO del sitio para mejorar indexación, relevancia semántica y calidad de snippets en buscadores/redes.
@@ -723,4 +745,5 @@ Un PR se considera terminado solo si:
 ### Documentación
 - README actualizado: Sí
 - AGENTS actualizado: Sí
+- Notas: README incluye resumen del nuevo patrón de acceso a cuenta y su comportamiento por estado de sesión.
 - Notas: Se documentó la nueva capa SEO técnica y la recomendación de configurar `NEXT_PUBLIC_SITE_URL` con dominio productivo.
