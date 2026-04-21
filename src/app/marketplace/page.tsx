@@ -1,8 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import SiteShell from "@/components/site-shell";
 import { marketplaceCategories, marketplaceProducts } from "@/data/marketplace-products";
 import ProductPurchaseActions from "@/components/product-purchase-actions";
+
+export const metadata: Metadata = {
+  title: "Marketplace floral en CDMX",
+  description:
+    "Catálogo de ramos, centros de mesa y regalos de Ritual Studio con opciones de compra directa por WhatsApp.",
+  alternates: {
+    canonical: "/marketplace"
+  },
+  openGraph: {
+    title: "Marketplace floral en CDMX",
+    description: "Explora categorías de arreglos florales premium y revisa el detalle de cada producto.",
+    url: "/marketplace"
+  }
+};
 
 export default function MarketplacePage() {
   return (

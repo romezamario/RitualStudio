@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import SiteShell from "@/components/site-shell";
@@ -16,6 +17,11 @@ const referenciasVisuales = [
     url: "https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?auto=format&fit=crop&w=1200&q=80"
   }
 ];
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/"
+  }
+};
 
 export default function Home() {
   return (
