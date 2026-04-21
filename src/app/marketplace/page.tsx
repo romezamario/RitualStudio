@@ -6,14 +6,14 @@ import { marketplaceCategories, marketplaceProducts } from "@/data/marketplace-p
 import ProductPurchaseActions from "@/components/product-purchase-actions";
 
 export const metadata: Metadata = {
-  title: "Marketplace floral en CDMX",
+  title: "Marketplace floral",
   description:
     "Catálogo de ramos, centros de mesa y regalos de Ritual Studio con opciones de compra directa por WhatsApp.",
   alternates: {
     canonical: "/marketplace"
   },
   openGraph: {
-    title: "Marketplace floral en CDMX",
+    title: "Marketplace floral",
     description: "Explora categorías de arreglos florales premium y revisa el detalle de cada producto.",
     url: "/marketplace"
   }

@@ -26,7 +26,7 @@ export const marketplaceProducts: MarketplaceProduct[] = [
     size: "Mediano (45 cm de alto aprox.)",
     flowers: ["Rosa de jardín", "Lisianthus", "Eucalipto"],
     idealFor: ["Aniversario", "Cumpleaños", "Regalo corporativo"],
-    delivery: "Entrega el mismo día en CDMX (pedido antes de 1:00 p.m.)."
+    delivery: "Entrega el mismo día en ciudades con cobertura express (pedido antes de 1:00 p.m.)."
   },
   {
     slug: "ramo-atelier-marfil",
@@ -41,7 +41,7 @@ export const marketplaceProducts: MarketplaceProduct[] = [
     size: "Grande (55 cm de alto aprox.)",
     flowers: ["Rosa crema", "Clavel premium", "Ammi majus"],
     idealFor: ["Casa nueva", "Agradecimiento", "Lobby boutique"],
-    delivery: "Programación con 24 horas de anticipación en CDMX y área metropolitana."
+    delivery: "Programación con 24 horas de anticipación según zona de cobertura."
   },
   {
     slug: "centro-bruma",
@@ -56,7 +56,7 @@ export const marketplaceProducts: MarketplaceProduct[] = [
     size: "60 cm de largo aprox.",
     flowers: ["Dalia estacional", "Rosa spray", "Follaje olivo"],
     idealFor: ["Cena especial", "Airbnb premium", "Restaurante"],
-    delivery: "Entrega y montaje ligero en sitio dentro de CDMX."
+    delivery: "Entrega y montaje ligero en sitio según disponibilidad de cobertura."
   },
   {
     slug: "centro-editorial",
@@ -101,7 +101,7 @@ export const marketplaceProducts: MarketplaceProduct[] = [
     size: "Cobertura media",
     flowers: ["Base seca + flor fresca", "Elementos de montaje"],
     idealFor: ["Pop-up store", "PR event", "Escaparate"],
-    delivery: "Incluye traslado, montaje y desmontaje básico en CDMX."
+    delivery: "Incluye traslado, montaje y desmontaje básico según ciudad y logística."
   },
   {
     slug: "regalo-ritual-box",

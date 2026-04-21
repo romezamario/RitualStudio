@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <SiteShell
-      eyebrow="Estudio floral editorial · CDMX"
+      eyebrow="Estudio floral editorial"
       title="Arreglos florales de autor para espacios, regalos y eventos con carácter"
       subtitle="Inspirados en el lenguaje sobrio y artístico de estudios de diseño contemporáneo, creamos composiciones con intención: textura, escala y narrativa visual adaptada a cada cliente."
     >
