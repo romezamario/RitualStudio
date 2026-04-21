@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth, type UserRole } from "@/components/auth-context";
 import { hasSupabaseConfig, signInWithPassword, signUpWithPassword } from "@/lib/supabase-client";
 
@@ -8,7 +9,9 @@ type AuthMode = "login" | "signup";
 
 export function LoginForm() {
   const { signIn } = useAuth();
-  const [mode, setMode] = useState<AuthMode>("login");
+  const searchParams = useSearchParams();
+  const initialMode = searchParams.get("mode") === "signup" ? "signup" : "login";
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");

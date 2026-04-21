@@ -576,3 +576,27 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Menú de usuario por ícono y avatar con iniciales
+### ¿Qué cambia?
+- Se removió del menú hamburguesa el botón textual `Crear usuario / Iniciar sesión`.
+- Se agregó un acceso de cuenta fijo en la esquina derecha del header:
+  - Si no hay sesión: muestra ícono de usuario y, al hacer clic, abre opciones `Iniciar sesión` y `Crear usuario`.
+  - Si hay sesión activa: muestra un círculo con iniciales del usuario y, al hacer clic, abre el menú de cuenta (pedidos, direcciones, opciones admin y cerrar sesión).
+- Se agregó soporte a `?mode=signup` en `/login` para abrir directamente el formulario en modo crear cuenta.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- Validación manual estructurada:
+  - Mobile: botón de cuenta visible al lado derecho y separado del menú hamburguesa.
+  - Sin sesión: clic en ícono de usuario despliega `Iniciar sesión` y `Crear usuario`.
+  - Con sesión: se visualiza avatar circular con iniciales y menú de usuario al hacer clic.
+
+### Impacto
+- El acceso de cuenta se vuelve más consistente y visible en mobile/desktop sin mezclarlo con la navegación principal.
+- La señal visual de sesión activa mejora (avatar con iniciales), facilitando reconocer estado autenticado.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

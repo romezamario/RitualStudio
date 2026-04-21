@@ -126,6 +126,12 @@ p {
   display: none;
 }
 
+.header-right {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.65rem;
+}
+
 .nav-links {
   display: flex;
   flex-wrap: wrap;
@@ -152,11 +158,55 @@ p {
   position: relative;
 }
 
-.user-menu-trigger {
-  max-width: 16rem;
+.account-access {
+  z-index: 31;
+}
+
+.user-access-trigger {
+  align-items: center;
+  background: color-mix(in srgb, white 60%, var(--rose-mist));
+  border: 1px solid color-mix(in srgb, var(--smoke) 45%, white);
+  border-radius: 999px;
+  color: var(--charcoal);
+  cursor: pointer;
+  display: inline-flex;
+  height: 2.4rem;
+  justify-content: center;
+  width: 2.4rem;
+}
+
+.user-access-trigger:hover {
+  background: white;
+}
+
+.user-access-trigger.is-authenticated {
+  background: color-mix(in srgb, var(--charcoal) 92%, white);
+  border-color: color-mix(in srgb, var(--charcoal) 84%, white);
+  color: #f3efed;
+}
+
+.user-initials {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.user-icon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.sr-only {
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .user-menu-panel {
@@ -756,8 +806,8 @@ p {
 @media (max-width: 900px) {
   .nav-wrap {
     border-radius: 1rem;
-    grid-template-columns: 1fr;
-    justify-items: start;
+    grid-template-columns: 1fr auto;
+    justify-items: stretch;
     padding: 1rem;
   }
 
@@ -796,12 +846,21 @@ p {
     transform: translateY(-5px) rotate(-45deg);
   }
 
+  .brand {
+    align-self: center;
+  }
+
+  .header-right {
+    justify-self: end;
+  }
+
   .nav-links {
     display: none;
     flex-direction: column;
     gap: 0.5rem;
     justify-content: flex-start;
     width: 100%;
+    grid-column: 1 / -1;
   }
 
   .nav-links.is-open {
@@ -818,6 +877,7 @@ p {
     display: none;
     flex-wrap: wrap;
     width: 100%;
+    grid-column: 1 / -1;
   }
 
   .header-actions.is-open {
@@ -829,18 +889,9 @@ p {
     width: 100%;
   }
 
-  .user-menu {
-    width: 100%;
-  }
-
-  .user-menu-trigger {
-    justify-content: center;
-    width: 100%;
-  }
-
   .user-menu-panel {
-    position: static;
-    width: 100%;
+    right: 0;
+    top: calc(100% + 0.5rem);
   }
 
   .feature-grid,
