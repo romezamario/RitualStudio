@@ -623,3 +623,21 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fix de build en Vercel por `useSearchParams` en `/login`
+### ¿Qué cambia?
+- Se actualizó `src/app/login/page.tsx` para envolver `LoginForm` dentro de `Suspense`.
+- Se añadió un fallback de carga liviano para el formulario de acceso.
+- Se resolvió el error de prerender reportado por Next.js 15: `useSearchParams() should be wrapped in a suspense boundary`.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npm run build`.
+
+### Impacto
+- El build de producción deja de fallar en Vercel al generar la ruta `/login`.
+- Se mantiene el flujo actual de login/registro sin cambios funcionales de negocio.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
