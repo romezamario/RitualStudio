@@ -211,6 +211,9 @@ p {
 }
 
 .user-menu {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
   position: relative;
 }
 
@@ -272,11 +275,10 @@ p {
   box-shadow: 0 12px 28px rgba(74, 74, 74, 0.12);
   display: grid;
   gap: 0.45rem;
+  margin-top: 0.45rem;
   min-width: 220px;
   padding: 0.7rem;
-  position: absolute;
-  right: 0;
-  top: calc(100% + 0.35rem);
+  position: static;
   z-index: 30;
 }
 
