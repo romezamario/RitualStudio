@@ -138,6 +138,23 @@ function resolveEmailRedirectTo() {
   }
 }
 
+function resolveRecoveryRedirectTo() {
+  const callbackPath = "/auth/callback";
+  const candidateUrl = publicSiteUrl?.length ? publicSiteUrl : typeof window !== "undefined" ? window.location.origin : null;
+
+  if (!candidateUrl) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(callbackPath, candidateUrl);
+    url.searchParams.set("next", "/actualizar-contrasena");
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
 async function requestSupabaseAuth(
   endpoint: string,
   body: {
@@ -292,6 +309,38 @@ export async function verifyOtpToken(params: {
       sessionCreated: false,
       session: null,
     };
+  }
+}
+
+export async function requestPasswordRecovery(email: string): Promise<{ error: string | null }> {
+  try {
+    const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
+    const emailRedirectTo = resolveRecoveryRedirectTo();
+
+    const response = await fetch(`${supabaseUrl}/auth/v1/recover`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify({
+        email,
+        ...(emailRedirectTo ? { options: { emailRedirectTo } } : {}),
+      }),
+    });
+
+    const data = (await response.json().catch(() => null)) as SupabaseErrorPayload | null;
+
+    if (!response.ok) {
+      return {
+        error: `${parseSupabaseError(data, "No fue posible enviar el enlace de recuperación.")} (HTTP ${response.status})`,
+      };
+    }
+
+    return { error: null };
+  } catch (error) {
+    return { error: parseNetworkError(error) };
   }
 }
 

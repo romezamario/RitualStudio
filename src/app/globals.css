@@ -452,6 +452,19 @@ p {
   background: white;
 }
 
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--charcoal);
+  justify-content: flex-start;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.btn-link:hover {
+  color: color-mix(in srgb, var(--charcoal) 84%, black);
+}
 
 .btn:disabled {
   cursor: not-allowed;
