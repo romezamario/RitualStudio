@@ -576,3 +576,35 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## SEO técnico implementado (abril 2026)
+- Metadata global reforzada en App Router: `title` con plantilla, `description`, `keywords`, `robots`, Open Graph y Twitter Cards.
+- Canonical tags en Home, Marketplace y detalle dinámico por producto.
+- Datos estructurados JSON-LD:
+  - `Florist`/organización a nivel global.
+  - `Product` en cada URL de detalle de marketplace.
+- Archivos SEO automáticos:
+  - `src/app/sitemap.ts` con rutas estáticas y productos del catálogo.
+  - `src/app/robots.ts` permitiendo indexación pública y bloqueando áreas privadas (`/admin`, `/mi-cuenta`).
+
+### Recomendaciones operativas SEO
+- Configurar `NEXT_PUBLIC_SITE_URL` con el dominio final de producción para canónicos, `robots.txt` y `sitemap.xml` correctos.
+- Reemplazar/crear imágenes OG definitivas en `public/images/seo/og/` para mejorar CTR en redes.
+
+## PR: SEO técnico base (metadata, sitemap, robots y schema)
+### ¿Qué cambia?
+- Se fortalece la capa SEO global del sitio con metadata semántica completa para motores de búsqueda y redes sociales.
+- Se agregan `sitemap.xml` y `robots.txt` dinámicos usando el catálogo del marketplace.
+- Se añaden datos estructurados (`Florist` y `Product`) para mejorar elegibilidad de rich results.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Mejora la indexabilidad técnica del sitio y la calidad de snippets al compartir enlaces.
+- Deja preparada la base SEO para escalar contenido (blog/categorías) sin rehacer infraestructura.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
