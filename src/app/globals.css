@@ -851,6 +851,9 @@ p {
   }
 
   .header-right {
+    align-items: flex-end;
+    display: grid;
+    gap: 0.5rem;
     justify-self: end;
   }
 
@@ -889,9 +892,17 @@ p {
     width: 100%;
   }
 
+  .account-access {
+    justify-self: end;
+    width: min(20rem, calc(100vw - 4rem));
+    z-index: 32;
+  }
+
   .user-menu-panel {
-    right: 0;
-    top: calc(100% + 0.5rem);
+    margin-top: 0.5rem;
+    min-width: 0;
+    position: static;
+    width: 100%;
   }
 
   .feature-grid,
