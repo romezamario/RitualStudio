@@ -7,7 +7,6 @@ import { CartProvider, useCart } from "@/components/cart-context";
 import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const links = [
-  { href: "/", label: "Inicio" },
   { href: "/marketplace", label: "Tienda" },
   { href: "/custom", label: "Diseño a medida" },
   { href: "/eventos", label: "Eventos" },
@@ -65,6 +64,18 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
           </Link>
 
           <div className="header-right">
+            <a
+              href={whatsappHref}
+              className="whatsapp-access"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Contactar por WhatsApp"
+              onClick={closeMenu}
+            >
+              <WhatsAppIcon />
+              <span className="sr-only">WhatsApp</span>
+            </a>
+
             <Link
               href="/carrito"
               className="cart-access"
@@ -164,24 +175,6 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
               </Link>
             ))}
           </nav>
-
-          <div className={`header-actions ${isMenuOpen ? "is-open" : ""}`}>
-            <span className="palette-swatch" aria-hidden>
-              <i className="swatch swatch-1" />
-              <i className="swatch swatch-2" />
-              <i className="swatch swatch-3" />
-              <i className="swatch swatch-4" />
-            </span>
-            <a
-              href={whatsappHref}
-              className="btn btn-primary"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={closeMenu}
-            >
-              Contáctanos
-            </a>
-          </div>
         </div>
       </header>
 
@@ -235,6 +228,17 @@ function CartIcon() {
     <svg viewBox="0 0 24 24" className="cart-icon" aria-hidden>
       <path
         d="M3 4.25h1.67c.33 0 .62.23.69.55l.33 1.45h12.55a.75.75 0 0 1 .72.96l-1.34 4.7a2.75 2.75 0 0 1-2.64 1.99H9.31a2.75 2.75 0 0 1-2.67-2.09L5.22 5.74h-2.2a.75.75 0 0 1 0-1.5Zm4.89 7.23c.16.66.74 1.12 1.42 1.12h6.67c.68 0 1.27-.46 1.43-1.12l1.06-3.73H6.83l1.06 3.73ZM8.75 17.5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5Zm7.5 0a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function WhatsAppIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="whatsapp-icon" aria-hidden>
+      <path
+        d="M12.03 3.25a8.75 8.75 0 0 0-7.48 13.29L3 21l4.65-1.5a8.75 8.75 0 1 0 4.38-16.25Zm0 1.5a7.25 7.25 0 0 1 6.17 11.04 7.2 7.2 0 0 1-6.17 3.46c-1.27 0-2.52-.34-3.61-.98l-.27-.16-2.73.88.9-2.62-.17-.27a7.25 7.25 0 0 1 5.88-11.35Zm-3.11 3.78c-.2 0-.51.08-.77.37-.26.29-.98.95-.98 2.3s1 2.65 1.14 2.84c.14.19 1.97 3.17 4.88 4.31 2.42.95 2.92.76 3.45.71.53-.05 1.71-.7 1.95-1.39.24-.69.24-1.28.17-1.39-.07-.12-.26-.19-.54-.33-.28-.14-1.66-.82-1.92-.91-.26-.09-.45-.14-.64.14-.19.28-.73.91-.9 1.1-.16.19-.33.21-.61.07-.28-.14-1.2-.44-2.29-1.41-.85-.76-1.42-1.7-1.59-1.98-.16-.28-.02-.43.12-.57.13-.13.28-.33.42-.49.14-.16.19-.28.28-.47.09-.19.05-.35-.02-.49-.07-.14-.64-1.54-.88-2.11-.23-.55-.47-.47-.64-.48h-.55Z"
         fill="currentColor"
       />
     </svg>

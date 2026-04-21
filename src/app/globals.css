@@ -130,6 +130,28 @@ p {
   align-items: center;
   display: inline-flex;
   gap: 0.65rem;
+  justify-self: end;
+}
+
+.whatsapp-access {
+  align-items: center;
+  background: #25d366;
+  border: 1px solid color-mix(in srgb, #25d366 72%, #0c8f43);
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  height: 2.4rem;
+  justify-content: center;
+  width: 2.4rem;
+}
+
+.whatsapp-access:hover {
+  background: color-mix(in srgb, #25d366 86%, #0c8f43);
+}
+
+.whatsapp-icon {
+  height: 1.1rem;
+  width: 1.1rem;
 }
 
 .cart-access {
@@ -176,7 +198,7 @@ p {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .nav-links a {
@@ -186,12 +208,6 @@ p {
 
 .nav-links a:hover {
   color: var(--ink);
-}
-
-.header-actions {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.65rem;
 }
 
 .user-menu {
@@ -292,36 +308,6 @@ p {
   color: #732f2f;
   cursor: pointer;
   text-align: left;
-}
-
-.palette-swatch {
-  display: inline-flex;
-  gap: 0.28rem;
-}
-
-.swatch {
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  border-radius: 999px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
-  display: block;
-  height: 0.85rem;
-  width: 0.85rem;
-}
-
-.swatch-1 {
-  background: var(--rose-mist);
-}
-
-.swatch-2 {
-  background: var(--sandstone);
-}
-
-.swatch-3 {
-  background: var(--smoke);
-}
-
-.swatch-4 {
-  background: var(--charcoal);
 }
 
 .hero-block {
@@ -897,8 +883,8 @@ p {
   }
 
   .header-right {
-    align-items: flex-end;
-    display: grid;
+    align-items: center;
+    display: inline-flex;
     gap: 0.5rem;
     justify-self: end;
   }
@@ -922,25 +908,8 @@ p {
     padding: 0.45rem 0;
   }
 
-  .header-actions {
-    display: none;
-    flex-wrap: wrap;
-    width: 100%;
-    grid-column: 1 / -1;
-  }
-
-  .header-actions.is-open {
-    display: inline-flex;
-  }
-
-  .header-actions .btn {
-    justify-content: center;
-    width: 100%;
-  }
-
   .account-access {
     justify-self: end;
-    width: min(20rem, calc(100vw - 4rem));
     z-index: 32;
   }
 
