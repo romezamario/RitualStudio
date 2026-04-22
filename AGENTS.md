@@ -1029,3 +1029,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó el objetivo de performance y el patrón recomendado de providers globales para futuras iteraciones.
+
+## PR: Ajuste visual del botón flotante de WhatsApp
+- Fecha: 2026-04-22
+- Objetivo: Alinear el botón flotante de WhatsApp con la paleta editorial del sitio y reemplazar el ícono por una versión más estética.
+
+### Lo aprendido
+- Un ícono de trazo simplificado con mejor proporción mejora legibilidad en tamaños pequeños sin perder reconocimiento de marca.
+- El botón flotante se percibe más integrado cuando hereda tokens visuales del sitio (`rose-mist`, `smoke`, `charcoal`) en lugar de mantener un color externo dominante.
+- Qué no funcionó y por qué: mantener el verde original destacaba demasiado frente al resto de accesos rápidos y rompía la armonía del header/editorial.
+
+### Decisiones técnicas
+- Se reemplazó el path SVG anterior por una versión más limpia (burbuja + teléfono) en `WhatsAppIcon`.
+- Se migró el estilo de `.whatsapp-floating` de verde corporativo a colores del sistema visual del proyecto.
+- Se añadió `:hover` con fondo blanco para mantener consistencia con patrones ya usados en iconos de carrito/usuario.
+- Razón de la decisión final: priorizar coherencia visual de marca del sitio sin afectar funcionalidad de contacto ni comportamiento draggable.
+
+### Riesgos y mitigaciones
+- Riesgo: menor reconocimiento inmediato del canal si el botón pierde demasiado contraste.
+- Mitigación: se mantuvo forma circular, posición fija y símbolo telefónico dentro de burbuja para conservar affordance de mensajería.
+- Pendientes: validar con negocio si se desea una versión intermedia (acento de color más cercano a WhatsApp) para campañas específicas.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado esperado: cambios visuales sin romper lint ni interacción de clic/arrastre del botón.
+- Resultado obtenido: lint exitoso y comportamiento visual/interactivo consistente.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión manual del botón flotante: nuevo ícono visible, color alineado a paleta del sitio y sin regresiones de interacción.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se registró el rationale visual y la validación aplicada para futuras iteraciones de branding.

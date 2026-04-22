@@ -851,3 +851,24 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Refresh visual del botón flotante de WhatsApp
+### ¿Qué cambia?
+- Se actualizó el ícono de WhatsApp por una versión vectorial más limpia y legible (burbuja + teléfono) para mejorar estética en el botón flotante.
+- Se reemplazó el color verde de marca WhatsApp por un estilo alineado al sistema visual del sitio (base clara derivada de `--rose-mist` + ícono en `--charcoal`).
+- Se agregó estado `hover` en el botón para mantener consistencia con los demás accesos rápidos del header.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Validación manual estructurada del botón flotante:
+  - visual del nuevo ícono;
+  - contraste del color con la paleta del sitio;
+  - interacción normal de clic/drag sin regresiones.
+
+### Impacto
+- El botón de WhatsApp conserva su visibilidad comercial, pero ahora se integra mejor al lenguaje visual editorial de Ritual Studio.
+- Se mejora percepción de calidad del componente al sustituir el ícono previo por uno más pulido.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
