@@ -900,7 +900,7 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 ### Qué hace el flujo
 1. El usuario agrega productos al carrito y entra a `/checkout`.
 2. El Card Payment Brick tokeniza la tarjeta en frontend (PCI scope de MP).
-3. Frontend envía al backend solo: `token`, `payment_method_id`, `payment_method_type`, `installments`, `payer.email`, `items` (slug/cantidad).
+3. Frontend envía al backend solo: `token`, `payment_method_id`, `payment_method_type` (cuando Mercado Pago lo incluye), `installments`, `payer.email`, `items` (slug/cantidad).
 4. Backend recalcula montos usando catálogo local (no confía en precio del frontend).
 5. Backend crea orden en Mercado Pago (`/v1/orders`) y guarda datos en `orders`.
 6. Si hay info de pago, también registra `payments`.
@@ -924,6 +924,11 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 - **No** usa `init_point`.
 - **No** usa `preference_id`.
 - **No** redirige fuera de `ritualstudio.com.mx`.
+
+### Troubleshooting de error: “Faltan datos obligatorios del pago”
+- Si el Brick no manda `payment_method_type` en `onSubmit`, el backend ahora usa fallback seguro `credit_card` para no rechazar pagos válidos por payload parcial.
+- Los campos que sí se mantienen como obligatorios son: `token`, `payment_method_id` y `payer.email`.
+- Si el error persiste, revisar en Network el payload enviado a `POST /api/mercadopago/create-order` y confirmar que esos tres campos existan.
 
 ## PR: Registro técnico de integraciones GitHub↔Supabase y Supabase↔Vercel
 ### ¿Qué cambia?

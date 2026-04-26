@@ -1128,3 +1128,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye nueva sección con variables y alcance del registro técnico de integraciones.
+
+## PR: Fix validación de datos obligatorios en checkout embebido (Mercado Pago)
+- Fecha: 2026-04-26
+- Objetivo: Corregir falsos positivos de “Faltan datos obligatorios del pago” cuando el Brick envía `payment_method_type` vacío/omitido, aun con tarjeta y datos completos.
+
+### Lo aprendido
+- En Card Payment Brick de Mercado Pago, `payment_method_type` puede no venir siempre en el `onSubmit`; tratarlo como obligatorio en backend provoca rechazos 400 aunque el resto de datos sea válido.
+- Validar únicamente los campos realmente imprescindibles (`token`, `payment_method_id`, `payer.email`) evita bloquear pagos válidos por variaciones del payload del SDK.
+- Qué no funcionó y por qué: exigir `payment_method_type` en el guard inicial del endpoint (`create-order`) disparaba el mensaje de datos faltantes para casos reales con payload parcial del Brick.
+
+### Decisiones técnicas
+- Se hizo opcional `payment_method_type` en el contrato TypeScript compartido del checkout.
+- Se removió `payment_method_type` de la validación obligatoria en `POST /api/mercadopago/create-order`.
+- Se agregó fallback backend a `credit_card` (`resolvedPaymentMethodType`) para mantener compatibilidad con `/v1/orders` y trazabilidad en metadata/persistencia.
+- Razón de la decisión final: privilegiar robustez ante variaciones reales del SDK sin degradar validaciones críticas del pago.
+
+### Riesgos y mitigaciones
+- Riesgo: que ciertos métodos requieran tipo distinto al fallback por defecto.
+- Mitigación: se conserva prioridad al valor real cuando sí llega desde frontend; el fallback solo aplica cuando viene omitido.
+- Pendientes: monitorear respuestas de producción para confirmar si conviene inferir tipo por BIN/issuer en una siguiente iteración.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: compilar sin errores y permitir payload de checkout sin `payment_method_type` obligatorio.
+- Resultado obtenido: lint y typecheck en verde tras ajuste de contrato y endpoint.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se añadió nota de troubleshooting para el error de datos obligatorios y el comportamiento del fallback backend.

@@ -18,7 +18,7 @@ type CreateOrderResponse = {
 type MpBrickFormData = {
   token: string;
   payment_method_id: string;
-  payment_method_type: string;
+  payment_method_type?: string;
   installments: number;
   payer: {
     email: string;

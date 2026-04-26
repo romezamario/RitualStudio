@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
   const { token, payment_method_id, payment_method_type, installments, payer, items } = body;
 
-  if (!token || !payment_method_id || !payment_method_type || !payer?.email) {
+  if (!token || !payment_method_id || !payer?.email) {
     return NextResponse.json({ error: "Faltan datos obligatorios del pago." }, { status: 400 });
   }
 
@@ -33,6 +33,8 @@ export async function POST(request: Request) {
   if (!Number.isInteger(installments) || installments < 1 || installments > 24) {
     return NextResponse.json({ error: "Cuotas inválidas." }, { status: 400 });
   }
+
+  const resolvedPaymentMethodType = payment_method_type || "credit_card";
 
   try {
     const { lineItems, totalAmount } = validateAndPriceLineItems(items);
@@ -53,7 +55,7 @@ export async function POST(request: Request) {
             amount: totalAmount,
             payment_method: {
               id: payment_method_id,
-              type: payment_method_type,
+              type: resolvedPaymentMethodType,
             },
             token,
             installments,
@@ -84,6 +86,7 @@ export async function POST(request: Request) {
         installments,
         payment_method_id,
         payment_method_type,
+        resolved_payment_method_type: resolvedPaymentMethodType,
       },
       raw_response: order,
     };
@@ -104,6 +107,7 @@ export async function POST(request: Request) {
         status: payment.status ?? order.status ?? "unknown",
         status_detail: payment.status_detail ?? order.status_detail ?? null,
         payment_method: payment.payment_method?.id ?? payment_method_id,
+        payment_method_type: payment.payment_method?.type ?? resolvedPaymentMethodType,
         amount: payment.amount ?? totalAmount,
         raw_response: payment,
       };
