@@ -1,6 +1,8 @@
 import SiteShell from "@/components/site-shell";
 import Image from "next/image";
 
+const CARD_IMAGE_SIZES = "(max-width: 900px) 100vw, (max-width: 1280px) 50vw, 33vw";
+
 const arreglos = [
   {
     nombre: "Nocturne",
@@ -36,7 +38,14 @@ export default function ArreglosPage() {
         {arreglos.map((arreglo) => (
           <article key={arreglo.nombre} className="studio-card">
             <div className="card-image-wrap">
-              <Image className="card-image" src={arreglo.imagen} alt={arreglo.nombre} width={1200} height={900} />
+              <Image
+                className="card-image"
+                src={arreglo.imagen}
+                alt={arreglo.nombre}
+                width={1200}
+                height={900}
+                sizes={CARD_IMAGE_SIZES}
+              />
             </div>
             <h2>{arreglo.nombre}</h2>
             <p>{arreglo.nota}</p>

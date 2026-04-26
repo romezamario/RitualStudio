@@ -116,6 +116,21 @@ public/images/
 
 > Todas las carpetas incluyen `.gitkeep` para versionar la estructura aunque aún no haya assets cargados.
 
+## Convención `next/image` para grids y tarjetas (`sizes`)
+
+Para evitar descargas de imágenes más grandes de lo necesario, usa siempre `sizes` alineado al layout CSS real:
+
+- Grids/tarjetas de catálogo (`.feature-grid`, `.reference-grid`):  
+  `sizes="(max-width: 900px) 100vw, (max-width: 1280px) 50vw, 33vw"`
+- Imagen principal de detalle de producto (`.product-detail`):  
+  `sizes="(max-width: 900px) 100vw, 48vw"`
+- Miniatura de carrito (`.cart-item` con columna fija de 180px):  
+  `sizes="(max-width: 900px) 100vw, 180px"`
+
+Regla operativa:
+- Marca `priority` **solo** en la imagen principal above-the-fold de la vista (ej. hero/imagen principal de detalle).
+- Mantén el resto de imágenes en carga lazy (comportamiento por defecto de `next/image`).
+
 ## Flujo GitHub → Vercel
 1. Conectar repositorio en Vercel (New Project).
 2. Verificar que detecte framework **Next.js**.

@@ -6,6 +6,8 @@ import { useMemo } from "react";
 import { useCart } from "@/components/cart-context";
 import { getWhatsAppHref } from "@/lib/whatsapp";
 
+const CART_IMAGE_SIZES = "(max-width: 900px) 100vw, 180px";
+
 export default function CartPageClient() {
   const { items, removeFromCart, clearCart, totalItems } = useCart();
 
@@ -38,7 +40,14 @@ export default function CartPageClient() {
         {items.map((item) => (
           <article key={item.slug} className="studio-card cart-item">
             <div className="cart-item-image-wrap">
-              <Image src={item.image} alt={item.name} width={600} height={420} className="cart-item-image" />
+              <Image
+                src={item.image}
+                alt={item.name}
+                width={600}
+                height={420}
+                className="cart-item-image"
+                sizes={CART_IMAGE_SIZES}
+              />
             </div>
             <div className="cart-item-copy">
               <p className="card-label">{item.category}</p>

@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import SiteShell from "@/components/site-shell";
 
+const GRID_IMAGE_SIZES = "(max-width: 900px) 100vw, (max-width: 1280px) 50vw, 33vw";
+
 const referenciasVisuales = [
   {
     titulo: "Bouquet editorial en tonos blush",
@@ -63,7 +65,7 @@ export default function Home() {
         <div className="reference-grid">
           {referenciasVisuales.map((item) => (
             <figure key={item.titulo} className="reference-item">
-              <Image src={item.url} alt={item.titulo} width={1200} height={900} />
+              <Image src={item.url} alt={item.titulo} width={1200} height={900} sizes={GRID_IMAGE_SIZES} />
               <figcaption>{item.titulo}</figcaption>
             </figure>
           ))}
