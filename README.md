@@ -872,3 +872,55 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## Checkout embebido con Mercado Pago (Checkout API / Orders)
+
+Se integró un flujo de pago **embebido** (sin redirecciones externas) usando SDK JS de Mercado Pago + Card Payment Brick, con creación de orden/pago desde backend.
+
+### Variables de entorno requeridas
+
+```bash
+# Frontend seguro (SDK JS)
+NEXT_PUBLIC_MP_PUBLIC_KEY=TEST-xxxxxxxx
+
+# Backend seguro (nunca exponer en cliente)
+MP_ACCESS_TOKEN=TEST-xxxxxxxx
+MP_WEBHOOK_SECRET=xxxxxxxx
+
+# Supabase backend (persistencia de órdenes/pagos/eventos)
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+```
+
+### Rutas incluidas
+- `GET/POST /api/mercadopago/webhook`
+- `POST /api/mercadopago/create-order`
+- `/checkout` (pantalla embebida de pago con tarjeta)
+
+### Qué hace el flujo
+1. El usuario agrega productos al carrito y entra a `/checkout`.
+2. El Card Payment Brick tokeniza la tarjeta en frontend (PCI scope de MP).
+3. Frontend envía al backend solo: `token`, `payment_method_id`, `payment_method_type`, `installments`, `payer.email`, `items` (slug/cantidad).
+4. Backend recalcula montos usando catálogo local (no confía en precio del frontend).
+5. Backend crea orden en Mercado Pago (`/v1/orders`) y guarda datos en `orders`.
+6. Si hay info de pago, también registra `payments`.
+7. El webhook recibe eventos, guarda `payment_events`, consulta estado real en MP y reconcilia `orders/payments`.
+
+### Pruebas en sandbox
+1. Configura llaves `TEST-` en Vercel/local.
+2. Ejecuta `npm run dev`.
+3. Agrega productos al carrito y abre `/checkout`.
+4. Realiza compra usando tarjetas de prueba de Mercado Pago.
+5. Verifica en Supabase que se registren filas en `orders`, `payments` y `payment_events`.
+
+### Configuración de webhook en Mercado Pago
+- URL sugerida de producción: `https://ritualstudio.com.mx/api/mercadopago/webhook`.
+- Para desarrollo, puedes exponer local con túnel HTTPS y configurar esa URL temporal.
+- El endpoint responde `200` incluso si falla reconciliación interna, para tolerar reintentos de MP sin romper recepción.
+
+### Nota de arquitectura
+- Este flujo usa **Checkout API / Orders embebido**.
+- **No** usa Checkout Pro.
+- **No** usa `init_point`.
+- **No** usa `preference_id`.
+- **No** redirige fuera de `ritualstudio.com.mx`.

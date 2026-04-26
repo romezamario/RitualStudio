@@ -767,7 +767,7 @@ Un PR se considera terminado solo si:
 - Resultado: Lint y build completan correctamente tras agregar `Suspense`.
 - Evidencia:
   - `npm run lint` OK.
-  - `npm run build` OK.
+  - `npm run build` falla por `Failed to fetch font` (fonts.googleapis.com) en este entorno.
 ## PR: Eliminación de referencias a Ciudad de México en contenido comercial
 - Fecha: 2026-04-21
 - Objetivo: Quitar referencias de CDMX/Ciudad de México en el contenido comercial y metadatos para comunicar cobertura en múltiples ciudades.
@@ -1062,3 +1062,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se registró el rationale visual y la validación aplicada para futuras iteraciones de branding.
+
+## PR: Checkout embebido con Mercado Pago (Checkout API / Orders)
+- Fecha: 2026-04-26
+- Objetivo: Implementar un flujo end-to-end de pago con tarjeta sin redirecciones externas, usando Card Payment Brick en frontend y creación/reconciliación de órdenes en backend con Supabase.
+
+### Lo aprendido
+- En un checkout embebido, el frontend solo debe tokenizar y enviar datos mínimos del medio de pago; el cálculo de montos debe resolverse en backend para evitar manipulación del cliente.
+- Mantener un endpoint de webhook idempotente y tolerante a reintentos es clave para sincronizar estados reales de pago (approved/pending/rejected) sin romper la recepción de eventos.
+- Preparar validación de firma desde el inicio permite endurecer seguridad progresivamente, aun cuando algunos headers/campos de notificación puedan variar por tipo de evento.
+
+### Decisiones técnicas
+- Se implementó `POST /api/mercadopago/create-order` con validaciones de payload, recálculo de total desde catálogo, `X-Idempotency-Key` y creación de orden en `/v1/orders`.
+- Se creó `POST /api/mercadopago/webhook` para registrar `payment_events`, consultar estado actualizado en Mercado Pago y reconciliar `orders/payments` en Supabase con estrategia de upsert.
+- Se agregó `/checkout` con SDK JS de Mercado Pago + Card Payment Brick, conservando experiencia embebida en el sitio y mostrando estados claros para aprobación, pendiente, rechazo y error.
+
+### Riesgos y mitigaciones
+- Riesgo: diferencias entre esquemas reales de tablas `orders`, `payments`, `payment_events` y columnas esperadas por integración.
+- Mitigación: manejo defensivo con logs de error backend y respuesta `200` en webhook para no perder notificaciones mientras se ajusta esquema final.
+- Pendientes: validar en ambiente de negocio los nombres/constraints definitivos para garantizar `on_conflict` y deduplicación al 100%.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + build de producción + validación manual estructurada de flujo.
+- Resultado esperado: Integración compila, no rompe funcionalidades existentes y deja disponibles rutas de create-order/webhook/checkout embebido.
+- Resultado obtenido: lint y typecheck en verde; build bloqueado por red al descargar fuentes de Google Fonts en este entorno, sin errores de TypeScript/ESLint en la integración implementada.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - `npm run build` falla por `Failed to fetch font` (fonts.googleapis.com) en este entorno.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta variables de entorno, sandbox, configuración de webhook y confirmación de flujo embebido sin Checkout Pro/preference/init_point.
