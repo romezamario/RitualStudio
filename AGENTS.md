@@ -1293,3 +1293,37 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta alcance del nuevo módulo admin de productos y su persistencia local actual.
+
+## PR: Fix de compilación en Vercel por tipado de `params` en ruta dinámica de marketplace
+- Fecha: 2026-04-26
+- Objetivo: Corregir el error de build en Vercel causado por un tipado incompatible de `params` en `src/app/marketplace/[slug]/page.tsx`.
+
+### Lo aprendido
+- En App Router de Next.js, tipar manualmente `params` en el componente de página puede chocar con los tipos generados de `PageProps` y romper `npm run build` en CI.
+- Para Client Components en rutas dinámicas, obtener el parámetro con `useParams` evita acoplarse a una firma de props que puede variar entre versiones de Next.
+- Qué no funcionó y por qué: mantener `type ProductDetailPageProps = { params: { slug: string } }` provocó conflicto de tipos donde `params` era esperado como `Promise` por el type-check de build.
+
+### Decisiones técnicas
+- Se eliminó el tipo `ProductDetailPageProps` y la recepción de `params` por props en la página de detalle.
+- Se adoptó `useParams<{ slug: string }>()` desde `next/navigation` para resolver `slug` directamente en cliente.
+- Se mantuvo intacto el resto del flujo (carga de catálogo desde `localStorage`, búsqueda por slug y fallback de producto inexistente).
+- Razón de la decisión final: corregir el build con el cambio mínimo y seguro, sin alterar comportamiento comercial del marketplace.
+
+### Riesgos y mitigaciones
+- Riesgo: `slug` ausente temporalmente durante hidratación del cliente.
+- Mitigación: fallback defensivo `const slug = params?.slug ?? ""` y render existente de “Producto no encontrado”.
+- Pendientes: evaluar migrar catálogo y detalle a fuente server-side para reducir dependencia de estado local en cliente.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + typecheck + build de producción.
+- Resultado esperado: eliminar error de tipado `PageProps` y compilar correctamente.
+- Resultado obtenido: lint y typecheck finalizan sin errores; en este entorno el build no completa por bloqueo de red al descargar fuentes de Google Fonts (`Inter` y `Playfair Display`), sin volver a mostrar el error de tipado reportado.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - `npm run build` falla por `Failed to fetch font` desde `fonts.googleapis.com`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incorpora una sección específica del fix para trazabilidad de despliegue en Vercel.

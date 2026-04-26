@@ -2,24 +2,23 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import SiteShell from "@/components/site-shell";
 import ProductPurchaseActions from "@/components/product-purchase-actions";
 import { getStoredMarketplaceProducts } from "@/lib/marketplace-catalog";
 import type { MarketplaceProduct } from "@/data/marketplace-products";
 
-type ProductDetailPageProps = {
-  params: { slug: string };
-};
-
-export default function ProductDetailPage({ params }: ProductDetailPageProps) {
+export default function ProductDetailPage() {
+  const params = useParams<{ slug: string }>();
+  const slug = params?.slug ?? "";
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
 
   useEffect(() => {
     setProducts(getStoredMarketplaceProducts());
   }, []);
 
-  const product = useMemo(() => products.find((item) => item.slug === params.slug), [products, params.slug]);
+  const product = useMemo(() => products.find((item) => item.slug === slug), [products, slug]);
 
   if (!product) {
     return (

@@ -198,6 +198,27 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 - AGENTS.md: Sí
 - README.md: Sí
 
+## PR: Fix de tipado en `/marketplace/[slug]` para build de Vercel
+### ¿Qué cambia?
+- Se corrigió el tipado de la página dinámica de detalle de producto para alinearlo con App Router de Next.js y evitar el error de compilación en Vercel relacionado con `PageProps`.
+- La ruta `src/app/marketplace/[slug]/page.tsx` dejó de recibir `params` por props tipadas manualmente y ahora obtiene el `slug` con `useParams` de `next/navigation`, manteniendo el componente como Client Component.
+- Se conserva el comportamiento funcional existente: búsqueda del producto por `slug`, render de detalle y fallback de “Producto no encontrado”.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- `npm run build` (en este entorno falla por descarga de Google Fonts, sin reproducir el error de tipado reportado).
+
+### Impacto
+- Se elimina el error de TypeScript que detenía el despliegue:
+  - `Type 'ProductDetailPageProps' does not satisfy the constraint 'PageProps'`
+  - `Type '{ slug: string; }' is missing ... from type 'Promise<any>'`
+- La firma de página queda compatible con App Router al resolver `slug` con `useParams` en cliente.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
 ## PR: Ajuste del menú de usuario para evitar empalme con contenido
 ### ¿Qué cambia?
 - Se ajustó el layout del bloque de cuenta en el header para que el panel de opciones de usuario forme parte del flujo del encabezado.
