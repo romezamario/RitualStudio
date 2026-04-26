@@ -1421,3 +1421,37 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README ahora incluye convención operativa de `sizes` y regla de uso de `priority` para componentes visuales nuevos.
+
+## PR: Fix de build en Vercel por tipado de `params` en detalle de marketplace
+- Fecha: 2026-04-26
+- Objetivo: Corregir el error de compilación en Vercel/Next 15 donde la página `src/app/marketplace/[slug]/page.tsx` no cumplía el contrato de `PageProps` esperado para `params`.
+
+### Lo aprendido
+- En este proyecto con Next.js 15, la validación de tipos de build puede exigir `params` como `Promise` en la firma de páginas dinámicas de App Router.
+- Un desajuste en el tipo de `params` puede pasar desapercibido en desarrollo pero romper despliegue en la fase de `Linting and checking validity of types`.
+- Qué no funcionó y por qué: usar `params: { slug: string }` en la firma de la página generó incompatibilidad con `PageProps` durante `next build` en Vercel.
+
+### Decisiones técnicas
+- Se actualizó `ProductDetailPageProps` para tipar `params` como `Promise<{ slug: string }>`.
+- La página `ProductDetailPage` pasó a `async` y ahora resuelve `slug` con `const { slug } = await params`.
+- Se mantuvo intacta la lógica de búsqueda de producto y rendering de la vista para minimizar riesgo funcional.
+- Razón de la decisión final: aplicar el cambio mínimo necesario para restaurar compatibilidad de build en Vercel sin alterar experiencia de usuario.
+
+### Riesgos y mitigaciones
+- Riesgo: introducir cambios colaterales en la ruta dinámica por refactor innecesario.
+- Mitigación: se limitó el ajuste al tipado/firma de props y a la lectura de `slug`.
+- Pendientes: evaluar en una iteración futura si conviene tipar de forma compartida todas las rutas dinámicas para evitar regresiones similares.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + typecheck + build en entorno restringido.
+- Resultado esperado: eliminar el error de `PageProps` en `/marketplace/[slug]`.
+- Resultado obtenido: `lint` y `tsc` pasan correctamente; `build` en este entorno falla por descarga de Google Fonts, sin volver a mostrar el error de tipado reportado.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - `npm run build` falla por `Failed to fetch font` desde `fonts.googleapis.com`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se añadió en README la trazabilidad del fix con referencia explícita al error de Vercel.

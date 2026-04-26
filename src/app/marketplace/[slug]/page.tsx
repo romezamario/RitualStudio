@@ -6,9 +6,9 @@ import ProductPurchaseActions from "@/components/product-purchase-actions";
 import { getMarketplaceProductBySlug, marketplaceProducts } from "@/data/marketplace-products";
 
 type ProductDetailPageProps = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
 export function generateStaticParams() {
@@ -17,8 +17,9 @@ export function generateStaticParams() {
 
 const DETAIL_IMAGE_SIZES = "(max-width: 900px) 100vw, 48vw";
 
-export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const product = getMarketplaceProductBySlug(params.slug);
+export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+  const { slug } = await params;
+  const product = getMarketplaceProductBySlug(slug);
 
   if (!product) {
     return (
