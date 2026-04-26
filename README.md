@@ -1029,3 +1029,23 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Marketplace server-first (SSR inicial) + enhancer de overrides admin
+### ¿Qué cambia?
+- `src/app/marketplace/page.tsx` y `src/app/marketplace/[slug]/page.tsx` se migraron a **Server Components** (sin `"use client"`).
+- El render inicial ahora usa `marketplaceProducts` directamente en servidor para entregar HTML completo desde el primer response.
+- En la ruta dinámica de detalle, se reemplazó lectura cliente de `useParams()` por `params` server-side y resolución previa del producto con `getMarketplaceProductBySlug`.
+- Se añadió `MarketplaceClientEnhancer` para aplicar overrides guardados por admin en `localStorage` después de hidratar, sin bloquear el primer render.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- `rg -n "^\"use client\"|useEffect|useParams" src/app/marketplace/page.tsx src/app/marketplace/[slug]/page.tsx` (sin coincidencias).
+
+### Impacto
+- Mejora SEO y rendimiento percibido al incluir listado/detalle en HTML inicial sin esperar `useEffect`.
+- Se conserva compatibilidad con personalizaciones locales de administración mediante enhancer cliente post-hidratación.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

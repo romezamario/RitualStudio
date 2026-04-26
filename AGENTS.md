@@ -1327,3 +1327,37 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incorpora una sección específica del fix para trazabilidad de despliegue en Vercel.
+
+## PR: Marketplace server-first + enhancer cliente para overrides admin
+- Fecha: 2026-04-26
+- Objetivo: Migrar `/marketplace` y `/marketplace/[slug]` a Server Components para render inicial SEO-friendly usando `marketplaceProducts`, manteniendo overrides de admin en `localStorage` con un enhancer cliente post-hidratación.
+
+### Lo aprendido
+- En App Router, mover el render principal a servidor elimina la dependencia de `useEffect` para mostrar contenido y mejora la garantía de HTML inicial completo para SEO.
+- Es viable conservar personalizaciones de admin en navegador con un Client Component pequeño que solo actúa tras hidratar, sin bloquear First Paint del catálogo base.
+- Qué no funcionó y por qué: mantener detalle en cliente con `useParams` y carga vía `useEffect` retrasaba contenido inicial y era menos robusto para indexación.
+
+### Decisiones técnicas
+- Se removió `"use client"` de `src/app/marketplace/page.tsx` y `src/app/marketplace/[slug]/page.tsx`, renderizando ambos desde datos estáticos server-side (`marketplaceProducts`).
+- En `[slug]`, se resolvió el producto en servidor mediante `params` y `getMarketplaceProductBySlug`, además de `generateStaticParams` para pre-render de slugs.
+- Se creó `MarketplaceClientEnhancer` para leer `localStorage` tras hidratar y aplicar overrides de admin cuando existan diferencias frente al catálogo base.
+- Razón de la decisión final: priorizar SEO/render inicial completo sin perder compatibilidad operativa con personalizaciones locales de administración.
+
+### Riesgos y mitigaciones
+- Riesgo: al existir override local, puede haber un cambio visual post-hidratación respecto al HTML inicial.
+- Mitigación: el enhancer solo activa override cuando detecta diferencias reales y oculta explícitamente el bloque server para evitar duplicidad visual.
+- Pendientes: migrar catálogo admin a persistencia server-side para eliminar dependencia de `localStorage` y evitar flicker en overrides.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estructural de render server-first.
+- Resultado esperado: páginas de marketplace sin hooks cliente para render inicial, con contenido base en HTML inicial y compatibilidad de lint/typecheck.
+- Resultado obtenido: lint y typecheck en verde; verificación estática confirma ausencia de `"use client"`, `useEffect` y `useParams` en páginas objetivo.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - `rg -n "^\"use client\"|useEffect|useParams" src/app/marketplace/page.tsx src/app/marketplace/[slug]/page.tsx` sin coincidencias.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README agrega nota del enfoque server-first y del papel de `MarketplaceClientEnhancer` para overrides post-hidratación.

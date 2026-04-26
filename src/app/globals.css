@@ -786,6 +786,10 @@ p {
   gap: 0.6rem;
 }
 
+html.marketplace-overrides-active #marketplace-server-content {
+  display: none;
+}
+
 .purchase-actions {
   display: flex;
   flex-wrap: wrap;
