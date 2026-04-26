@@ -1227,3 +1227,35 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README amplía troubleshooting de 401 con detalle de sanitización (BOM/`Bearer:`) y coherencia de entorno.
+
+
+## PR: Guía de configuración de credenciales Mercado Pago en Vercel (sandbox vs producción)
+- Fecha: 2026-04-26
+- Objetivo: Documentar una guía operativa para evitar mezcla de entornos al usar credenciales de prueba de Mercado Pago en Vercel.
+
+### Lo aprendido
+- En Vercel, es común dejar llaves `TEST-` también en el entorno `Production` durante pruebas; esto no rompe técnicamente el checkout, pero impide cobros reales al momento de salida a producción.
+- Separar por entorno (`Preview/Development` para sandbox y `Production` para productivo) reduce errores de diagnóstico cuando el negocio espera transacciones reales.
+- Qué no funcionó y por qué: asumir que “Production” en Vercel implica automáticamente cobro real; el comportamiento lo define el tipo de credencial, no el nombre del entorno.
+
+### Decisiones técnicas
+- Se agregó en README una sección explícita de recomendación de configuración por entorno para Mercado Pago en Vercel.
+- Se mantuvo la configuración actual de variables del código (sin cambios funcionales), priorizando claridad operativa/documental para el equipo.
+- Razón de la decisión final: resolver la duda de configuración sin introducir riesgo adicional en el flujo de checkout ya estable.
+
+### Riesgos y mitigaciones
+- Riesgo: confundir una prueba en `Production` con una salida real a cobro productivo.
+- Mitigación: guía textual en README diferenciando prefijos `TEST-` y `APP_USR-` con su uso recomendado por entorno de Vercel.
+- Pendientes: cuando se habilite go-live, reemplazar llaves `TEST-` por productivas en `Production` y ejecutar prueba end-to-end real controlada.
+
+### Pruebas
+- Tipo: Validación manual estructurada + prueba automatizada de calidad.
+- Resultado esperado: documentación actualizada sin romper compilación ni calidad del proyecto.
+- Resultado obtenido: lint en verde y nueva guía visible en README.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Cambio documental orientado a operación de credenciales en Vercel.
