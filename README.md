@@ -978,3 +978,33 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Gestión de productos para administradores (alta + edición)
+### ¿Qué cambia?
+- Se creó la ruta ` /admin/productos ` para que cuentas administradoras den de alta y editen productos.
+- El formulario admin permite capturar:
+  - nombre del producto,
+  - descripción,
+  - foto (carga local con vista previa),
+  - precio,
+  - activación de oferta y precio de oferta.
+- Se agregó persistencia local del catálogo en `localStorage` para iterar rápidamente sin bloquear por backend.
+- Marketplace (`/marketplace` y `/marketplace/[slug]`) ahora lee el catálogo persistido, mostrando productos nuevos/editados desde administración.
+- Se incorporó visualización de precio con oferta (`precio anterior` + `precio actual`) cuando aplica.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- Validación manual estructurada del flujo esperado:
+  - entrar con admin a `/admin/productos`;
+  - dar de alta producto con foto + precio + oferta opcional;
+  - editar producto existente;
+  - validar reflejo en `/marketplace` y en `/marketplace/[slug]`.
+
+### Impacto
+- El equipo administrativo ya puede operar altas/ediciones básicas de catálogo desde interfaz, sin tocar código.
+- Permite iterar comercialmente mientras se define una persistencia definitiva en base de datos.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

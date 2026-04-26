@@ -1,80 +1,35 @@
-import type { Metadata } from "next";
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import SiteShell from "@/components/site-shell";
-import { getMarketplaceProductBySlug, marketplaceProducts } from "@/data/marketplace-products";
 import ProductPurchaseActions from "@/components/product-purchase-actions";
+import { getStoredMarketplaceProducts } from "@/lib/marketplace-catalog";
+import type { MarketplaceProduct } from "@/data/marketplace-products";
 
 type ProductDetailPageProps = {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 };
 
-export function generateStaticParams() {
-  return marketplaceProducts.map((product) => ({ slug: product.slug }));
-}
+export default function ProductDetailPage({ params }: ProductDetailPageProps) {
+  const [products, setProducts] = useState<MarketplaceProduct[]>([]);
 
-export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const product = getMarketplaceProductBySlug(slug);
+  useEffect(() => {
+    setProducts(getStoredMarketplaceProducts());
+  }, []);
 
-  if (!product) {
-    return {
-      title: "Producto no encontrado",
-      robots: {
-        index: false,
-        follow: false
-      }
-    };
-  }
-
-  return {
-    title: `${product.name} en Marketplace`,
-    description: `${product.shortDescription} ${product.delivery}`,
-    alternates: {
-      canonical: `/marketplace/${product.slug}`
-    },
-    openGraph: {
-      title: `${product.name} · Ritual Studio`,
-      description: product.shortDescription,
-      url: `/marketplace/${product.slug}`,
-      type: "article",
-      images: [
-        {
-          url: product.image,
-          alt: product.name
-        }
-      ]
-    }
-  };
-}
-
-export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const { slug } = await params;
-  const product = getMarketplaceProductBySlug(slug);
+  const product = useMemo(() => products.find((item) => item.slug === params.slug), [products, params.slug]);
 
   if (!product) {
-    notFound();
+    return (
+      <SiteShell eyebrow="Marketplace" title="Producto no encontrado" subtitle="Revisa el catálogo disponible.">
+        <Link href="/marketplace" className="btn btn-ghost">
+          Volver al marketplace
+        </Link>
+      </SiteShell>
+    );
   }
-
-  const productJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    image: [product.image],
-    description: product.description,
-    category: product.category,
-    brand: {
-      "@type": "Brand",
-      name: "Ritual Studio"
-    },
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "MXN",
-      availability: "https://schema.org/InStock",
-      price: product.price.replace(/[^\d.]/g, "")
-    }
-  };
 
   return (
     <SiteShell
@@ -82,13 +37,6 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       title={product.name}
       subtitle={`${product.shortDescription} ${product.delivery}`}
     >
-      <script
-        type="application/ld+json"
-        suppressHydrationWarning
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(productJsonLd)
-        }}
-      />
       <article className="product-detail">
         <div className="product-detail-image-wrap">
           <Image src={product.image} alt={product.name} width={1400} height={1000} className="product-detail-image" />
@@ -102,6 +50,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <div className="product-meta-grid">
             <section className="studio-card">
               <p className="card-label">Precio</p>
+              {product.originalPrice ? <span className="price-old">{product.originalPrice}</span> : null}
               <strong className="price-tag">{product.price}</strong>
             </section>
             <section className="studio-card">

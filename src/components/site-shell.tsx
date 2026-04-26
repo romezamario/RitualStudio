@@ -44,6 +44,7 @@ function SiteShellFrame({ title, subtitle, eyebrow, children }: SiteShellProps) 
           { href: "/mi-cuenta/direcciones", label: "Mis direcciones" },
           { href: "/admin/pedidos", label: "Gestión de pedidos" },
           { href: "/admin/usuarios", label: "Gestión de usuarios" },
+          { href: "/admin/productos", label: "Gestión de productos" },
         ]
       : [
           { href: "/mi-cuenta", label: "Dashboard" },

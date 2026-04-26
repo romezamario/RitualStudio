@@ -1259,3 +1259,37 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Cambio documental orientado a operación de credenciales en Vercel.
+
+## PR: Gestión admin de productos (alta + edición con oferta y foto)
+- Fecha: 2026-04-26
+- Objetivo: Permitir que administradores den de alta y editen productos del marketplace capturando nombre, descripción, foto, precio y configuración de oferta.
+
+### Lo aprendido
+- Para desbloquear operación comercial sin backend de catálogo, una persistencia local controlada (`localStorage`) permite validar flujo completo de altas/ediciones desde UI.
+- Incluir vista previa inmediata de imagen al cargar archivo reduce errores de captura en operación administrativa.
+- Qué no funcionó y por qué: mantener marketplace solo con dataset estático impedía reflejar cambios de administración sin redeploy.
+
+### Decisiones técnicas
+- Se creó `/admin/productos` como módulo dedicado de operación para admins.
+- Se implementó `AdminProductsManager` con formulario de alta/edición y listado editable de catálogo.
+- Se centralizó la lectura/escritura del catálogo en `src/lib/marketplace-catalog.ts` para reutilizar la misma fuente en admin y marketplace público.
+- Se actualizó `/marketplace` y `/marketplace/[slug]` para consumir catálogo persistido y reflejar cambios operativos.
+- Razón de la decisión final: habilitar valor funcional inmediato con el mínimo riesgo arquitectónico mientras se planifica persistencia server-side.
+
+### Riesgos y mitigaciones
+- Riesgo: `localStorage` no sincroniza entre dispositivos ni usuarios.
+- Mitigación: documentar que esta iteración es operativa/local y dejar pendiente migración a tabla `products` en Supabase.
+- Pendientes: mover catálogo a backend con control de permisos y auditoría de cambios.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + validación manual estructurada.
+- Resultado esperado: alta/edición de productos funcional para admin, sin romper calidad del proyecto.
+- Resultado obtenido: lint y typecheck en verde; flujo de formulario/listado preparado para operación en `/admin/productos` y reflejo en marketplace.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta alcance del nuevo módulo admin de productos y su persistencia local actual.
