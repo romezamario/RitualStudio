@@ -1194,3 +1194,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se agregó guía puntual para diagnosticar 401 de Mercado Pago en despliegue Vercel.
+
+## PR: Hardening adicional para 401 de Mercado Pago (normalización + coherencia de entorno)
+- Fecha: 2026-04-26
+- Objetivo: Reducir casos residuales de 401 reforzando sanitización de `MP_ACCESS_TOKEN` y detección temprana de mezcla de credenciales sandbox/producción.
+
+### Lo aprendido
+- En variables pegadas desde paneles externos puede colarse un carácter BOM (`\uFEFF`) o el formato `Bearer:<token>`, y eso no se corrige con un `trim()` simple.
+- La combinación de `NEXT_PUBLIC_MP_PUBLIC_KEY` y `MP_ACCESS_TOKEN` de entornos distintos (`TEST-` vs `APP_USR-`) es una causa frecuente de errores de autorización difíciles de detectar solo con el mensaje genérico de 401.
+- Qué no funcionó y por qué: la normalización previa removía comillas y `Bearer ` con espacio, pero no cubría BOM ni variante con dos puntos.
+
+### Decisiones técnicas
+- Se amplió `getMercadoPagoAccessToken()` para remover BOM inicial y tolerar prefijo `Bearer` con espacio o `:`.
+- Se agregó validación previa en `mpApiFetch` para detectar mezcla de entorno entre `NEXT_PUBLIC_MP_PUBLIC_KEY` y `MP_ACCESS_TOKEN` antes de invocar `/v1/orders`.
+- Se actualizó el mensaje de error 401 para reforzar la verificación de entorno y no solo formato del token.
+- Razón de la decisión final: mejorar el tiempo de diagnóstico operativo en Vercel y evitar iteraciones ciegas de prueba/error en producción.
+
+### Riesgos y mitigaciones
+- Riesgo: falsos positivos si Mercado Pago introduce formatos nuevos de credenciales.
+- Mitigación: la validación de entorno solo se activa cuando detecta prefijos claros (`TEST-` o `APP_USR-`), manteniendo compatibilidad con casos no clasificables.
+- Pendientes: validar en producción si conviene exponer un endpoint interno de healthcheck de credenciales (sin revelar secretos) para soporte.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: compilar sin errores y mantener contrato actual del checkout.
+- Resultado obtenido: lint y typecheck en verde tras hardening de token y validación de entorno.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README amplía troubleshooting de 401 con detalle de sanitización (BOM/`Bearer:`) y coherencia de entorno.

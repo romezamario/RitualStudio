@@ -933,8 +933,9 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 ### Troubleshooting de error: “Mercado Pago respondió con 401”
 - El `401 Unauthorized` suele indicar credencial inválida o mal formateada en backend (no un problema del formulario frontend).
 - Verifica que `MP_ACCESS_TOKEN` sea el token correcto del entorno (sandbox `TEST-...` o producción `APP_USR-...`) y que **no** incluya el prefijo `Bearer`.
-- El backend ahora normaliza `MP_ACCESS_TOKEN` por seguridad (remueve comillas y un `Bearer ` accidental), pero la recomendación sigue siendo guardar solo el token plano en Vercel.
+- El backend ahora normaliza `MP_ACCESS_TOKEN` por seguridad (remueve comillas, BOM y un `Bearer` accidental con espacio o `:`), pero la recomendación sigue siendo guardar solo el token plano en Vercel.
 - Si hay llaves mezcladas (por ejemplo `NEXT_PUBLIC_MP_PUBLIC_KEY` de sandbox con `MP_ACCESS_TOKEN` de producción), Mercado Pago puede rechazar la operación. Usa ambos del mismo entorno.
+- Si mezclas entornos (`TEST-` vs `APP_USR-`), el backend devolverá un error explícito antes de llamar a Mercado Pago para facilitar diagnóstico.
 
 ## PR: Registro técnico de integraciones GitHub↔Supabase y Supabase↔Vercel
 ### ¿Qué cambia?
