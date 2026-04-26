@@ -913,6 +913,14 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 4. Realiza compra usando tarjetas de prueba de Mercado Pago.
 5. Verifica en Supabase que se registren filas en `orders`, `payments` y `payment_events`.
 
+
+
+### Recomendación de configuración en Vercel (cuando usas credenciales de prueba)
+- Si tus llaves empiezan con `TEST-`, configúralas en **Preview** y **Development** para evitar pruebas accidentales en producción.
+- En **Production**, usa llaves productivas (`APP_USR-` para `MP_ACCESS_TOKEN` y la `NEXT_PUBLIC_MP_PUBLIC_KEY` correspondiente) solo cuando quieras cobrar en real.
+- `NEXT_PUBLIC_MP_PUBLIC_KEY` puede estar en frontend (prefijo `NEXT_PUBLIC_`), pero `MP_ACCESS_TOKEN` debe quedarse solo en backend y nunca exponerse al cliente.
+- Si mantienes llaves `TEST-` en `Production`, el checkout funcionará en modo sandbox (sin cobros reales), lo cual puede ser útil temporalmente pero no es setup final de go-live.
+
 ### Configuración de webhook en Mercado Pago
 - URL sugerida de producción: `https://ritualstudio.com.mx/api/mercadopago/webhook`.
 - Para desarrollo, puedes exponer local con túnel HTTPS y configurar esa URL temporal.
