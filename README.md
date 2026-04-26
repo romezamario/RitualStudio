@@ -1129,3 +1129,24 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Mensaje accionable en error del Card Payment Brick (producción vs test)
+### ¿Qué cambia?
+- En `src/components/checkout-client.tsx` se agregó una traducción de errores del callback `onError` del Card Payment Brick para evitar el mensaje genérico único.
+- Cuando Mercado Pago devuelve causas relacionadas con métodos de pago/BIN (`get_payment_methods`), el frontend ahora muestra una guía explícita según entorno:
+  - con llave productiva (`APP_USR-`): usar tarjeta real y no tarjetas de prueba,
+  - con llave de test (`TEST-`): revisar datos o probar otra tarjeta de test.
+- Si Mercado Pago entrega `cause.description` o `message`, se muestra ese contexto para diagnóstico más rápido.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Menor ambigüedad para negocio/QA al diagnosticar errores del formulario embebido.
+- Reduce falsos tickets de “falló Mercado Pago” cuando en realidad hay mezcla de entorno (producción vs tarjetas de prueba).
+
+### Troubleshooting de error visual: “No pudimos obtener la información de pago. Intenta otra tarjeta”
+- Si tu `NEXT_PUBLIC_MP_PUBLIC_KEY` empieza con `APP_USR-` (producción), no uses tarjetas de prueba de Mercado Pago; usa una tarjeta real habilitada.
+- Si estás en pruebas, usa llaves `TEST-` y tarjetas de prueba del entorno sandbox.
+- Verifica también que `MP_ACCESS_TOKEN` corresponda al mismo entorno que la public key.
