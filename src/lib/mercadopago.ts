@@ -58,7 +58,9 @@ export function getMercadoPagoAccessToken() {
   }
 
   const withoutQuotes = rawToken.replace(/^['"]|['"]$/g, "");
-  return withoutQuotes.replace(/^Bearer\s+/i, "").trim();
+  const withoutBom = withoutQuotes.replace(/^\uFEFF/, "");
+  const withoutBearer = withoutBom.replace(/^Bearer[:\s]+/i, "").trim();
+  return withoutBearer;
 }
 
 export function getMercadoPagoWebhookSecret() {
@@ -124,9 +126,24 @@ export async function mpApiFetch<T>(
   init: RequestInit & { accessToken?: string } = {}
 ): Promise<T> {
   const accessToken = init.accessToken ?? getMercadoPagoAccessToken();
+  const publicKey = getMercadoPagoPublicKey();
 
   if (!accessToken) {
     throw new Error("MP_ACCESS_TOKEN no está configurado.");
+  }
+
+  const tokenIsTest = /^TEST-/i.test(accessToken);
+  const tokenIsProd = /^APP_USR-/i.test(accessToken);
+  const publicKeyIsTest = /^TEST-/i.test(publicKey);
+  const publicKeyIsProd = /^APP_USR-/i.test(publicKey);
+
+  if (
+    (tokenIsTest && publicKeyIsProd) ||
+    (tokenIsProd && publicKeyIsTest)
+  ) {
+    throw new Error(
+      "Detectamos llaves de Mercado Pago mezcladas: NEXT_PUBLIC_MP_PUBLIC_KEY y MP_ACCESS_TOKEN deben pertenecer al mismo entorno (TEST o APP_USR)."
+    );
   }
 
   const response = await fetch(`${MP_API_BASE}${path}`, {
@@ -144,7 +161,7 @@ export async function mpApiFetch<T>(
   if (!response.ok) {
     if (response.status === 401) {
       throw new Error(
-        "Mercado Pago respondió con 401 (Unauthorized). Revisa MP_ACCESS_TOKEN en Vercel: debe ser Access Token válido, sin prefijo 'Bearer'."
+        "Mercado Pago respondió con 401 (Unauthorized). Revisa MP_ACCESS_TOKEN en Vercel: debe ser Access Token válido, sin prefijo 'Bearer', y del mismo entorno que NEXT_PUBLIC_MP_PUBLIC_KEY."
       );
     }
 
