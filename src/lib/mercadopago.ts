@@ -16,7 +16,7 @@ export type ValidatedLineItem = {
 export type MpCreateOrderInput = {
   token: string;
   payment_method_id: string;
-  payment_method_type: string;
+  payment_method_type?: string;
   installments: number;
   payer: {
     email: string;
