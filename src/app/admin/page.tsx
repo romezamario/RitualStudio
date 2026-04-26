@@ -26,6 +26,15 @@ export default function AdminHomePage() {
             Ir a gestión de usuarios
           </Link>
         </article>
+
+        <article className="studio-card">
+          <p className="card-label">Productos</p>
+          <h2>Alta y edición de catálogo</h2>
+          <p>Crea productos nuevos y actualiza precio, oferta, descripción y foto.</p>
+          <Link href="/admin/productos" className="text-link">
+            Ir a gestión de productos
+          </Link>
+        </article>
       </div>
     </SiteShell>
   );

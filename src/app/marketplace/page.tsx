@@ -1,25 +1,25 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 import SiteShell from "@/components/site-shell";
-import { marketplaceCategories, marketplaceProducts } from "@/data/marketplace-products";
 import ProductPurchaseActions from "@/components/product-purchase-actions";
-
-export const metadata: Metadata = {
-  title: "Marketplace floral",
-  description:
-    "Catálogo de ramos, centros de mesa y regalos de Ritual Studio con opciones de compra directa por WhatsApp.",
-  alternates: {
-    canonical: "/marketplace"
-  },
-  openGraph: {
-    title: "Marketplace floral",
-    description: "Explora categorías de arreglos florales premium y revisa el detalle de cada producto.",
-    url: "/marketplace"
-  }
-};
+import { getStoredMarketplaceProducts } from "@/lib/marketplace-catalog";
+import type { MarketplaceProduct } from "@/data/marketplace-products";
 
 export default function MarketplacePage() {
+  const [products, setProducts] = useState<MarketplaceProduct[]>([]);
+
+  useEffect(() => {
+    setProducts(getStoredMarketplaceProducts());
+  }, []);
+
+  const categories = useMemo(
+    () => Array.from(new Set(products.map((product) => product.category))),
+    [products],
+  );
+
   return (
     <SiteShell
       eyebrow="Marketplace Ritual Studio"
@@ -27,7 +27,7 @@ export default function MarketplacePage() {
       subtitle="Desliza hacia abajo para descubrir ramos, centros de mesa, eventos y regalos. Cada producto tiene su ficha de detalle con información ampliada."
     >
       <div className="marketplace-topbar" aria-label="Categorías de productos">
-        {marketplaceCategories.map((category) => {
+        {categories.map((category) => {
           const categoryId = `categoria-${category.toLowerCase().replace(/\s+/g, "-")}`;
 
           return (
@@ -40,15 +40,15 @@ export default function MarketplacePage() {
 
       <p className="scroll-hint">Scroll down ↓ para seguir explorando el catálogo completo.</p>
 
-      {marketplaceCategories.map((category) => {
+      {categories.map((category) => {
         const categoryId = `categoria-${category.toLowerCase().replace(/\s+/g, "-")}`;
-        const products = marketplaceProducts.filter((product) => product.category === category);
+        const categoryProducts = products.filter((product) => product.category === category);
 
         return (
           <section key={category} id={categoryId} className="marketplace-section" aria-label={`Categoría ${category}`}>
             <h2>{category}</h2>
             <div className="feature-grid">
-              {products.map((product) => (
+              {categoryProducts.map((product) => (
                 <article key={product.slug} className="studio-card marketplace-card">
                   <div className="card-image-wrap">
                     <Image className="card-image" src={product.image} alt={product.name} width={1200} height={900} />
@@ -56,7 +56,10 @@ export default function MarketplacePage() {
                   <p className="card-label">{product.category}</p>
                   <h3>{product.name}</h3>
                   <p>{product.shortDescription}</p>
-                  <strong className="price-tag">{product.price}</strong>
+                  <div className="price-stack">
+                    {product.originalPrice ? <span className="price-old">{product.originalPrice}</span> : null}
+                    <strong className="price-tag">{product.price}</strong>
+                  </div>
                   <div className="marketplace-card-actions">
                     <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
                       Ver detalle

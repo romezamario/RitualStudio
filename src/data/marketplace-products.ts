@@ -10,6 +10,8 @@ export type MarketplaceProduct = {
   flowers: string[];
   idealFor: string[];
   delivery: string;
+  originalPrice?: string;
+  hasOffer?: boolean;
 };
 
 export const marketplaceProducts: MarketplaceProduct[] = [
