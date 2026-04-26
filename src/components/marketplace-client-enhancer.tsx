@@ -32,6 +32,26 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
   }, [initialProducts]);
 
   const shouldRenderListOverride = mode === "list" && !!overrideProducts;
+  const groupedOverrideProducts = useMemo(() => {
+    if (mode !== "list" || !overrideProducts) {
+      return [];
+    }
+
+    const grouped = overrideProducts.reduce<Record<string, MarketplaceProduct[]>>((accumulator, product) => {
+      if (!accumulator[product.category]) {
+        accumulator[product.category] = [];
+      }
+
+      accumulator[product.category].push(product);
+      return accumulator;
+    }, {});
+
+    return Object.entries(grouped).map(([category, products]) => ({ category, products }));
+  }, [mode, overrideProducts]);
+  const overrideCategories = useMemo(
+    () => groupedOverrideProducts.map((section) => section.category),
+    [groupedOverrideProducts],
+  );
   const detailProduct = useMemo(() => {
     if (mode !== "detail" || !overrideProducts || !slug) {
       return null;
@@ -53,12 +73,10 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
   }, [shouldRenderDetailOverride, shouldRenderListOverride]);
 
   if (shouldRenderListOverride && overrideProducts) {
-    const categories = Array.from(new Set(overrideProducts.map((product) => product.category)));
-
     return (
       <div className="marketplace-client-override" aria-label="Marketplace con personalizaciones de admin">
         <div className="marketplace-topbar" aria-label="Categorías de productos">
-          {categories.map((category) => (
+          {overrideCategories.map((category) => (
             <a key={category} href={`#${getCategoryId(category)}`} className="chip-link">
               {category}
             </a>
@@ -67,49 +85,45 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
 
         <p className="scroll-hint">Scroll down ↓ para seguir explorando el catálogo completo.</p>
 
-        {categories.map((category) => {
-          const categoryProducts = overrideProducts.filter((product) => product.category === category);
-
-          return (
-            <section
-              key={category}
-              id={getCategoryId(category)}
-              className="marketplace-section"
-              aria-label={`Categoría ${category}`}
-            >
-              <h2>{category}</h2>
-              <div className="feature-grid">
-                {categoryProducts.map((product) => (
-                  <article key={product.slug} className="studio-card marketplace-card">
-                    <div className="card-image-wrap">
-                      <Image
-                        className="card-image"
-                        src={product.image}
-                        alt={product.name}
-                        width={1200}
-                        height={900}
-                        sizes={CARD_IMAGE_SIZES}
-                      />
-                    </div>
-                    <p className="card-label">{product.category}</p>
-                    <h3>{product.name}</h3>
-                    <p>{product.shortDescription}</p>
-                    <div className="price-stack">
-                      {product.originalPrice ? <span className="price-old">{product.originalPrice}</span> : null}
-                      <strong className="price-tag">{product.price}</strong>
-                    </div>
-                    <div className="marketplace-card-actions">
-                      <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
-                        Ver detalle
-                      </Link>
-                      <ProductPurchaseActions product={product} />
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-          );
-        })}
+        {groupedOverrideProducts.map((section) => (
+          <section
+            key={section.category}
+            id={getCategoryId(section.category)}
+            className="marketplace-section"
+            aria-label={`Categoría ${section.category}`}
+          >
+            <h2>{section.category}</h2>
+            <div className="feature-grid">
+              {section.products.map((product) => (
+                <article key={product.slug} className="studio-card marketplace-card">
+                  <div className="card-image-wrap">
+                    <Image
+                      className="card-image"
+                      src={product.image}
+                      alt={product.name}
+                      width={1200}
+                      height={900}
+                      sizes={CARD_IMAGE_SIZES}
+                    />
+                  </div>
+                  <p className="card-label">{product.category}</p>
+                  <h3>{product.name}</h3>
+                  <p>{product.shortDescription}</p>
+                  <div className="price-stack">
+                    {product.originalPrice ? <span className="price-old">{product.originalPrice}</span> : null}
+                    <strong className="price-tag">{product.price}</strong>
+                  </div>
+                  <div className="marketplace-card-actions">
+                    <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
+                      Ver detalle
+                    </Link>
+                    <ProductPurchaseActions product={product} />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     );
   }

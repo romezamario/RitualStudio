@@ -188,6 +188,24 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 
 ## Historial de cambios
 
+## PR: Refactor de agrupación memoizada en marketplace client override
+### ¿Qué cambia?
+- Se refactorizó el render del override cliente de `/marketplace` para agrupar productos por categoría con `useMemo`, evitando recalcular filtros por cada categoría durante el render.
+- La estructura agrupada se construye con `reduce` y luego se transforma a secciones (`{ category, products }`) para iteración directa.
+- La barra de chips de categorías ahora se deriva de la misma estructura agrupada para mantener una sola fuente de verdad.
+- Se conservaron los `id` de ancla (`categoria-...`) para compatibilidad total con los links de navegación existentes.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+
+### Impacto
+- Menor trabajo en render del override cliente al eliminar `filter` dentro del `map` de categorías.
+- Código más mantenible al centralizar el agrupado y reutilizarlo tanto en navegación por categorías como en secciones de productos.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
 ## PR: Header en 2 secciones + WhatsApp flotante y movible
 ### ¿Qué cambia?
 - Se separó el header en dos secciones claras:
