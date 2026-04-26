@@ -1455,3 +1455,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se añadió en README la trazabilidad del fix con referencia explícita al error de Vercel.
+
+## PR: Agrupación memoizada de productos por categoría en override cliente de marketplace
+- Fecha: 2026-04-26
+- Objetivo: Optimizar el render del marketplace cuando existen overrides de admin, eliminando filtros repetidos por categoría y manteniendo compatibilidad de anclas.
+
+### Lo aprendido
+- Recalcular `filter` por cada categoría en cada render es evitable cuando ya existe una lista de productos en memoria; un agrupado memoizado simplifica y hace más predecible el costo de render.
+- Derivar chips de categorías desde la misma estructura agrupada evita desalineaciones entre navegación y secciones visibles.
+- Qué no funcionó y por qué: mantener `categories.map(...filter...)` duplicaba recorrido de datos y dispersaba la lógica de agrupación en el JSX.
+
+### Decisiones técnicas
+- Se implementó `useMemo` para agrupar `overrideProducts` con `reduce` a una estructura por categoría y exponerla como arreglo de secciones `{ category, products }`.
+- Se agregó un segundo `useMemo` para derivar la lista de categorías a partir del agrupado.
+- Se cambió el render para iterar directamente `groupedOverrideProducts`, eliminando `filter` dentro del map.
+- Se mantuvo `getCategoryId` sin cambios para conservar `id`/anclas existentes (`categoria-...`).
+- Razón de la decisión final: reducir trabajo en render con un ajuste acotado, manteniendo comportamiento y rutas actuales.
+
+### Riesgos y mitigaciones
+- Riesgo: alterar accidentalmente el orden visual de categorías/productos en el override cliente.
+- Mitigación: el agrupado respeta orden de aparición original en `overrideProducts` al construir secciones.
+- Pendientes: evaluar reutilizar el mismo patrón de agrupado en render server de `/marketplace` para homologar implementación en ambos lados.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad.
+- Resultado esperado: proyecto sin errores de lint tras refactor de agrupación.
+- Resultado obtenido: lint en verde.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye sección en historial sobre el refactor de agrupación memoizada del override cliente.
