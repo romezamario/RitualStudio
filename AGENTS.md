@@ -1361,3 +1361,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README agrega nota del enfoque server-first y del papel de `MarketplaceClientEnhancer` para overrides post-hidratación.
+
+## PR: SiteShell servidor + islas cliente para header y WhatsApp
+- Fecha: 2026-04-26
+- Objetivo: Reducir JavaScript hidratado en páginas informativas moviendo `SiteShell` a Server Component y aislando la interactividad en componentes cliente dedicados.
+
+### Lo aprendido
+- Convertir el shell principal a componente servidor conserva SSR/estructura estática sin perder UX si la lógica interactiva se mueve a “islas” cliente con props serializables.
+- Mantener `links` y `href` como datos planos (`string[]`/objetos simples) evita pasar funciones no serializables entre fronteras server/client.
+- El header puede seguir leyendo estado global (`auth/cart`) desde un componente cliente aislado sin forzar que todo el layout sea cliente.
+
+### Decisiones técnicas
+- `src/components/site-shell.tsx` se convirtió a Server Component y ahora solo renderiza estructura estática: fondo, header contenedor, hero base y footer.
+- Se extrajo la interacción del encabezado a `HeaderInteractive` (menú mobile, menú de usuario y badge de carrito) como Client Component.
+- Se extrajo el botón movible de WhatsApp a `FloatingWhatsAppButton` como Client Component recibiendo solo `href` serializable.
+- Se conservaron clases CSS actuales para minimizar riesgo visual y evitar regresiones de estilo.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + build de producción con limitación de red.
+- Resultado: `npm run lint` pasa sin errores; `npm run build` no completa por bloqueo de red al descargar Google Fonts, sin errores nuevos atribuibles al refactor server/client.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npm run build` falla con `Failed to fetch font 'Inter'` y `Failed to fetch font 'Playfair Display'` desde `fonts.googleapis.com`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se añadió en README el cambio arquitectónico hacia shell servidor + islas cliente para reducir JS en rutas informativas.

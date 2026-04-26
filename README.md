@@ -1049,3 +1049,29 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: SiteShell servidor + islas cliente para header y WhatsApp
+### ¿Qué cambia?
+- `SiteShell` ahora es **Server Component** y se encarga solo de la estructura estática compartida (header contenedor, hero base y footer).
+- La interactividad del encabezado se movió a `HeaderInteractive` (Client Component):
+  - menú hamburguesa mobile,
+  - menú de usuario autenticado,
+  - badge de carrito.
+- El botón de WhatsApp flotante y arrastrable se movió a `FloatingWhatsAppButton` (Client Component).
+- La frontera server/client usa props serializables mínimas (`links` y `href`) para mantener bajo acoplamiento.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npm run build` (en este entorno falla por descarga de Google Fonts desde `fonts.googleapis.com`).
+- Revisión estructural del refactor:
+  - páginas informativas continúan usando el mismo header funcional;
+  - la estructura base de `SiteShell` no requiere hidratación global al ser componente servidor.
+
+### Impacto
+- Menor superficie de JavaScript hidratado en rutas informativas al evitar que todo el shell sea cliente.
+- Se mantiene funcionalidad existente del header y del botón flotante de WhatsApp.
+- Arquitectura más mantenible para futuras “islas” interactivas.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
