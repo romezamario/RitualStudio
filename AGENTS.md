@@ -1488,3 +1488,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye sección en historial sobre el refactor de agrupación memoizada del override cliente.
+
+## PR: Mensaje accionable en error del Card Payment Brick (producción vs test)
+- Fecha: 2026-04-26
+- Objetivo: Corregir el diagnóstico del error genérico del formulario de pago para mostrar una causa accionable cuando el Brick no puede obtener métodos de pago de la tarjeta.
+
+### Lo aprendido
+- El `onError` del Card Payment Brick puede incluir `cause.code`/`cause.description`; ignorarlo deja al usuario con un mensaje genérico sin pista operativa.
+- El error de obtención de métodos/BIN es frecuente cuando se prueban tarjetas de test con llaves productivas (`APP_USR`) o hay datos de tarjeta inválidos.
+- Qué no funcionó y por qué: usar siempre el texto fijo "Hubo un problema en el formulario..." no permite distinguir entre error de configuración de entorno y error de captura.
+
+### Decisiones técnicas
+- Se añadió un parser de error del Brick en frontend (`getHumanReadableBrickError`) para traducir códigos/causas a mensajes útiles.
+- Se detecta si la `NEXT_PUBLIC_MP_PUBLIC_KEY` es productiva (`APP_USR-`) para devolver una recomendación explícita sobre no mezclar tarjetas de prueba con producción.
+- Se mantuvo `console.error` para conservar trazabilidad técnica completa en logs.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: lint/typecheck en verde tras el cambio y sin regresiones de tipado en checkout.
+- Resultado obtenido: checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye troubleshooting específico para el error del Brick de "No pudimos obtener la información de pago" en escenarios producción/test.

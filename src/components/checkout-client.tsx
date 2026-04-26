@@ -15,6 +15,39 @@ type CreateOrderResponse = {
   error?: string;
 };
 
+type MpBrickError = {
+  message?: string;
+  cause?: Array<{ code?: string; description?: string }>;
+};
+
+function getHumanReadableBrickError(error: unknown, isProductionKey: boolean) {
+  const fallback = "Hubo un problema en el formulario de pago. Verifica tus datos e intenta de nuevo.";
+
+  if (!error || typeof error !== "object") {
+    return fallback;
+  }
+
+  const mpError = error as MpBrickError;
+  const causeCode = mpError.cause?.[0]?.code?.toLowerCase() ?? "";
+  const causeDescription = mpError.cause?.[0]?.description;
+
+  if (causeCode.includes("get_payment_methods") || causeCode.includes("bin")) {
+    return isProductionKey
+      ? "No pudimos validar esta tarjeta en producción. Si estás probando integración, usa llaves TEST con tarjetas de prueba; con llaves APP_USR usa una tarjeta real habilitada."
+      : "No pudimos obtener la información de esta tarjeta de prueba. Revisa número, vencimiento y CVV o intenta otra tarjeta de test de Mercado Pago.";
+  }
+
+  if (causeDescription) {
+    return `Error de Mercado Pago: ${causeDescription}`;
+  }
+
+  if (mpError.message) {
+    return `Error de Mercado Pago: ${mpError.message}`;
+  }
+
+  return fallback;
+}
+
 type MpBrickFormData = {
   token: string;
   payment_method_id: string;
@@ -62,6 +95,7 @@ export default function CheckoutClient() {
   );
 
   const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim();
+  const isProductionKey = /^APP_USR-/i.test(publicKey ?? "");
 
   useEffect(() => {
     return () => {
@@ -152,7 +186,7 @@ export default function CheckoutClient() {
           },
           onError: (error: unknown) => {
             setCheckoutStatus("error");
-            setFeedback("Hubo un problema en el formulario de pago. Verifica tus datos e intenta de nuevo.");
+            setFeedback(getHumanReadableBrickError(error, isProductionKey));
             console.error("[MP Brick]", error);
           },
         },
