@@ -1150,3 +1150,31 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 - Si tu `NEXT_PUBLIC_MP_PUBLIC_KEY` empieza con `APP_USR-` (producción), no uses tarjetas de prueba de Mercado Pago; usa una tarjeta real habilitada.
 - Si estás en pruebas, usa llaves `TEST-` y tarjetas de prueba del entorno sandbox.
 - Verifica también que `MP_ACCESS_TOKEN` corresponda al mismo entorno que la public key.
+
+## PR: CRUD server-side de productos admin en Supabase
+### ¿Qué cambia?
+- Se agregaron endpoints de App Router para gestión administrativa de productos en Supabase:
+  - `GET/POST /api/admin/products`
+  - `PUT/DELETE /api/admin/products/[slug]`
+- `AdminProductsManager` ahora consume esos endpoints (carga inicial por API, guardar por `POST/PUT`, eliminación por `DELETE`).
+- El fallback por `localStorage` queda controlado por feature flag `NEXT_PUBLIC_MARKETPLACE_LOCAL_FALLBACK=true`.
+- `/marketplace` y `/marketplace/[slug]` ahora resuelven catálogo desde backend (Supabase) mediante una capa común en `src/lib/marketplace-catalog.ts`, con fallback al catálogo estático solo por compatibilidad.
+
+### Variables de entorno nuevas/relevantes
+- `SUPABASE_SERVICE_ROLE_KEY` (obligatoria en servidor para CRUD admin y lectura server-side del catálogo).
+- `NEXT_PUBLIC_MARKETPLACE_LOCAL_FALLBACK` (opcional):
+  - `true` => habilita compatibilidad temporal con `localStorage` (admin y enhancer cliente).
+  - no definida/`false` => deshabilita fallback local y usa backend como fuente principal.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- `npm run build` (falla en este entorno por bloqueo de red hacia Google Fonts; sin errores nuevos de tipado/lint por este cambio).
+
+### Impacto
+- El catálogo deja de depender de persistencia local como fuente primaria y pasa a flujo server-side administrable.
+- La operación admin queda preparada para multiusuario real al centralizar cambios en Supabase.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

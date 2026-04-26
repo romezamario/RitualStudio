@@ -3,7 +3,7 @@ import Image from "next/image";
 import SiteShell from "@/components/site-shell";
 import MarketplaceClientEnhancer from "@/components/marketplace-client-enhancer";
 import ProductPurchaseActions from "@/components/product-purchase-actions";
-import { marketplaceProducts } from "@/data/marketplace-products";
+import { getMarketplaceProductsForRender, isLocalMarketplaceFallbackEnabled } from "@/lib/marketplace-catalog";
 
 const CARD_IMAGE_SIZES = "(max-width: 900px) 100vw, (max-width: 1280px) 50vw, 33vw";
 
@@ -11,8 +11,9 @@ function getCategoryId(category: string) {
   return `categoria-${category.toLowerCase().replace(/\s+/g, "-")}`;
 }
 
-export default function MarketplacePage() {
-  const categories = Array.from(new Set(marketplaceProducts.map((product) => product.category)));
+export default async function MarketplacePage() {
+  const products = await getMarketplaceProductsForRender();
+  const categories = Array.from(new Set(products.map((product) => product.category)));
 
   return (
     <SiteShell
@@ -32,7 +33,7 @@ export default function MarketplacePage() {
         <p className="scroll-hint">Scroll down ↓ para seguir explorando el catálogo completo.</p>
 
         {categories.map((category) => {
-          const categoryProducts = marketplaceProducts.filter((product) => product.category === category);
+          const categoryProducts = products.filter((product) => product.category === category);
 
           return (
             <section
@@ -76,7 +77,7 @@ export default function MarketplacePage() {
         })}
       </div>
 
-      <MarketplaceClientEnhancer mode="list" initialProducts={marketplaceProducts} />
+      {isLocalMarketplaceFallbackEnabled() ? <MarketplaceClientEnhancer mode="list" initialProducts={products} /> : null}
     </SiteShell>
   );
 }

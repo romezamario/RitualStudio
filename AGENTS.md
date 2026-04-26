@@ -1515,3 +1515,39 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye troubleshooting específico para el error del Brick de "No pudimos obtener la información de pago" en escenarios producción/test.
+
+## PR: CRUD server-side de productos admin en Supabase
+- Fecha: 2026-04-26
+- Objetivo: Migrar la gestión de productos del admin desde persistencia local a endpoints server-side con Supabase como fuente primaria de catálogo.
+
+### Lo aprendido
+- Un módulo admin con `localStorage` desbloquea validación temprana, pero para operación real multiusuario se requiere mover escritura/lectura a backend centralizado.
+- En App Router, proteger endpoints con validación de sesión + rol admin en servidor permite exponer CRUD sin filtrar credenciales privilegiadas al cliente.
+- Qué no funcionó y por qué: mantener `saveStoredMarketplaceProducts` como flujo principal impedía sincronización entre usuarios/dispositivos y no ofrecía trazabilidad server-side.
+
+### Decisiones técnicas
+- Se crearon endpoints `GET/POST /api/admin/products` y `PUT/DELETE /api/admin/products/[slug]` usando `supabaseAdminRequest` + guard de admin con `getCurrentUserProfile`.
+- Se actualizó `AdminProductsManager` para consumir API como camino principal (carga inicial, alta/edición, eliminación).
+- Se dejó `localStorage` solo como fallback opcional bajo `NEXT_PUBLIC_MARKETPLACE_LOCAL_FALLBACK=true`.
+- Se ajustó `src/lib/marketplace-catalog.ts` para centralizar mapeo Supabase↔catálogo y lectura server-side de productos, manteniendo fallback al dataset estático por compatibilidad.
+- Se migró `/marketplace` y `/marketplace/[slug]` para leer catálogo desde la capa común conectada a Supabase.
+- Razón de la decisión final: priorizar un flujo de catálogo server-first y administrable sin romper compatibilidad temporal en entornos sin backend disponible.
+
+### Riesgos y mitigaciones
+- Riesgo: ausencia de `SUPABASE_SERVICE_ROLE_KEY` bloquea CRUD y lectura server-side desde Supabase.
+- Mitigación: fallback a catálogo estático para render público y fallback local opcional por feature flag para operación temporal.
+- Pendientes: consolidar esquema/constraints de tabla `public.products` y definir estrategia de auditoría/versionado de cambios de catálogo.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + build en entorno restringido.
+- Resultado esperado: CRUD admin conectado a API server-side y marketplace consumiendo capa común backend-compatible sin romper calidad.
+- Resultado obtenido: lint y typecheck en verde; build falla por restricción de red al descargar Google Fonts, sin errores nuevos atribuibles al cambio.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - `npm run build` falla con `Failed to fetch font` desde `fonts.googleapis.com`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó feature flag de fallback local y la transición del catálogo a fuente server-side en Supabase.
