@@ -1090,3 +1090,24 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fix de tipado `params` (Promise) en `/marketplace/[slug]` para build de Next 15
+### ¿Qué cambia?
+- Se corrigió la firma de la página dinámica `src/app/marketplace/[slug]/page.tsx` para que `params` use el contrato esperado por Next.js 15 en este proyecto (`Promise<{ slug: string }>`).
+- La página de detalle ahora es `async` y resuelve `slug` con `await params` antes de buscar el producto.
+- Con este ajuste se elimina el error de compilación de tipos en Vercel:
+  - `Type 'ProductDetailPageProps' does not satisfy the constraint 'PageProps'`
+  - `Type '{ slug: string; }' is missing ... from type 'Promise<any>'`
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- `npm run build` (en este entorno sigue fallando por red al descargar Google Fonts desde `fonts.googleapis.com`, pero ya no aparece el error de tipado de `PageProps` reportado en despliegue).
+
+### Impacto
+- El build deja de romperse por incompatibilidad de tipos en la ruta dinámica de detalle de marketplace.
+- El cambio es acotado al contrato de props de la página; no modifica lógica de negocio ni contenido visible.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
