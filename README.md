@@ -924,3 +924,37 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 - **No** usa `init_point`.
 - **No** usa `preference_id`.
 - **No** redirige fuera de `ritualstudio.com.mx`.
+
+## PR: Registro técnico de integraciones GitHub↔Supabase y Supabase↔Vercel
+### ¿Qué cambia?
+- Se agregó un módulo central `src/lib/integration-metadata.ts` para registrar en código que existen estas integraciones operativas:
+  - GitHub → Supabase (repo conectado, rama productiva, working directory y deploy a producción).
+  - Supabase → Vercel (team/proyecto conectado, entornos sincronizados y prefijo de variables públicas).
+- Se integró este registro en requests hacia Supabase mediante el header `X-Client-Info`, para adjuntar contexto técnico mínimo al usar Auth y operaciones backend.
+- Se unificó el uso del mismo header en:
+  - `src/lib/supabase-client.ts` (login/signup/recovery desde frontend)
+  - `src/lib/supabase/server.ts` (validación server-side por token/perfil)
+  - `src/lib/supabase-admin.ts` (operaciones con service role)
+
+### Variables de entorno para estas integraciones
+```bash
+# GitHub -> Supabase
+NEXT_PUBLIC_GITHUB_REPOSITORY=romezamario/RitualStudio
+NEXT_PUBLIC_SUPABASE_WORKING_DIRECTORY=.
+NEXT_PUBLIC_SUPABASE_DEPLOY_TO_PRODUCTION=true
+NEXT_PUBLIC_SUPABASE_PRODUCTION_BRANCH=main
+
+# Supabase -> Vercel
+NEXT_PUBLIC_VERCEL_TEAM=romezamario-1622
+NEXT_PUBLIC_VERCEL_PROJECT=ritual-studio
+NEXT_PUBLIC_SUPABASE_VERCEL_SYNC_ENVS=production
+NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
+```
+
+### Impacto
+- El repositorio ahora deja trazabilidad explícita y versionada de parámetros clave de integración.
+- Al centralizar la metadata, futuras automatizaciones (observabilidad, auditoría o checks internos) pueden reutilizar una sola fuente de verdad.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

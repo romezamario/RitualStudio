@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import type { User } from "@/lib/supabase/types";
 import { getSupabaseConfig } from "@/lib/supabase/config";
+import { getSupabaseClientInfoHeader } from "@/lib/integration-metadata";
 
 const ACCESS_TOKEN_COOKIE = "sb-access-token";
 const REFRESH_TOKEN_COOKIE = "sb-refresh-token";
@@ -39,6 +40,7 @@ export async function getUserFromAccessToken(accessToken: string | null): Promis
     headers: {
       apikey: supabaseAnonKey,
       Authorization: `Bearer ${accessToken}`,
+      "X-Client-Info": getSupabaseClientInfoHeader(),
     },
     cache: "no-store",
   });
@@ -72,6 +74,7 @@ export async function getUserProfileById(userId: string, accessToken: string): P
     headers: {
       apikey: supabaseAnonKey,
       Authorization: `Bearer ${accessToken}`,
+      "X-Client-Info": getSupabaseClientInfoHeader(),
     },
     cache: "no-store",
   });

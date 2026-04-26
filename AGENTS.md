@@ -1095,3 +1095,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta variables de entorno, sandbox, configuración de webhook y confirmación de flujo embebido sin Checkout Pro/preference/init_point.
+
+## PR: Registro en código de integraciones GitHub↔Supabase y Supabase↔Vercel
+- Fecha: 2026-04-26
+- Objetivo: Dejar en el repositorio un registro técnico explícito de ambas integraciones y propagar datos clave al momento de ejecutar requests contra Supabase.
+
+### Lo aprendido
+- Centralizar metadata operativa de integraciones en un solo módulo reduce duplicidad y evita desalineación entre documentación y ejecución real del código.
+- Incluir contexto de integración en `X-Client-Info` aporta trazabilidad liviana sin exponer secretos sensibles.
+- Qué no funcionó y por qué: guardar esta trazabilidad solo en README no era suficiente, porque no llega al runtime de las llamadas que realmente usan Supabase.
+
+### Decisiones técnicas
+- Se creó `src/lib/integration-metadata.ts` como fuente única para datos clave de integración (repo, rama, working dir, team/proyecto Vercel, entornos sincronizados y prefijo público).
+- Se reutilizó `getSupabaseClientInfoHeader()` en cliente, servidor y admin para estandarizar encabezados de requests a Supabase.
+- Se mantuvo el uso de variables `NEXT_PUBLIC_*` únicamente para metadata no sensible y se evitó incluir tokens/keys privados en este registro.
+- Razón de la decisión final: balancear trazabilidad operativa, bajo impacto en arquitectura existente y compatibilidad con despliegues en Vercel/Supabase.
+
+### Riesgos y mitigaciones
+- Riesgo: confundir metadata de integración con secretos reales de conexión.
+- Mitigación: documentación explícita de variables permitidas y exclusión de llaves privadas en el módulo.
+- Pendientes: si se requiere auditoría profunda, complementar con persistencia en tabla dedicada de eventos (server-side).
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: cambios compilan sin romper flujo actual de auth/admin/server con Supabase.
+- Resultado obtenido: lint y typecheck en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye nueva sección con variables y alcance del registro técnico de integraciones.
