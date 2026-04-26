@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { MarketplaceProduct } from "@/data/marketplace-products";
 import {
   buildMarketplaceProduct,
   getStoredMarketplaceProducts,
+  isLocalMarketplaceFallbackEnabled,
   saveStoredMarketplaceProducts,
 } from "@/lib/marketplace-catalog";
 
@@ -30,19 +31,63 @@ const initialForm: FormState = {
 };
 
 export default function AdminProductsManager() {
-  const [products, setProducts] = useState<MarketplaceProduct[]>(() => getStoredMarketplaceProducts());
+  const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [form, setForm] = useState<FormState>(initialForm);
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadProducts = async () => {
+      try {
+        const response = await fetch("/api/admin/products", { method: "GET" });
+        const body = (await response.json().catch(() => null)) as
+          | { data?: MarketplaceProduct[]; error?: string }
+          | null;
+
+        if (!response.ok) {
+          throw new Error(body?.error ?? "No fue posible cargar productos.");
+        }
+
+        if (!ignore) {
+          setProducts(body?.data ?? []);
+          setFeedback("");
+        }
+      } catch (error) {
+        if (!ignore) {
+          if (isLocalMarketplaceFallbackEnabled()) {
+            const fallbackProducts = getStoredMarketplaceProducts();
+            setProducts(fallbackProducts);
+            setFeedback("No fue posible cargar desde backend. Se usó fallback local.");
+          } else {
+            setFeedback(error instanceof Error ? error.message : "No fue posible cargar productos.");
+          }
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadProducts();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const sortedProducts = useMemo(
     () => [...products].sort((a, b) => a.name.localeCompare(b.name, "es-MX")),
     [products],
   );
 
-  const persist = (nextProducts: MarketplaceProduct[]) => {
-    setProducts(nextProducts);
-    saveStoredMarketplaceProducts(nextProducts);
+  const persistLocalFallback = (nextProducts: MarketplaceProduct[]) => {
+    if (isLocalMarketplaceFallbackEnabled()) {
+      saveStoredMarketplaceProducts(nextProducts);
+    }
   };
 
   const resetForm = () => {
@@ -64,7 +109,7 @@ export default function AdminProductsManager() {
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const basePrice = Number(form.price);
@@ -85,25 +130,68 @@ export default function AdminProductsManager() {
       return;
     }
 
-    const product = buildMarketplaceProduct({
-      slug: form.slug,
-      name: form.name,
-      description: form.description,
-      image:
-        form.image ||
-        "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80",
-      hasOffer: form.hasOffer,
-      price: basePrice,
-      offerPrice: form.hasOffer ? offerPrice : undefined,
-    });
+    try {
+      const response = await fetch(editingSlug ? `/api/admin/products/${editingSlug}` : "/api/admin/products", {
+        method: editingSlug ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          slug: form.slug,
+          name: form.name,
+          description: form.description,
+          image:
+            form.image ||
+            "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80",
+          hasOffer: form.hasOffer,
+          price: basePrice,
+          offerPrice: form.hasOffer ? offerPrice : undefined,
+        }),
+      });
 
-    const nextProducts = editingSlug
-      ? products.map((item) => (item.slug === editingSlug ? { ...product, slug: editingSlug } : item))
-      : [product, ...products.filter((item) => item.slug !== product.slug)];
+      const body = (await response.json().catch(() => null)) as
+        | { data?: MarketplaceProduct; error?: string }
+        | null;
 
-    persist(nextProducts);
-    resetForm();
-    setFeedback(editingSlug ? "Producto actualizado." : "Producto dado de alta correctamente.");
+      if (!response.ok || !body?.data) {
+        throw new Error(body?.error ?? "No fue posible guardar el producto.");
+      }
+
+      const nextProducts = editingSlug
+        ? products.map((item) => (item.slug === editingSlug ? body.data! : item))
+        : [body.data, ...products.filter((item) => item.slug !== body.data!.slug)];
+
+      setProducts(nextProducts);
+      persistLocalFallback(nextProducts);
+      resetForm();
+      setFeedback(editingSlug ? "Producto actualizado." : "Producto dado de alta correctamente.");
+    } catch (error) {
+      if (isLocalMarketplaceFallbackEnabled()) {
+        const product = buildMarketplaceProduct({
+          slug: form.slug,
+          name: form.name,
+          description: form.description,
+          image:
+            form.image ||
+            "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80",
+          hasOffer: form.hasOffer,
+          price: basePrice,
+          offerPrice: form.hasOffer ? offerPrice : undefined,
+        });
+
+        const nextProducts = editingSlug
+          ? products.map((item) => (item.slug === editingSlug ? { ...product, slug: editingSlug } : item))
+          : [product, ...products.filter((item) => item.slug !== product.slug)];
+
+        setProducts(nextProducts);
+        persistLocalFallback(nextProducts);
+        resetForm();
+        setFeedback("Backend no disponible. Cambio guardado en fallback local.");
+        return;
+      }
+
+      setFeedback(error instanceof Error ? error.message : "No fue posible guardar el producto.");
+    }
   };
 
   const startEdit = (product: MarketplaceProduct) => {
@@ -117,6 +205,32 @@ export default function AdminProductsManager() {
       price: (product.originalPrice ?? product.price).replace(/[^\d]/g, ""),
       offerPrice: product.hasOffer ? product.price.replace(/[^\d]/g, "") : "",
     });
+  };
+
+  const handleDelete = async (slug: string) => {
+    try {
+      const response = await fetch(`/api/admin/products/${slug}`, { method: "DELETE" });
+      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(body?.error ?? "No fue posible eliminar el producto.");
+      }
+
+      const nextProducts = products.filter((product) => product.slug !== slug);
+      setProducts(nextProducts);
+      persistLocalFallback(nextProducts);
+      setFeedback("Producto eliminado.");
+    } catch (error) {
+      if (isLocalMarketplaceFallbackEnabled()) {
+        const nextProducts = products.filter((product) => product.slug !== slug);
+        setProducts(nextProducts);
+        persistLocalFallback(nextProducts);
+        setFeedback("Backend no disponible. Eliminación aplicada en fallback local.");
+        return;
+      }
+
+      setFeedback(error instanceof Error ? error.message : "No fue posible eliminar el producto.");
+    }
   };
 
   return (
@@ -151,7 +265,14 @@ export default function AdminProductsManager() {
           </label>
 
           {form.image ? (
-            <Image src={form.image} alt="Vista previa" className="admin-product-preview" width={1200} height={900} unoptimized />
+            <Image
+              src={form.image}
+              alt="Vista previa"
+              className="admin-product-preview"
+              width={1200}
+              height={900}
+              unoptimized
+            />
           ) : null}
 
           <label>
@@ -205,6 +326,7 @@ export default function AdminProductsManager() {
       <section className="studio-card">
         <p className="card-label">Catálogo actual</p>
         <h2>Productos registrados</h2>
+        {loading ? <p>Cargando productos...</p> : null}
         <div className="admin-products-list">
           {sortedProducts.map((product) => (
             <article key={product.slug} className="admin-product-item">
@@ -220,9 +342,14 @@ export default function AdminProductsManager() {
                   <strong>{product.price}</strong>
                 )}
               </div>
-              <button type="button" className="btn btn-ghost" onClick={() => startEdit(product)}>
-                Editar
-              </button>
+              <div className="cta-row">
+                <button type="button" className="btn btn-ghost" onClick={() => startEdit(product)}>
+                  Editar
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={() => void handleDelete(product.slug)}>
+                  Eliminar
+                </button>
+              </div>
             </article>
           ))}
         </div>

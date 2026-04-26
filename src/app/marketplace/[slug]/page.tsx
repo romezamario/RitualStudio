@@ -3,7 +3,11 @@ import Link from "next/link";
 import SiteShell from "@/components/site-shell";
 import MarketplaceClientEnhancer from "@/components/marketplace-client-enhancer";
 import ProductPurchaseActions from "@/components/product-purchase-actions";
-import { getMarketplaceProductBySlug, marketplaceProducts } from "@/data/marketplace-products";
+import {
+  getMarketplaceProductBySlugForRender,
+  getMarketplaceProductsForRender,
+  isLocalMarketplaceFallbackEnabled,
+} from "@/lib/marketplace-catalog";
 
 type ProductDetailPageProps = {
   params: Promise<{
@@ -11,15 +15,17 @@ type ProductDetailPageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return marketplaceProducts.map((product) => ({ slug: product.slug }));
+export async function generateStaticParams() {
+  const products = await getMarketplaceProductsForRender();
+  return products.map((product) => ({ slug: product.slug }));
 }
 
 const DETAIL_IMAGE_SIZES = "(max-width: 900px) 100vw, 48vw";
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params;
-  const product = getMarketplaceProductBySlug(slug);
+  const products = await getMarketplaceProductsForRender();
+  const product = await getMarketplaceProductBySlugForRender(slug);
 
   if (!product) {
     return (
@@ -99,7 +105,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         </div>
       </article>
 
-      <MarketplaceClientEnhancer mode="detail" slug={product.slug} initialProducts={marketplaceProducts} />
+      {isLocalMarketplaceFallbackEnabled() ? (
+        <MarketplaceClientEnhancer mode="detail" slug={product.slug} initialProducts={products} />
+      ) : null}
     </SiteShell>
   );
 }
