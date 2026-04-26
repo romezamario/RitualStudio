@@ -1,24 +1,22 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
 import SiteShell from "@/components/site-shell";
+import MarketplaceClientEnhancer from "@/components/marketplace-client-enhancer";
 import ProductPurchaseActions from "@/components/product-purchase-actions";
-import { getStoredMarketplaceProducts } from "@/lib/marketplace-catalog";
-import type { MarketplaceProduct } from "@/data/marketplace-products";
+import { getMarketplaceProductBySlug, marketplaceProducts } from "@/data/marketplace-products";
 
-export default function ProductDetailPage() {
-  const params = useParams<{ slug: string }>();
-  const slug = params?.slug ?? "";
-  const [products, setProducts] = useState<MarketplaceProduct[]>([]);
+type ProductDetailPageProps = {
+  params: {
+    slug: string;
+  };
+};
 
-  useEffect(() => {
-    setProducts(getStoredMarketplaceProducts());
-  }, []);
+export function generateStaticParams() {
+  return marketplaceProducts.map((product) => ({ slug: product.slug }));
+}
 
-  const product = useMemo(() => products.find((item) => item.slug === slug), [products, slug]);
+export default function ProductDetailPage({ params }: ProductDetailPageProps) {
+  const product = getMarketplaceProductBySlug(params.slug);
 
   if (!product) {
     return (
@@ -36,7 +34,7 @@ export default function ProductDetailPage() {
       title={product.name}
       subtitle={`${product.shortDescription} ${product.delivery}`}
     >
-      <article className="product-detail">
+      <article id="marketplace-server-content" className="product-detail">
         <div className="product-detail-image-wrap">
           <Image src={product.image} alt={product.name} width={1400} height={1000} className="product-detail-image" />
         </div>
@@ -89,6 +87,8 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </article>
+
+      <MarketplaceClientEnhancer mode="detail" slug={product.slug} initialProducts={marketplaceProducts} />
     </SiteShell>
   );
 }
