@@ -5,6 +5,8 @@ import MarketplaceClientEnhancer from "@/components/marketplace-client-enhancer"
 import ProductPurchaseActions from "@/components/product-purchase-actions";
 import { marketplaceProducts } from "@/data/marketplace-products";
 
+const CARD_IMAGE_SIZES = "(max-width: 900px) 100vw, (max-width: 1280px) 50vw, 33vw";
+
 function getCategoryId(category: string) {
   return `categoria-${category.toLowerCase().replace(/\s+/g, "-")}`;
 }
@@ -44,7 +46,14 @@ export default function MarketplacePage() {
                 {categoryProducts.map((product) => (
                   <article key={product.slug} className="studio-card marketplace-card">
                     <div className="card-image-wrap">
-                      <Image className="card-image" src={product.image} alt={product.name} width={1200} height={900} />
+                      <Image
+                        className="card-image"
+                        src={product.image}
+                        alt={product.name}
+                        width={1200}
+                        height={900}
+                        sizes={CARD_IMAGE_SIZES}
+                      />
                     </div>
                     <p className="card-label">{product.category}</p>
                     <h3>{product.name}</h3>

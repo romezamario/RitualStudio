@@ -13,6 +13,9 @@ type MarketplaceClientEnhancerProps = {
   slug?: string;
 };
 
+const CARD_IMAGE_SIZES = "(max-width: 900px) 100vw, (max-width: 1280px) 50vw, 33vw";
+const DETAIL_IMAGE_SIZES = "(max-width: 900px) 100vw, 48vw";
+
 function getCategoryId(category: string) {
   return `categoria-${category.toLowerCase().replace(/\s+/g, "-")}`;
 }
@@ -79,7 +82,14 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
                 {categoryProducts.map((product) => (
                   <article key={product.slug} className="studio-card marketplace-card">
                     <div className="card-image-wrap">
-                      <Image className="card-image" src={product.image} alt={product.name} width={1200} height={900} />
+                      <Image
+                        className="card-image"
+                        src={product.image}
+                        alt={product.name}
+                        width={1200}
+                        height={900}
+                        sizes={CARD_IMAGE_SIZES}
+                      />
                     </div>
                     <p className="card-label">{product.category}</p>
                     <h3>{product.name}</h3>
@@ -108,7 +118,14 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
     return (
       <article className="product-detail marketplace-client-override" aria-label="Detalle con personalizaciones de admin">
         <div className="product-detail-image-wrap">
-          <Image src={detailProduct.image} alt={detailProduct.name} width={1400} height={1000} className="product-detail-image" />
+          <Image
+            src={detailProduct.image}
+            alt={detailProduct.name}
+            width={1400}
+            height={1000}
+            className="product-detail-image"
+            sizes={DETAIL_IMAGE_SIZES}
+          />
         </div>
 
         <div className="product-detail-content">

@@ -1388,3 +1388,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se añadió en README el cambio arquitectónico hacia shell servidor + islas cliente para reducir JS en rutas informativas.
+
+## PR: Optimización de `next/image` en grids, marketplace y carrito
+- Fecha: 2026-04-26
+- Objetivo: Añadir `sizes` realista en imágenes de tarjetas/grids, limitar `priority` a la imagen principal above-the-fold y reducir solicitudes de ancho innecesario en marketplace/carrito.
+
+### Lo aprendido
+- `next/image` sin `sizes` en layouts responsivos de tarjetas puede sobredimensionar el recurso solicitado, sobre todo cuando la UI termina mostrando columnas estrechas.
+- Definir una convención explícita por patrón visual (grid de 1/2/3 columnas, detalle 2 columnas, miniatura fija de carrito) ayuda a mantener consistencia de rendimiento en nuevos componentes.
+- Qué no funcionó y por qué: depender de valores implícitos de `next/image` no refleja correctamente el ancho visual real de tarjetas en todos los breakpoints.
+
+### Decisiones técnicas
+- Se agregó `sizes` en todas las imágenes de grids/tarjetas de `marketplace`, `arreglos`, home (moodboard) y carrito.
+- Se marcó con `priority` únicamente la imagen principal del detalle de producto en `/marketplace/[slug]` (above-the-fold).
+- Se mantuvo lazy loading por defecto para el resto de imágenes al no usar `priority`.
+- Razón de la decisión final: mejorar rendimiento percibido y uso de red con cambios acotados, sin alterar el diseño ni la estructura de rutas.
+
+### Riesgos y mitigaciones
+- Riesgo: desalineación futura entre `sizes` y CSS si cambian breakpoints/columnas.
+- Mitigación: se documentó la convención de `sizes` en README para que nuevos cambios visuales actualicen ambos lados (CSS + `sizes`).
+- Pendientes: revisar la convención si se agregan nuevos layouts con reglas de columnas diferentes.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación estática de TypeScript.
+- Resultado esperado: proyecto sin errores de lint/typecheck tras añadir `sizes` y `priority` acotado.
+- Resultado obtenido: checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README ahora incluye convención operativa de `sizes` y regla de uso de `priority` para componentes visuales nuevos.

@@ -15,6 +15,8 @@ export function generateStaticParams() {
   return marketplaceProducts.map((product) => ({ slug: product.slug }));
 }
 
+const DETAIL_IMAGE_SIZES = "(max-width: 900px) 100vw, 48vw";
+
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const product = getMarketplaceProductBySlug(params.slug);
 
@@ -36,7 +38,15 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     >
       <article id="marketplace-server-content" className="product-detail">
         <div className="product-detail-image-wrap">
-          <Image src={product.image} alt={product.name} width={1400} height={1000} className="product-detail-image" />
+          <Image
+            src={product.image}
+            alt={product.name}
+            width={1400}
+            height={1000}
+            className="product-detail-image"
+            sizes={DETAIL_IMAGE_SIZES}
+            priority
+          />
         </div>
 
         <div className="product-detail-content">
