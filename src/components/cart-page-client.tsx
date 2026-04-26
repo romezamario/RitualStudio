@@ -59,7 +59,10 @@ export default function CartPageClient() {
         <p>Productos agregados: {totalItems}</p>
 
         <div className="cta-row">
-          <a className="btn btn-primary" href={checkoutHref} target="_blank" rel="noopener noreferrer">
+          <Link className="btn btn-primary" href="/checkout">
+            Pagar con tarjeta
+          </Link>
+          <a className="btn btn-ghost" href={checkoutHref} target="_blank" rel="noopener noreferrer">
             Comprar por WhatsApp
           </a>
           <button type="button" className="btn btn-ghost" onClick={clearCart}>

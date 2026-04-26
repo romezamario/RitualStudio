@@ -6,7 +6,7 @@ export default function CarritoPage() {
     <SiteShell
       eyebrow="Marketplace Ritual Studio"
       title="Carrito de compras"
-      subtitle="Revisa tus productos seleccionados, elimina los que no necesites y finaliza tu compra por WhatsApp."
+      subtitle="Revisa tus productos seleccionados y finaliza tu compra con checkout embebido con tarjeta o por WhatsApp."
     >
       <CartPageClient />
     </SiteShell>
