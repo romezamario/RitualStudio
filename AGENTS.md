@@ -1551,3 +1551,35 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó feature flag de fallback local y la transición del catálogo a fuente server-side en Supabase.
+
+## PR: Versionado visible del sitio en footer
+- Fecha: 2026-04-26
+- Objetivo: Mostrar una versión legible del sitio en el footer global para trazabilidad rápida de despliegues.
+
+### Lo aprendido
+- Exponer la versión en un componente compartido como `SiteShell` garantiza cobertura automática en todas las rutas sin cambios adicionales por página.
+- Permitir override por variable pública de entorno (`NEXT_PUBLIC_SITE_VERSION`) simplifica etiquetar versiones por ambiente (preview/staging/producción).
+- Qué no funcionó y por qué: depender únicamente de una etiqueta manual en UI obliga a editar código para cada release y aumenta riesgo de desalineación.
+
+### Decisiones técnicas
+- Se actualizó `src/components/site-shell.tsx` para renderizar `v<versión>` dentro del footer global.
+- Se tomó como prioridad `NEXT_PUBLIC_SITE_VERSION` (trim) y fallback a `version` de `package.json`.
+- Se mantuvo el enlace a aviso de privacidad sin cambios para no alterar navegación legal.
+- Razón de la decisión final: implementar versionado visible con un cambio mínimo, centralizado y configurable.
+
+### Riesgos y mitigaciones
+- Riesgo: que la versión visible no coincida con release esperado si no se actualiza variable por entorno.
+- Mitigación: fallback automático a `package.json` evita valor vacío y mantiene una referencia base consistente.
+- Pendientes: definir convención de versionado por ambiente (por ejemplo `1.2.0-beta.3`) en pipeline de despliegue.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad.
+- Resultado esperado: proyecto sin errores de lint tras agregar lectura de versión en footer.
+- Resultado obtenido: lint en verde.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README ahora documenta `NEXT_PUBLIC_SITE_VERSION` y el comportamiento de fallback con `package.json`.

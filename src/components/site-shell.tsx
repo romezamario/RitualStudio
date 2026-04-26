@@ -2,6 +2,7 @@ import Link from "next/link";
 import { HeaderInteractive } from "@/components/header-interactive";
 import { FloatingWhatsAppButton } from "@/components/floating-whatsapp-button";
 import { getWhatsAppHref } from "@/lib/whatsapp";
+import packageJson from "../../package.json";
 
 const links = [
   { href: "/marketplace", label: "Tienda" },
@@ -12,6 +13,7 @@ const links = [
 ];
 
 const whatsappHref = getWhatsAppHref(process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ?? "Hola Ritual Studio, quiero más información.");
+const siteVersion = process.env.NEXT_PUBLIC_SITE_VERSION?.trim() || packageJson.version;
 
 type SiteShellProps = {
   title: string;
@@ -39,7 +41,9 @@ export default function SiteShell({ title, subtitle, eyebrow, children }: SiteSh
 
       <footer className="site-footer">
         <div className="container site-footer-inner">
-          <p>© {new Date().getFullYear()} Ritual Studio.</p>
+          <p>
+            © {new Date().getFullYear()} Ritual Studio · v{siteVersion}
+          </p>
           <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>
         </div>
       </footer>

@@ -164,6 +164,8 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<tu_publishable_key>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<tu_anon_key>
 # recomendado para producción y previews
 NEXT_PUBLIC_SITE_URL=https://tu-dominio.com
+# opcional para mostrar una versión manual en footer
+NEXT_PUBLIC_SITE_VERSION=0.1.0
 ```
 
 Notas operativas:
@@ -172,6 +174,7 @@ Notas operativas:
 - El registro (`signUp`) ahora envía `emailRedirectTo` usando `NEXT_PUBLIC_SITE_URL` y, si no existe, usa el `origin` actual del navegador.
 - La recuperación de contraseña (`recover`) también envía `emailRedirectTo` para aterrizar en `/actualizar-contrasena`.
 - Si la confirmación crea sesión, el usuario se sincroniza automáticamente en la app al llegar a `/correo-confirmado`.
+- El footer muestra la versión del sitio (`vX.Y.Z`): usa `NEXT_PUBLIC_SITE_VERSION` si está definida; si no, usa automáticamente la versión de `package.json`.
 
 ## Nota técnica (build en Vercel)
 Se aplicó una mitigación para desbloquear el build cuando falla la carga de plugins de PostCSS (`@tailwindcss/postcss`) en instalación remota:
@@ -187,6 +190,23 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 - Se incorporó una galería moodboard con imágenes de referencia floral (Unsplash) para acelerar revisión visual con cliente antes de sesión fotográfica final.
 
 ## Historial de cambios
+
+## PR: Versionado visible del sitio en footer
+### ¿Qué cambia?
+- Se agregó la visualización de versión del sitio en el footer global de `SiteShell`.
+- La versión mostrada prioriza `NEXT_PUBLIC_SITE_VERSION` (si existe) y usa como fallback `version` desde `package.json`.
+- El formato visible quedó como `© <año> Ritual Studio · v<versión>`.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+
+### Impacto
+- Facilita identificar rápidamente la versión desplegada desde cualquier ruta del sitio.
+- Permite sobreescribir versión por entorno sin tocar código, útil para releases y validación de QA.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
 
 ## PR: Refactor de agrupación memoizada en marketplace client override
 ### ¿Qué cambia?
