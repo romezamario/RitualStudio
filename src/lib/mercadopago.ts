@@ -51,7 +51,14 @@ export function getMercadoPagoPublicKey() {
 }
 
 export function getMercadoPagoAccessToken() {
-  return process.env.MP_ACCESS_TOKEN?.trim() ?? "";
+  const rawToken = process.env.MP_ACCESS_TOKEN?.trim() ?? "";
+
+  if (!rawToken) {
+    return "";
+  }
+
+  const withoutQuotes = rawToken.replace(/^['"]|['"]$/g, "");
+  return withoutQuotes.replace(/^Bearer\s+/i, "").trim();
 }
 
 export function getMercadoPagoWebhookSecret() {
@@ -135,6 +142,12 @@ export async function mpApiFetch<T>(
   const data = (await response.json().catch(() => null)) as T | { message?: string } | null;
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error(
+        "Mercado Pago respondió con 401 (Unauthorized). Revisa MP_ACCESS_TOKEN en Vercel: debe ser Access Token válido, sin prefijo 'Bearer'."
+      );
+    }
+
     const errorMessage =
       (data as { message?: string } | null)?.message ?? `Mercado Pago respondió con ${response.status}.`;
     throw new Error(errorMessage);

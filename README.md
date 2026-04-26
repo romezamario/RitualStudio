@@ -930,6 +930,12 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 - Los campos que sí se mantienen como obligatorios son: `token`, `payment_method_id` y `payer.email`.
 - Si el error persiste, revisar en Network el payload enviado a `POST /api/mercadopago/create-order` y confirmar que esos tres campos existan.
 
+### Troubleshooting de error: “Mercado Pago respondió con 401”
+- El `401 Unauthorized` suele indicar credencial inválida o mal formateada en backend (no un problema del formulario frontend).
+- Verifica que `MP_ACCESS_TOKEN` sea el token correcto del entorno (sandbox `TEST-...` o producción `APP_USR-...`) y que **no** incluya el prefijo `Bearer`.
+- El backend ahora normaliza `MP_ACCESS_TOKEN` por seguridad (remueve comillas y un `Bearer ` accidental), pero la recomendación sigue siendo guardar solo el token plano en Vercel.
+- Si hay llaves mezcladas (por ejemplo `NEXT_PUBLIC_MP_PUBLIC_KEY` de sandbox con `MP_ACCESS_TOKEN` de producción), Mercado Pago puede rechazar la operación. Usa ambos del mismo entorno.
+
 ## PR: Registro técnico de integraciones GitHub↔Supabase y Supabase↔Vercel
 ### ¿Qué cambia?
 - Se agregó un módulo central `src/lib/integration-metadata.ts` para registrar en código que existen estas integraciones operativas:

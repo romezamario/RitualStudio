@@ -1161,3 +1161,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se añadió nota de troubleshooting para el error de datos obligatorios y el comportamiento del fallback backend.
+
+## PR: Diagnóstico y hardening de 401 en checkout de Mercado Pago
+- Fecha: 2026-04-26
+- Objetivo: Reducir fallas 401 en el cobro embebido detectando configuración incorrecta de credenciales y haciendo más robusta la lectura de `MP_ACCESS_TOKEN`.
+
+### Lo aprendido
+- El error `401 Unauthorized` en `POST /v1/orders` normalmente proviene de credenciales backend inválidas/mal formateadas, no del Card Payment Brick en frontend.
+- En Vercel es frecuente pegar el token como `Bearer ...` o con comillas; al concatenar luego en el header se termina enviando `Bearer Bearer ...`, lo que Mercado Pago rechaza.
+- Qué no funcionó y por qué: depender de `trim()` simple en `MP_ACCESS_TOKEN` no cubría prefijo `Bearer` accidental ni comillas envolventes.
+
+### Decisiones técnicas
+- Se robusteció `getMercadoPagoAccessToken()` para normalizar token: quitar comillas externas y remover prefijo `Bearer ` si viene incluido.
+- Se agregó un mensaje de error explícito para `401` con acción recomendada de configuración en Vercel.
+- Se documentó troubleshooting específico en README para separar claramente causas de frontend vs backend en este incidente.
+- Razón de la decisión final: minimizar tiempo de diagnóstico operativo y evitar falsos positivos de “error de integración frontend” cuando la causa real es credencial.
+
+### Riesgos y mitigaciones
+- Riesgo: ocultar una mala práctica de configuración al “arreglarla” automáticamente en runtime.
+- Mitigación: se mantiene mensaje explícito recomendando guardar el token plano sin `Bearer` en entorno.
+- Pendientes: validar en producción que no haya mezcla de llaves sandbox/producción entre `NEXT_PUBLIC_MP_PUBLIC_KEY` y `MP_ACCESS_TOKEN`.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: cambios compilan sin errores y el flujo mantiene contrato actual de checkout.
+- Resultado obtenido: lint y typecheck en verde tras ajustes de normalización y manejo de error 401.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se agregó guía puntual para diagnosticar 401 de Mercado Pago en despliegue Vercel.
