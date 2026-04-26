@@ -1,3 +1,4 @@
+import { getSupabaseClientInfoHeader } from "@/lib/integration-metadata";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()?.replace(/\/$/, "");
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
@@ -19,6 +20,7 @@ export async function supabaseAdminRequest<T>(
       Authorization: `Bearer ${serviceRoleKey}`,
       "Content-Type": "application/json",
       Prefer: "return=representation",
+      "X-Client-Info": getSupabaseClientInfoHeader(),
       ...(init.headers ?? {}),
     },
     cache: "no-store",

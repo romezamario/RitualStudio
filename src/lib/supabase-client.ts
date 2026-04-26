@@ -1,4 +1,5 @@
 import { getSupabaseConfig, hasSupabaseConfig } from "@/lib/supabase/config";
+import { getSupabaseClientInfoHeader } from "@/lib/integration-metadata";
 
 const publicSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 
@@ -176,6 +177,7 @@ async function requestSupabaseAuth(
         "Content-Type": "application/json",
         apikey: supabaseAnonKey,
         Authorization: `Bearer ${supabaseAnonKey}`,
+        "X-Client-Info": getSupabaseClientInfoHeader(),
       },
       body: JSON.stringify(body),
     });
@@ -275,6 +277,7 @@ export async function verifyOtpToken(params: {
         "Content-Type": "application/json",
         apikey: supabaseAnonKey,
         Authorization: `Bearer ${supabaseAnonKey}`,
+        "X-Client-Info": getSupabaseClientInfoHeader(),
       },
       body: JSON.stringify({
         token_hash: params.tokenHash,
@@ -323,6 +326,7 @@ export async function requestPasswordRecovery(email: string): Promise<{ error: s
         "Content-Type": "application/json",
         apikey: supabaseAnonKey,
         Authorization: `Bearer ${supabaseAnonKey}`,
+        "X-Client-Info": getSupabaseClientInfoHeader(),
       },
       body: JSON.stringify({
         email,
