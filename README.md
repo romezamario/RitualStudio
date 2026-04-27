@@ -208,7 +208,7 @@ Notas operativas:
 El flujo de alta/edición de productos en `/admin/productos` ahora sube imágenes al bucket dedicado `product-images` en Supabase Storage y guarda en `public.products.image` únicamente URL/path de Storage (no Base64).
 
 ### Configuración recomendada
-- Migración SQL: `supabase/migrations/20260427_product_images_storage.sql`.
+- Migración SQL: `supabase/migrations/20260427113000_product_images_storage.sql`.
 - Bucket: `product-images` (público para lectura por URL directa).
 - Escritura: restringida por policy a usuarios autenticados con rol admin.
 - Backend seguro de subida: `POST /api/admin/products/upload-image` (valida sesión admin y tipo/tamaño de archivo).
@@ -240,6 +240,22 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 - Se incorporó una galería moodboard con imágenes de referencia floral (Unsplash) para acelerar revisión visual con cliente antes de sesión fotográfica final.
 
 ## Historial de cambios
+
+## PR: Fix de versión duplicada en migración de Storage
+### ¿Qué cambia?
+- Se renombró la migración del bucket de imágenes a `supabase/migrations/20260427113000_product_images_storage.sql`.
+- Se corrigieron las referencias de documentación para apuntar al nuevo nombre.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+
+### Impacto
+- Se evita la colisión de versión en `supabase_migrations.schema_migrations` (`version=20260427`) al aplicar migraciones en Supabase.
+- Queda establecida la convención recomendada de timestamps completos para nuevas migraciones.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
 
 ## PR: Imágenes de productos en Supabase Storage (sin Base64)
 ### ¿Qué cambia?

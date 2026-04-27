@@ -1867,7 +1867,7 @@ Un PR se considera terminado solo si:
 
 ### Decisiones técnicas
 - Se creó `POST /api/admin/products/upload-image` protegido por sesión admin para subir `File` al bucket `product-images` con `SUPABASE_SERVICE_ROLE_KEY`.
-- Se añadió migración `supabase/migrations/20260427_product_images_storage.sql` para crear/configurar bucket dedicado y policies (lectura pública + escritura admin).
+- Se añadió migración `supabase/migrations/20260427113000_product_images_storage.sql` para crear/configurar bucket dedicado y policies (lectura pública + escritura admin).
 - Se rechazó `image` en formato data URL en `POST /api/admin/products` y `PUT /api/admin/products/[slug]`.
 - Se sanitizó persistencia de fallback local para conservar sólo metadatos ligeros y URL de imagen.
 - Razón de la decisión final: mantener seguridad y trazabilidad de assets sin romper la operación actual del panel admin.
@@ -1889,3 +1889,33 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta bucket, endpoint de subida y regla de rechazo de `data:image/...` en payload admin.
+
+## PR: Fix de versión duplicada en migración de Storage
+- Fecha: 2026-04-27
+- Objetivo: Corregir el error `duplicate key value violates unique constraint schema_migrations_pkey` al aplicar la migración del bucket de imágenes.
+
+### Lo aprendido
+- En Supabase, el prefijo numérico del archivo de migración define `version` en `schema_migrations`; repetirlo provoca colisión aunque el nombre descriptivo sea distinto.
+- Qué no funcionó y por qué: usar `20260427_...` en dos migraciones distintas generó el mismo `version=20260427`.
+
+### Decisiones técnicas
+- Se renombró la migración de Storage a `20260427113000_product_images_storage.sql` para garantizar unicidad de versión.
+- Se actualizaron referencias documentales en README y AGENTS al nuevo nombre de archivo.
+- Razón de la decisión final: resolver la causa raíz sin cambiar el contenido SQL ya validado.
+
+### Riesgos y mitigaciones
+- Riesgo: documentación desalineada con el archivo real tras renombre.
+- Mitigación: actualización de todas las referencias en repo en el mismo commit.
+- Pendientes: mantener convención de timestamps completos (`YYYYMMDDHHMMSS`) para nuevas migraciones.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad.
+- Resultado esperado: proyecto en verde tras renombre/documentación.
+- Resultado obtenido: lint sin errores.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se dejó explícita la causa del conflicto `schema_migrations_pkey` y la convención recomendada.
