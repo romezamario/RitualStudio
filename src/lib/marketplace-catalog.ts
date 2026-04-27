@@ -2,6 +2,8 @@ import { marketplaceProducts, type MarketplaceProduct } from "@/data/marketplace
 import { normalizeProductImageReference } from "@/lib/product-image-storage";
 
 const STORAGE_KEY = "ritualstudio.marketplace.products";
+const MARKETPLACE_PUBLIC_CACHE_REVALIDATE_SECONDS = 300;
+
 
 export type EditableMarketplaceProductInput = {
   slug?: string;
@@ -128,8 +130,35 @@ export async function fetchMarketplaceProductsFromBackend() {
   return data.map(fromSupabaseMarketplaceProductRecord);
 }
 
+export async function fetchPublicMarketplaceProductsFromBackend() {
+  if (typeof window !== "undefined") {
+    return null;
+  }
+
+  const { supabasePublicReadRequest } = await import("@/lib/supabase-public");
+  const { data, error } = await supabasePublicReadRequest<SupabaseMarketplaceProductRecord[]>(
+    "/rest/v1/products?select=slug,name,category,price,image,short_description,description,size,flowers,ideal_for,delivery,original_price,has_offer&order=name.asc",
+    {
+      next: {
+        revalidate: MARKETPLACE_PUBLIC_CACHE_REVALIDATE_SECONDS,
+        tags: ["marketplace-products"],
+      },
+    },
+  );
+
+  if (error || !data) {
+    return null;
+  }
+
+  if (!data.length) {
+    return [];
+  }
+
+  return data.map(fromSupabaseMarketplaceProductRecord);
+}
+
 export async function getMarketplaceProductsForRender() {
-  const backendProducts = await fetchMarketplaceProductsFromBackend();
+  const backendProducts = await fetchPublicMarketplaceProductsFromBackend();
 
   if (backendProducts && backendProducts.length > 0) {
     return backendProducts;
