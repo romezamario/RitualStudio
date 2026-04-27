@@ -191,6 +191,23 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 
 ## Historial de cambios
 
+## PR: Ajuste tipográfico global para una estética más elegante
+### ¿Qué cambia?
+- Se redujo la escala tipográfica global del sitio ajustando `html { font-size: 93.75%; }` en `src/app/globals.css`.
+- Al estar basada en `rem`, la reducción impacta de forma consistente títulos, párrafos, botones, formularios y textos auxiliares sin reescribir cada componente.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El sitio mantiene la misma jerarquía visual y layout, pero con una lectura menos dominante y una percepción más sobria/elegante.
+- El cambio es global y centralizado, facilitando futuros ajustes finos de tipografía desde un solo punto.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
 ## PR: Acceso directo a gestión de productos desde dashboard admin
 ### ¿Qué cambia?
 - Se actualizó la tarjeta de **Administración** dentro de `/mi-cuenta` (cuando el usuario tiene rol admin) para incluir un botón directo a `/admin/productos`.
