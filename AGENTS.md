@@ -2057,3 +2057,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se agregó una sección operativa para mantenimiento de hostnames remotos de imágenes según cambios de infraestructura.
+
+## PR: Variantes de imagen en upload admin de productos
+- Fecha: 2026-04-27
+- Objetivo: Generar variantes optimizadas por tamaño al subir imágenes de catálogo y endurecer validaciones de formato/peso para mejorar rendimiento web.
+
+### Lo aprendido
+- Delegar la transformación a `storage/v1/render/image` de Supabase permite derivar variantes web (`webp`) sin agregar dependencias nativas de procesamiento en el runtime de Next.js.
+- Mantener una convención fija por carpeta (`catalog/<slug-o-id>/thumb.webp|card.webp|detail.webp`) simplifica integración entre frontend, CDN y persistencia de referencias.
+- El mayor riesgo operativo de catálogo suele venir de formatos pesados/no web (HEIC/TIFF/BMP/SVG/GIF sin compresión orientada a foto); bloquearlos en entrada reduce incidentes de performance.
+
+### Decisiones técnicas
+- Se sube primero un `original-*` y luego se generan/suben 3 variantes (`thumb`, `card`, `detail`) en WebP dentro de la misma carpeta del producto.
+- Se tomó `slug` o `productId` desde `FormData` para construir la carpeta de storage; si no llegan, se usa un identificador aleatorio seguro.
+- La respuesta del endpoint incluye `db.image` y `db.imageVariants` para persistencia en base de datos como objeto JSON por tamaño.
+- Se redujo el límite general a 4MB y se agregó restricción específica para PNG >2MB con mensaje de conversión sugerida a WEBP/AVIF.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación estática de TypeScript.
+- Resultado: Lint y chequeo de tipos sin errores.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta el nuevo contrato del endpoint (`variants` y `db.imageVariants`) y las nuevas reglas de validación de peso/formato.
