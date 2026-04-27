@@ -1446,3 +1446,31 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Endpoint canónico de resumen de orden para checkout éxito
+### ¿Qué cambia?
+- Se agrega `GET /api/mercadopago/order-summary` en `src/app/api/mercadopago/order-summary/route.ts`.
+- El endpoint acepta `external_reference` y/o `payment_id` como query params para localizar la orden y el pago.
+- La respuesta devuelve solo campos de comprobante: estado consolidado, total, email de comprador, método de pago, items de `orders.metadata.items` y timestamps relevantes (orden/pago).
+- La ruta ` /checkout/exito ` ahora consume este endpoint y deja de depender de datos locales del carrito para renderizar el resumen.
+- Se agregan mensajes diferenciados para estados `pending` y `rejected`, además de fallback de soporte cuando no existe coincidencia de orden.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El comprobante post-pago pasa a depender de datos canónicos persistidos en Supabase, mejorando consistencia entre frontend y backoffice.
+- Se minimiza exposición de datos: el endpoint no retorna `raw_response` ni payloads internos completos.
+- Mejora la experiencia post-checkout para pagos no acreditados inmediatamente al mostrar estados y mensajes de seguimiento claros.
+
+### Contrato del endpoint (resumen)
+- Query params soportados:
+  - `external_reference=<string>`
+  - `payment_id=<string>`
+- Errores esperados:
+  - `400` si no se envía ningún identificador.
+  - `404` si no hay coincidencia.
+- Ejemplo de uso:
+  - `/api/mercadopago/order-summary?external_reference=ritual-...`
+  - `/api/mercadopago/order-summary?payment_id=1234567890`

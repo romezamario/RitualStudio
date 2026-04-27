@@ -1937,3 +1937,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Ajuste correctivo de naming; sin cambios funcionales en SQL.
+
+## PR: Endpoint canónico de resumen de orden para checkout éxito
+- Fecha: 2026-04-27
+- Objetivo: Exponer un endpoint de lectura para comprobante (`/api/mercadopago/order-summary`) y migrar `/checkout/exito` para consumir datos canónicos de `orders/payments` en lugar de depender de estado local.
+
+### Lo aprendido
+- Para la pantalla de éxito, consultar un endpoint dedicado evita acoplar la UI a parámetros incompletos de redirección o al estado efímero del carrito.
+- Soportar lookup por `external_reference` y `payment_id` reduce fricción operativa cuando solo uno de los identificadores está disponible.
+- Qué no funcionó y por qué: confiar solo en query params del redirect no garantiza consistencia de estado (especialmente en `pending/rejected` y reconciliación tardía por webhook).
+
+### Decisiones técnicas
+- Se creó `GET /api/mercadopago/order-summary` con búsqueda por `external_reference` y/o `payment_id`, reconciliando datos entre tablas `orders` y `payments` vía `supabaseAdminRequest`.
+- El endpoint retorna únicamente campos de recibo (estado consolidado, total, email, método de pago, items y timestamps) para evitar exposición de `raw_response` o metadatos sensibles.
+- Se reemplazó la lógica server-side directa de `/checkout/exito` por un cliente que consume el endpoint y muestra mensajes diferenciados para `pending` y `rejected`, además de fallback de soporte cuando no hay coincidencia.
+- Razón de la decisión final: centralizar la “fuente de verdad” del comprobante y dejar la UI desacoplada de detalles de persistencia.
+
+### Riesgos y mitigaciones
+- Riesgo: no encontrar coincidencia cuando webhook aún no ha reconciliado tablas.
+- Mitigación: fallback con mensaje accionable y datos de referencia/pago para soporte.
+- Pendientes: evaluar autenticación/ownership del endpoint para escenarios multiusuario y endurecer aún más minimización de campos por rol.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: endpoint y página de éxito compilan/lint sin errores, con flujo de render por estados.
+- Resultado obtenido: checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incorpora nuevo endpoint, parámetros soportados y comportamiento de la pantalla de éxito por estado.
