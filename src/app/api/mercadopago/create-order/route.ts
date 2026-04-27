@@ -65,6 +65,20 @@ export async function POST(request: Request) {
       description: lineItems.map((item) => `${item.quantity}x ${item.name}`).join(" | ").slice(0, 240),
     };
 
+    console.info("[MP create-order] Request a Mercado Pago", {
+      external_reference: externalReference,
+      transaction_amount: totalAmount,
+      installments,
+      payment_method_id,
+      payer_email: payer.email,
+      items: lineItems.map((item) => ({
+        slug: item.slug,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        subtotal: item.subtotal,
+      })),
+    });
+
     const payment = await mpApiFetch<MpPaymentResponse>("/v1/payments", {
       method: "POST",
       headers: {
