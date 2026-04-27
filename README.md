@@ -1534,3 +1534,20 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Impacto
 - El catálogo puede consumir imágenes por contexto visual (miniatura/tarjeta/detalle) sin sobrecargar la UI con un único asset pesado.
 - El backend devuelve estructura explícita para guardar referencias por variante en DB en un JSON (`imageVariants`) o columnas separadas si se decide en una migración posterior.
+
+## PR: Helper de URLs transformadas para imágenes de producto
+### ¿Qué cambia?
+- Se agregó `src/lib/product-image-storage.ts` con presets por contexto de uso para construir URLs de render transformadas de Supabase Storage (`/storage/v1/render/image/public/...`) en lugar de usar solamente el objeto público original.
+- Los contextos soportados son: `marketplace-card`, `product-detail`, `cart` y `admin-preview`, cada uno con `width`, `height` y `quality` propios.
+- Se actualizaron las vistas de marketplace/listado, detalle, carrito y preview de admin para pedir la variante transformada correspondiente y mantener consistencia con los `sizes` definidos en cada componente.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+
+### Impacto
+- Menor peso potencial de descarga y mejor adecuación del asset al viewport real por sección.
+- Queda centralizada la estrategia de transformación de imagen para facilitar ajustes futuros de performance sin tocar múltiples componentes.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

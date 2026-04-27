@@ -47,7 +47,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       <article id="marketplace-server-content" className="product-detail">
         <div className="product-detail-image-wrap">
           <Image
-            src={toRenderableProductImageUrl(product.image)}
+            src={toRenderableProductImageUrl(product.image, "product-detail")}
             alt={product.name}
             width={1400}
             height={1000}

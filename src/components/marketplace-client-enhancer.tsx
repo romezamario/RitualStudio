@@ -100,7 +100,7 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
                   <div className="card-image-wrap">
                     <Image
                       className="card-image"
-                      src={toRenderableProductImageUrl(product.image)}
+                      src={toRenderableProductImageUrl(product.image, "marketplace-card")}
                       alt={product.name}
                       width={1200}
                       height={900}
@@ -134,7 +134,7 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
       <article className="product-detail marketplace-client-override" aria-label="Detalle con personalizaciones de admin">
         <div className="product-detail-image-wrap">
           <Image
-            src={toRenderableProductImageUrl(detailProduct.image)}
+            src={toRenderableProductImageUrl(detailProduct.image, "product-detail")}
             alt={detailProduct.name}
             width={1400}
             height={1000}
