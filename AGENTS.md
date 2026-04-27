@@ -1888,3 +1888,52 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incorpora la nueva ruta `/checkout/exito`, el flujo de redirección y el uso de metadatos persistidos para el resumen de productos.
+
+## PR: Imágenes de catálogo en Supabase Storage sin Base64
+- Fecha: 2026-04-27
+- Objetivo: Reemplazar el flujo de imágenes Base64 por subida a Supabase Storage y garantizar que `products.image` guarde solo URL/path liviano.
+
+### Lo aprendido
+- Guardar imágenes como `data:image/...` rompe escalabilidad (payloads pesados, escritura innecesaria en DB y riesgo de exceder límites de almacenamiento local).
+- Un endpoint backend para upload con `service_role` mantiene el secreto fuera del cliente y simplifica validaciones de tipo/tamaño.
+- Normalizar y validar la referencia de imagen en capa API evita regresiones aunque cambie el cliente en el futuro.
+
+### Decisiones técnicas
+- Se creó bucket dedicado `product-images` mediante migración SQL con lectura pública y escritura restringida a admins autenticados.
+- Se implementó `/api/admin/products/upload-image` para recibir `multipart/form-data`, subir a Storage y devolver `path/publicUrl`.
+- Se bloquearon payloads con `data:image/` en `POST/PUT` de productos, aceptando solo URL/path.
+- Se sanitizó fallback local para persistir únicamente metadatos y referencias de imagen válidas.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad (lint) + validación estática de flujos de payload y persistencia.
+- Resultado: Lint sin errores; flujo admin preparado para subida de archivo a storage y rechazo explícito de data URLs en API.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó creación de bucket y consideraciones para lectura pública vs URLs firmadas.
+
+## PR: Fix de versionado de migración para Supabase Storage
+- Fecha: 2026-04-27
+- Objetivo: Corregir conflicto de versión duplicada en `schema_migrations` al aplicar migraciones de Supabase.
+
+### Lo aprendido
+- Supabase toma la versión de migración desde el prefijo numérico del nombre de archivo; usar `20260427_...` puede colisionar con otras migraciones del mismo día.
+- Para evitar `duplicate key value violates unique constraint "schema_migrations_pkey"`, conviene usar timestamp completo `YYYYMMDDHHMMSS` en el nombre.
+
+### Decisiones técnicas
+- Se renombró la migración a `20260427120000_product_images_storage.sql` para garantizar unicidad.
+- Se actualizó documentación en README para referenciar el nombre correcto.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad.
+- Resultado: Lint sin errores; se elimina causa de colisión por versión duplicada al ejecutar migraciones.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Ajuste correctivo de naming; sin cambios funcionales en SQL.

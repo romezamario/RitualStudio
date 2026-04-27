@@ -1,4 +1,5 @@
 import { marketplaceProducts, type MarketplaceProduct } from "@/data/marketplace-products";
+import { normalizeProductImageReference } from "@/lib/product-image-storage";
 
 const STORAGE_KEY = "ritualstudio.marketplace.products";
 
@@ -57,7 +58,7 @@ export function buildMarketplaceProduct(input: EditableMarketplaceProductInput):
     name: input.name.trim(),
     category: "Ramos",
     price: formatCurrency(finalPrice),
-    image: input.image,
+    image: normalizeProductImageReference(input.image),
     shortDescription: shortDescription || "Producto floral creado por administración.",
     description: input.description.trim(),
     size: "Personalizable",
@@ -142,6 +143,15 @@ export async function getMarketplaceProductBySlugForRender(slug: string) {
   return products.find((product) => product.slug === slug) ?? null;
 }
 
+function sanitizeProductForLocalStorage(product: MarketplaceProduct): MarketplaceProduct {
+  const normalizedImage = normalizeProductImageReference(product.image);
+
+  return {
+    ...product,
+    image: normalizedImage || "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80",
+  };
+}
+
 export function getStoredMarketplaceProducts(): MarketplaceProduct[] {
   if (typeof window === "undefined" || !isLocalMarketplaceFallbackEnabled()) {
     return marketplaceProducts;
@@ -155,7 +165,8 @@ export function getStoredMarketplaceProducts(): MarketplaceProduct[] {
 
   try {
     const parsed = JSON.parse(raw) as MarketplaceProduct[];
-    return parsed.length ? parsed : marketplaceProducts;
+    const sanitized = parsed.map(sanitizeProductForLocalStorage);
+    return sanitized.length ? sanitized : marketplaceProducts;
   } catch {
     return marketplaceProducts;
   }
@@ -166,7 +177,8 @@ export function saveStoredMarketplaceProducts(products: MarketplaceProduct[]) {
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  const lightweightProducts = products.map(sanitizeProductForLocalStorage);
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lightweightProducts));
 }
 
 export function getMarketplaceProduct(slug: string) {

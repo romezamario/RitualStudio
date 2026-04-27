@@ -8,6 +8,7 @@ import {
   getMarketplaceProductsForRender,
   isLocalMarketplaceFallbackEnabled,
 } from "@/lib/marketplace-catalog";
+import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
 
 type ProductDetailPageProps = {
   params: Promise<{
@@ -46,7 +47,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       <article id="marketplace-server-content" className="product-detail">
         <div className="product-detail-image-wrap">
           <Image
-            src={product.image}
+            src={toRenderableProductImageUrl(product.image)}
             alt={product.name}
             width={1400}
             height={1000}

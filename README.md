@@ -1407,3 +1407,42 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Impacto
 - El usuario recibe una confirmación clara y confiable de pago acreditado en una vista final más alineada con la narrativa de marca.
 - El detalle de productos no depende del carrito local (que se limpia), evitando pérdida de trazabilidad después del pago.
+
+## PR: Migración de imágenes de productos a Supabase Storage
+### ¿Qué cambia?
+- Se agregó un bucket dedicado `product-images` vía migración SQL (`supabase/migrations/20260427120000_product_images_storage.sql`) con límite de 8MB y MIME types de imagen permitidos.
+- Se implementó `POST /api/admin/products/upload-image` para subir archivos de imagen desde Admin de forma segura en backend (service role), retornando path y URL pública de storage.
+- El gestor admin de productos dejó de usar `readAsDataURL`; ahora sube el `File` al bucket y guarda en `image` solo la referencia de storage (path/URL).
+- Las APIs de alta/edición de productos ahora rechazan data URLs base64 (`data:image/...`) y normalizan `image` como URL/path.
+- Se robusteció el fallback local (`localStorage`) para persistir solo metadatos ligeros y referencias de imagen válidas, nunca blobs base64.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+
+### Impacto
+- Se evita inflar payloads y `localStorage` con Base64.
+- Las imágenes del catálogo quedan centralizadas en Supabase Storage, listas para CDN y políticas de acceso.
+- El campo `public.products.image` se mantiene limpio como URL/path reutilizable.
+
+### Variables relevantes
+```bash
+# opcional (default: product-images)
+SUPABASE_PRODUCT_IMAGES_BUCKET=product-images
+```
+
+Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se requiere bucket privado, se puede migrar a URLs firmadas en el endpoint server-side.
+
+
+## PR: Fix de versión duplicada en migración de Storage
+### ¿Qué cambia?
+- Se renombró la migración de Storage a `supabase/migrations/20260427120000_product_images_storage.sql` para usar una versión única y evitar conflicto con `schema_migrations_pkey`.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+
+### Impacto
+- Se corrige el error de Supabase CLI: `duplicate key value violates unique constraint "schema_migrations_pkey"` al aplicar migraciones.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

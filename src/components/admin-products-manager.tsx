@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
 import type { MarketplaceProduct } from "@/data/marketplace-products";
 import {
   buildMarketplaceProduct,
@@ -36,6 +37,7 @@ export default function AdminProductsManager() {
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -95,22 +97,47 @@ export default function AdminProductsManager() {
     setEditingSlug(null);
   };
 
-  const handleImageUpload = (file?: File | null) => {
+  const handleImageUpload = async (file?: File | null) => {
     if (!file) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = typeof reader.result === "string" ? reader.result : "";
-      setForm((current) => ({ ...current, image: dataUrl }));
-    };
+    setIsUploadingImage(true);
+    setFeedback("Subiendo imagen a storage...");
 
-    reader.readAsDataURL(file);
+    try {
+      const payload = new FormData();
+      payload.set("file", file);
+
+      const response = await fetch("/api/admin/products/upload-image", {
+        method: "POST",
+        body: payload,
+      });
+
+      const body = (await response.json().catch(() => null)) as
+        | { data?: { image?: string; publicUrl?: string; renderUrl?: string }; error?: string }
+        | null;
+
+      if (!response.ok || !body?.data?.image) {
+        throw new Error(body?.error ?? "No fue posible subir la imagen.");
+      }
+
+      setForm((current) => ({ ...current, image: body.data?.image ?? "" }));
+      setFeedback("Imagen subida correctamente.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "No fue posible subir la imagen.");
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isUploadingImage) {
+      setFeedback("Espera a que termine la subida de imagen.");
+      return;
+    }
 
     const basePrice = Number(form.price);
     const offerPrice = Number(form.offerPrice);
@@ -261,12 +288,19 @@ export default function AdminProductsManager() {
 
           <label>
             Foto del producto
-            <input type="file" accept="image/*" onChange={(event) => handleImageUpload(event.target.files?.[0])} />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(event) => void handleImageUpload(event.target.files?.[0])}
+              disabled={isUploadingImage}
+            />
           </label>
+
+          {isUploadingImage ? <p>Subiendo imagen...</p> : null}
 
           {form.image ? (
             <Image
-              src={form.image}
+              src={toRenderableProductImageUrl(form.image)}
               alt="Vista previa"
               className="admin-product-preview"
               width={1200}
@@ -309,7 +343,7 @@ export default function AdminProductsManager() {
           ) : null}
 
           <div className="cta-row">
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" disabled={isUploadingImage}>
               {editingSlug ? "Guardar cambios" : "Dar de alta"}
             </button>
             {editingSlug ? (
