@@ -1608,3 +1608,21 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fix visual de `internal_error` en checkout embebido
+### ¿Qué cambia?
+- Se ajustó el callback `onSubmit` del Card Payment Brick para no rechazar la promesa cuando falla el request al backend.
+- Ante error en `POST /api/mercadopago/create-order`, el checkout ahora mantiene el manejo en UI propia (`checkout-feedback`) y evita que el Brick muestre el banner genérico `internal_error`.
+- El estado de error y el mensaje de diagnóstico se siguen mostrando en pantalla para que usuario/soporte tengan contexto accionable.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Se elimina el falso error visual genérico de Mercado Pago (`internal_error`) al rechazar la promesa del Brick.
+- Mejora la experiencia de pago al presentar errores controlados y comprensibles dentro del flujo del sitio.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
