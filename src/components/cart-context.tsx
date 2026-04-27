@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { MarketplaceProduct } from "@/data/marketplace-products";
+import { marketplaceProducts, type MarketplaceProduct } from "@/data/marketplace-products";
 
 const CART_STORAGE_KEY = "ritual-studio-cart";
 
@@ -24,6 +24,44 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
+function sanitizeCartItems(rawItems: unknown): CartItem[] {
+  if (!Array.isArray(rawItems)) {
+    return [];
+  }
+
+  const productBySlug = new Map(marketplaceProducts.map((product) => [product.slug, product]));
+
+  return rawItems
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") {
+        return null;
+      }
+
+      const maybeSlug = "slug" in entry ? String(entry.slug) : "";
+      const maybeQuantity = "quantity" in entry ? Number(entry.quantity) : 0;
+
+      if (!maybeSlug || !Number.isInteger(maybeQuantity) || maybeQuantity < 1 || maybeQuantity > 10) {
+        return null;
+      }
+
+      const product = productBySlug.get(maybeSlug as MarketplaceProduct["slug"]);
+
+      if (!product) {
+        return null;
+      }
+
+      return {
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+        quantity: maybeQuantity,
+      };
+    })
+    .filter((item): item is CartItem => item !== null);
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -37,8 +75,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const parsed = JSON.parse(rawCart) as CartItem[];
-      setItems(parsed);
+      const parsed = JSON.parse(rawCart) as unknown;
+      setItems(sanitizeCartItems(parsed));
     } catch {
       setItems([]);
     } finally {

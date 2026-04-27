@@ -1730,6 +1730,28 @@ Un PR se considera terminado solo si:
 ### Pruebas
 - Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
 - Resultado esperado: proyecto sin errores de lint/tipos después del ajuste tipográfico global.
+## PR: Fix de "Producto inválido" en checkout por carrito desactualizado
+- Fecha: 2026-04-27
+- Objetivo: Evitar que el checkout falle cuando `localStorage` conserva productos antiguos o slugs que ya no existen en el catálogo actual.
+
+### Lo aprendido
+- El carrito persistido puede quedar desfasado respecto al catálogo vigente y disparar validaciones backend de `Producto inválido`.
+- Sanitizar el carrito al hidratarse desde `localStorage` evita que datos legacy lleguen al checkout y a la API de pago.
+- Qué no funcionó y por qué: confiar en que todo item persistido en cliente seguiría existiendo en `marketplaceProducts`.
+
+### Decisiones técnicas
+- Se agregó saneamiento del carrito al cargar `localStorage`, conservando únicamente productos existentes y cantidades válidas.
+- El saneamiento rehidrata datos canónicos del catálogo (nombre/precio/imagen/categoría) para evitar drift en campos derivados.
+- Se ajustó la API de `create-order` para clasificar errores de validación de línea de compra como `400` en vez de `500`.
+
+### Riesgos y mitigaciones
+- Riesgo: eliminar items legacy podría sorprender a usuarios con carrito viejo.
+- Mitigación: priorizar consistencia del checkout y evitar bloqueos de pago por datos inválidos.
+- Pendientes: evaluar aviso UI explícito cuando se depuren productos inválidos del carrito.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: proyecto sin errores de lint/tipos y flujo robusto frente a slugs inválidos.
 - Resultado obtenido: checks en verde.
 - Evidencia:
   - `npm run lint` OK.
@@ -1739,3 +1761,4 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README registra el ajuste tipográfico global y su impacto visual para trazabilidad de diseño.
+- Notas: README incluye el comportamiento de saneamiento de carrito y clasificación de errores de validación en checkout.

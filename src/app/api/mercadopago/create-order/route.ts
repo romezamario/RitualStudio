@@ -14,6 +14,18 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function getValidationErrorStatus(message: string) {
+  const knownValidationMessages = [
+    "Debes enviar al menos un producto",
+    "Producto inválido",
+    "Cantidad inválida",
+    "No fue posible calcular el total de la orden",
+    "El monto mínimo para pagar con tarjeta en este checkout",
+  ];
+
+  return knownValidationMessages.some((knownMessage) => message.includes(knownMessage)) ? 400 : 500;
+}
+
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as MpCreateOrderInput | null;
 
@@ -121,15 +133,13 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("[MP create-order] Error procesando orden:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "No fue posible procesar el pago en este momento. Intenta nuevamente.";
+    const status = getValidationErrorStatus(errorMessage);
 
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "No fue posible procesar el pago en este momento. Intenta nuevamente.",
-      },
-      { status: 500 }
+      { error: errorMessage },
+      { status }
     );
   }
 }

@@ -1294,3 +1294,21 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fix de "Producto inválido" en checkout por carrito desactualizado
+### ¿Qué cambia?
+- `CartProvider` ahora sanea el carrito al hidratar `localStorage`: conserva solo slugs existentes en catálogo y cantidades enteras válidas (1-10).
+- Los campos del carrito se normalizan con datos canónicos del catálogo (`name`, `price`, `image`, `category`) para evitar desalineación en checkout.
+- La API `POST /api/mercadopago/create-order` clasifica errores de validación de productos/cantidades/monto como `400` (request inválido) en lugar de `500`.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Se evita el fallo `Producto inválido: <slug>` cuando el navegador conserva productos legacy en `localStorage`.
+- El checkout queda más resiliente frente a cambios de catálogo sin comprometer validación server-side de precios y productos.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
