@@ -22,7 +22,7 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /contacto ` Canales de contacto.
 - ` /login ` Acceso con email/contraseña conectado a Supabase Auth (login + registro).
 - ` /actualizar-contrasena ` Paso final de recuperación para definir nueva contraseña después del enlace enviado por correo.
-- ` /mi-cuenta ` Dashboard del usuario autenticado con acceso centralizado a perfil, pedidos, direcciones y accesos administrativos (si aplica).
+- ` /mi-cuenta ` Dashboard del usuario autenticado con acceso centralizado a perfil, pedidos, direcciones y accesos administrativos (si aplica), incluyendo acceso directo a productos para cuentas admin.
 - ` /auth/callback ` Callback de confirmación de correo para Supabase (`token_hash` + `type`) con redirección amigable.
 - ` /correo-confirmado ` Página de éxito visual para confirmación de correo.
 - ` /auth/error ` Página de error amigable cuando el enlace de confirmación es inválido o expiró.
@@ -190,6 +190,22 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 - Se incorporó una galería moodboard con imágenes de referencia floral (Unsplash) para acelerar revisión visual con cliente antes de sesión fotográfica final.
 
 ## Historial de cambios
+
+## PR: Acceso directo a gestión de productos desde dashboard admin
+### ¿Qué cambia?
+- Se actualizó la tarjeta de **Administración** dentro de `/mi-cuenta` (cuando el usuario tiene rol admin) para incluir un botón directo a `/admin/productos`.
+- El bloque de copy del dashboard admin ahora menciona explícitamente que desde esa sección se puede gestionar catálogo, además de pedidos y usuarios.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+
+### Impacto
+- Reduce fricción operativa: el admin ya no necesita abrir el menú principal para ubicar la gestión de productos.
+- Mantiene una ruta de entrada única a operaciones críticas (pedidos, productos y usuarios) desde el dashboard autenticado.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
 
 ## PR: Versionado visible del sitio en footer
 ### ¿Qué cambia?

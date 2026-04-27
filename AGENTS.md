@@ -1642,3 +1642,34 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta el paso operativo para aplicar la migración y explica el origen del error de schema cache.
+
+## PR: Acceso directo a gestión de productos desde dashboard admin
+- Fecha: 2026-04-27
+- Objetivo: Evitar que el usuario administrador tenga que ir al menú principal para encontrar la gestión de productos, exponiendo ese acceso directamente en su dashboard autenticado.
+
+### Lo aprendido
+- Cuando el rol admin opera desde `/mi-cuenta`, concentrar accesos críticos en una sola tarjeta reduce pasos y evita navegación innecesaria por menú.
+- El dashboard de cuenta funciona mejor como “hub operativo” si incluye pedidos, usuarios y productos sin cambiar de contexto.
+- Qué no funcionó y por qué: dejar solo pedidos/usuarios en la tarjeta de administración obligaba al admin a buscar productos en navegación global.
+
+### Decisiones técnicas
+- Se añadió un botón `Productos admin` en la tarjeta de administración de `AccountDashboardClient` apuntando a `/admin/productos`.
+- Se actualizó el texto descriptivo de esa tarjeta para explicitar cobertura de catálogo, pedidos y usuarios.
+- Razón de la decisión final: resolver la necesidad con el cambio más pequeño posible, sin alterar rutas ni permisos existentes.
+
+### Riesgos y mitigaciones
+- Riesgo: saturar visualmente la tarjeta al agregar otro CTA.
+- Mitigación: se reutilizó la misma fila de acciones (`cta-row`) y estilo existente (`btn btn-ghost`) para mantener consistencia visual.
+- Pendientes: evaluar en una iteración posterior si conviene priorizar orden de CTAs según uso real (analytics).
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad.
+- Resultado esperado: lint sin errores tras actualizar dashboard de cuenta.
+- Resultado obtenido: lint en verde.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye el cambio en módulos y en historial de cambios para trazabilidad operativa.
