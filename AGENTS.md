@@ -1855,3 +1855,37 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta el cambio de fuente de catálogo para validación de checkout.
+
+## PR: Imágenes de catálogo en Supabase Storage sin Base64
+- Fecha: 2026-04-27
+- Objetivo: Migrar el flujo de imágenes de productos admin para subir archivos a Supabase Storage y guardar en catálogo únicamente URL/path (rechazando `data:image/...`).
+
+### Lo aprendido
+- Reemplazar `FileReader.readAsDataURL` por una subida server-side evita payloads pesados y reduce riesgo de saturar `localStorage` o requests API.
+- Validar explícitamente `data:image/` en API de productos corta regresiones aunque UI cambie en el futuro.
+- Qué no funcionó y por qué: conservar la previsualización basada en Base64 mezclaba responsabilidades de vista y persistencia, y terminaba guardando blobs codificados en cliente.
+
+### Decisiones técnicas
+- Se creó `POST /api/admin/products/upload-image` protegido por sesión admin para subir `File` al bucket `product-images` con `SUPABASE_SERVICE_ROLE_KEY`.
+- Se añadió migración `supabase/migrations/20260427_product_images_storage.sql` para crear/configurar bucket dedicado y policies (lectura pública + escritura admin).
+- Se rechazó `image` en formato data URL en `POST /api/admin/products` y `PUT /api/admin/products/[slug]`.
+- Se sanitizó persistencia de fallback local para conservar sólo metadatos ligeros y URL de imagen.
+- Razón de la decisión final: mantener seguridad y trazabilidad de assets sin romper la operación actual del panel admin.
+
+### Riesgos y mitigaciones
+- Riesgo: ausencia de variables server (`NEXT_PUBLIC_SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`) impide upload.
+- Mitigación: endpoint responde error accionable y no persiste estado inválido.
+- Pendientes: evaluar variante con bucket privado + signed URLs si negocio requiere ocultar assets públicos.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: compilar/lint sin errores y flujo admin sin Base64.
+- Resultado obtenido: checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta bucket, endpoint de subida y regla de rechazo de `data:image/...` en payload admin.

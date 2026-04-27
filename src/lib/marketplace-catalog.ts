@@ -1,6 +1,8 @@
 import { marketplaceProducts, type MarketplaceProduct } from "@/data/marketplace-products";
 
 const STORAGE_KEY = "ritualstudio.marketplace.products";
+const DEFAULT_PRODUCT_IMAGE =
+  "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80";
 
 export type EditableMarketplaceProductInput = {
   slug?: string;
@@ -11,6 +13,10 @@ export type EditableMarketplaceProductInput = {
   price: number;
   offerPrice?: number;
 };
+
+export function isBase64DataImageUrl(value: string) {
+  return /^data:image\//i.test(value.trim());
+}
 
 type SupabaseMarketplaceProductRecord = {
   slug: string;
@@ -40,6 +46,13 @@ function slugify(value: string) {
 
 function formatCurrency(value: number) {
   return `$${new Intl.NumberFormat("es-MX").format(value)} MXN`;
+}
+
+function toLightweightProduct(product: MarketplaceProduct): MarketplaceProduct {
+  return {
+    ...product,
+    image: isBase64DataImageUrl(product.image) ? DEFAULT_PRODUCT_IMAGE : product.image,
+  };
 }
 
 export function isLocalMarketplaceFallbackEnabled() {
@@ -155,7 +168,8 @@ export function getStoredMarketplaceProducts(): MarketplaceProduct[] {
 
   try {
     const parsed = JSON.parse(raw) as MarketplaceProduct[];
-    return parsed.length ? parsed : marketplaceProducts;
+    const sanitized = parsed.map(toLightweightProduct);
+    return sanitized.length ? sanitized : marketplaceProducts;
   } catch {
     return marketplaceProducts;
   }
@@ -166,7 +180,7 @@ export function saveStoredMarketplaceProducts(products: MarketplaceProduct[]) {
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(products.map(toLightweightProduct)));
 }
 
 export function getMarketplaceProduct(slug: string) {
