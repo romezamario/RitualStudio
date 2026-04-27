@@ -1256,3 +1256,24 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fix de checkout Mercado Pago para montos menores al mínimo
+### ¿Qué cambia?
+- Se agregó una validación compartida de monto mínimo para pagos con tarjeta en Mercado Pago: `MIN_MX_CARD_PAYMENT_AMOUNT = 10`.
+- El frontend de `/checkout` ahora bloquea la inicialización del Card Payment Brick cuando el total es menor a `$10 MXN` y muestra un mensaje accionable para regresar al carrito y ajustar el monto.
+- El backend `POST /api/mercadopago/create-order` valida también el mínimo antes de llamar a Mercado Pago para evitar requests inválidos.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- Validación manual estructurada del caso reportado:
+  - carrito con total `$1 MXN` muestra bloqueo preventivo y mensaje de mínimo;
+  - el checkout ya no intenta procesar el Brick en ese escenario.
+
+### Impacto
+- Se evita el error operativo `empty_installments` en totales no elegibles para tarjeta al interceptar el caso antes del intento de pago.
+- El usuario recibe una guía clara para corregir el carrito en vez de un error técnico de integración.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

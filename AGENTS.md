@@ -1673,3 +1673,37 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye el cambio en módulos y en historial de cambios para trazabilidad operativa.
+
+## PR: Fix de checkout Mercado Pago para montos menores al mínimo
+- Fecha: 2026-04-27
+- Objetivo: Evitar el error `empty_installments` en checkout cuando el total del carrito está por debajo del mínimo procesable con tarjeta.
+
+### Lo aprendido
+- El Card Payment Brick puede devolver `empty_installments` cuando el monto no habilita cuotas/métodos de pago para la tarjeta en ese contexto.
+- Prevenir el caso con validación de negocio en frontend y backend elimina ruido de errores técnicos para usuario final.
+- Qué no funcionó y por qué: permitir checkout con total de `$1 MXN` disparaba un flujo no elegible para tarjeta y terminaba en error del Brick.
+
+### Decisiones técnicas
+- Se definió una constante compartida `MIN_MX_CARD_PAYMENT_AMOUNT = 10` en la capa de utilidades de Mercado Pago.
+- Se agregó guard en `CheckoutClient` para mostrar estado bloqueado cuando el total es menor al mínimo en lugar de montar el Brick.
+- Se agregó validación server-side en `create-order` para rechazar montos menores al mínimo antes de invocar `/v1/payments`.
+- Razón de la decisión final: centralizar regla de monto mínimo y aplicar defensa en profundidad (UI + API) para evitar regresiones.
+
+### Riesgos y mitigaciones
+- Riesgo: que el mínimo por país/cuenta cambie y el valor hardcodeado quede desactualizado.
+- Mitigación: se centralizó en una sola constante para ajustar rápidamente sin tocar múltiples archivos.
+- Pendientes: evaluar mover este mínimo a variable de entorno si negocio requiere ajustes por cuenta/mercado.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript + validación manual estructurada.
+- Resultado esperado: proyecto en verde y checkout bloqueado correctamente bajo `$10 MXN`.
+- Resultado obtenido: lint y typecheck en verde; comportamiento preventivo incorporado para montos menores al mínimo.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+  - Revisión manual del flujo con total `$1 MXN` mostrando mensaje de monto mínimo en checkout.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye el fix, su impacto y el flujo de validación aplicado en frontend/backend.

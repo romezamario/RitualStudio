@@ -4,7 +4,7 @@ import Script from "next/script";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/components/cart-context";
-import { parseMxPrice } from "@/lib/mercadopago";
+import { MIN_MX_CARD_PAYMENT_AMOUNT, parseMxPrice } from "@/lib/mercadopago";
 
 type CheckoutStatus = "idle" | "loading" | "approved" | "pending" | "rejected" | "error";
 
@@ -96,6 +96,7 @@ export default function CheckoutClient() {
 
   const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim();
   const isProductionKey = /^APP_USR-/i.test(publicKey ?? "");
+  const isBelowMercadoPagoMinAmount = total < MIN_MX_CARD_PAYMENT_AMOUNT;
 
   useEffect(() => {
     return () => {
@@ -108,7 +109,14 @@ export default function CheckoutClient() {
   }, []);
 
   const mountBrick = async () => {
-    if (isBrickMounted.current || !window.MercadoPago || !publicKey || !items.length || total <= 0) {
+    if (
+      isBrickMounted.current ||
+      !window.MercadoPago ||
+      !publicKey ||
+      !items.length ||
+      total <= 0 ||
+      isBelowMercadoPagoMinAmount
+    ) {
       return;
     }
 
@@ -219,6 +227,22 @@ export default function CheckoutClient() {
         <p>Agrega productos en marketplace para continuar con el pago embebido.</p>
         <Link href="/marketplace" className="btn btn-primary">
           Ir al marketplace
+        </Link>
+      </section>
+    );
+  }
+
+  if (isBelowMercadoPagoMinAmount) {
+    return (
+      <section className="studio-card checkout-state checkout-state-error">
+        <h2>Total no válido para pago con tarjeta</h2>
+        <p>
+          El total actual es <strong>${total.toLocaleString("es-MX")} MXN</strong> y Mercado Pago requiere al menos{" "}
+          <strong>${MIN_MX_CARD_PAYMENT_AMOUNT} MXN</strong> para procesar pagos con tarjeta en este checkout.
+        </p>
+        <p>Agrega más productos al carrito o ajusta el precio para continuar.</p>
+        <Link href="/carrito" className="btn btn-primary">
+          Volver al carrito
         </Link>
       </section>
     );
