@@ -1914,3 +1914,26 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó creación de bucket y consideraciones para lectura pública vs URLs firmadas.
+
+## PR: Fix de versionado de migración para Supabase Storage
+- Fecha: 2026-04-27
+- Objetivo: Corregir conflicto de versión duplicada en `schema_migrations` al aplicar migraciones de Supabase.
+
+### Lo aprendido
+- Supabase toma la versión de migración desde el prefijo numérico del nombre de archivo; usar `20260427_...` puede colisionar con otras migraciones del mismo día.
+- Para evitar `duplicate key value violates unique constraint "schema_migrations_pkey"`, conviene usar timestamp completo `YYYYMMDDHHMMSS` en el nombre.
+
+### Decisiones técnicas
+- Se renombró la migración a `20260427120000_product_images_storage.sql` para garantizar unicidad.
+- Se actualizó documentación en README para referenciar el nombre correcto.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad.
+- Resultado: Lint sin errores; se elimina causa de colisión por versión duplicada al ejecutar migraciones.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Ajuste correctivo de naming; sin cambios funcionales en SQL.

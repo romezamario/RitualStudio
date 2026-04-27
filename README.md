@@ -1410,7 +1410,7 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 
 ## PR: Migración de imágenes de productos a Supabase Storage
 ### ¿Qué cambia?
-- Se agregó un bucket dedicado `product-images` vía migración SQL (`supabase/migrations/20260427_product_images_storage.sql`) con límite de 8MB y MIME types de imagen permitidos.
+- Se agregó un bucket dedicado `product-images` vía migración SQL (`supabase/migrations/20260427120000_product_images_storage.sql`) con límite de 8MB y MIME types de imagen permitidos.
 - Se implementó `POST /api/admin/products/upload-image` para subir archivos de imagen desde Admin de forma segura en backend (service role), retornando path y URL pública de storage.
 - El gestor admin de productos dejó de usar `readAsDataURL`; ahora sube el `File` al bucket y guarda en `image` solo la referencia de storage (path/URL).
 - Las APIs de alta/edición de productos ahora rechazan data URLs base64 (`data:image/...`) y normalizan `image` como URL/path.
@@ -1431,3 +1431,18 @@ SUPABASE_PRODUCT_IMAGES_BUCKET=product-images
 ```
 
 Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se requiere bucket privado, se puede migrar a URLs firmadas en el endpoint server-side.
+
+
+## PR: Fix de versión duplicada en migración de Storage
+### ¿Qué cambia?
+- Se renombró la migración de Storage a `supabase/migrations/20260427120000_product_images_storage.sql` para usar una versión única y evitar conflicto con `schema_migrations_pkey`.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+
+### Impacto
+- Se corrige el error de Supabase CLI: `duplicate key value violates unique constraint "schema_migrations_pkey"` al aplicar migraciones.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
