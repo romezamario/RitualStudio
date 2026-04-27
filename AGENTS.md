@@ -2004,3 +2004,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye variables de entorno de correo y troubleshooting de comprobante post-pago.
+
+## PR: Resiliencia del comprobante post-checkout con fallback a Mercado Pago
+- Fecha: 2026-04-27
+- Objetivo: Evitar falsos negativos en `/checkout/exito` cuando la orden aún no está disponible en Supabase pero el pago sí fue aprobado en Mercado Pago.
+
+### Lo aprendido
+- El flujo post-pago puede caer en una ventana de inconsistencia entre la persistencia local y la consulta inmediata del comprobante.
+- Depender solo de tablas locales para el resumen puede mostrar error al cliente aun teniendo `payment_id` válido.
+- Aceptar alias de query params de Mercado Pago (ej. `collection_id`) reduce fallas por diferencias de retorno entre integraciones.
+
+### Decisiones técnicas
+- Se agregó fallback en `GET /api/mercadopago/order-summary` para consultar `GET /v1/payments/{payment_id}` en Mercado Pago cuando no hay coincidencias en Supabase.
+- Se devolvió un recibo mínimo canónico con estado, monto, método y email desde Mercado Pago cuando la base local aún no responde.
+- Se añadió compatibilidad en `/checkout/exito` para usar `collection_id` como respaldo de `payment_id`.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de tipos.
+- Resultado: Lint y TypeScript sin errores tras incorporar fallback y alias de parámetros.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó el fallback operativo para reducir errores visibles en el resultado de pago.
