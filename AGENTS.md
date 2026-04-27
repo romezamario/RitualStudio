@@ -2109,3 +2109,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta el nuevo helper y el impacto en optimización de imágenes por contexto.
+
+## PR: Fuente única de render en marketplace (server o client por request)
+- Fecha: 2026-04-27
+- Objetivo: Evitar el doble árbol de render (server + client) en marketplace para no montar imágenes duplicadas y usar una sola fuente de verdad por request.
+
+### Lo aprendido
+- Ocultar contenido server con CSS después de hidratar (`display:none`) no evita el costo de montar dos árboles ni la carga potencial de imágenes.
+- Seleccionar estrategia de render en servidor según flag de fallback simplifica comportamiento y hace más predecible el rendimiento.
+- En fallback cliente, usar `overrideProducts ?? initialProducts` permite mantener contenido funcional aun cuando no hay override en `localStorage`.
+
+### Decisiones técnicas
+- En `src/app/marketplace/page.tsx` y `src/app/marketplace/[slug]/page.tsx` se decidió branching temprano por `isLocalMarketplaceFallbackEnabled()` para renderizar **solo** server o **solo** client.
+- Se eliminó la dependencia de la clase global `marketplace-overrides-active` y el ocultamiento de `#marketplace-server-content` en CSS.
+- `MarketplaceClientEnhancer` se simplificó para renderizar siempre una vista válida en su modo (`list` o `detail`) tomando una fuente activa única de productos.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado: Checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye el cambio de estrategia de render para marketplace y su impacto en rendimiento/carga de imágenes.

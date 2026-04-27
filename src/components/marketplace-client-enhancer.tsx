@@ -32,13 +32,13 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
     }
   }, [initialProducts]);
 
-  const shouldRenderListOverride = mode === "list" && !!overrideProducts;
+  const activeProducts = overrideProducts ?? initialProducts;
   const groupedOverrideProducts = useMemo(() => {
-    if (mode !== "list" || !overrideProducts) {
+    if (mode !== "list") {
       return [];
     }
 
-    const grouped = overrideProducts.reduce<Record<string, MarketplaceProduct[]>>((accumulator, product) => {
+    const grouped = activeProducts.reduce<Record<string, MarketplaceProduct[]>>((accumulator, product) => {
       if (!accumulator[product.category]) {
         accumulator[product.category] = [];
       }
@@ -48,32 +48,20 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
     }, {});
 
     return Object.entries(grouped).map(([category, products]) => ({ category, products }));
-  }, [mode, overrideProducts]);
+  }, [activeProducts, mode]);
   const overrideCategories = useMemo(
     () => groupedOverrideProducts.map((section) => section.category),
     [groupedOverrideProducts],
   );
   const detailProduct = useMemo(() => {
-    if (mode !== "detail" || !overrideProducts || !slug) {
+    if (mode !== "detail" || !slug) {
       return null;
     }
 
-    return overrideProducts.find((product) => product.slug === slug) ?? null;
-  }, [mode, overrideProducts, slug]);
-  const shouldRenderDetailOverride = mode === "detail" && !!detailProduct;
+    return activeProducts.find((product) => product.slug === slug) ?? null;
+  }, [activeProducts, mode, slug]);
 
-  useEffect(() => {
-    const shouldEnableOverride = shouldRenderListOverride || shouldRenderDetailOverride;
-    const root = document.documentElement;
-
-    root.classList.toggle("marketplace-overrides-active", shouldEnableOverride);
-
-    return () => {
-      root.classList.remove("marketplace-overrides-active");
-    };
-  }, [shouldRenderDetailOverride, shouldRenderListOverride]);
-
-  if (shouldRenderListOverride && overrideProducts) {
+  if (mode === "list") {
     return (
       <div className="marketplace-client-override" aria-label="Marketplace con personalizaciones de admin">
         <div className="marketplace-topbar" aria-label="Categorías de productos">
@@ -129,7 +117,7 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
     );
   }
 
-  if (shouldRenderDetailOverride && detailProduct) {
+  if (mode === "detail" && detailProduct) {
     return (
       <article className="product-detail marketplace-client-override" aria-label="Detalle con personalizaciones de admin">
         <div className="product-detail-image-wrap">
@@ -194,5 +182,13 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
     );
   }
 
-  return null;
+  return (
+    <div className="studio-card">
+      <p className="card-label">Marketplace</p>
+      <p>No encontramos este producto en el catálogo actual.</p>
+      <Link href="/marketplace" className="btn btn-ghost">
+        Volver al marketplace
+      </Link>
+    </div>
+  );
 }

@@ -1551,3 +1551,21 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fuente única de render en marketplace (server **o** client por request)
+### ¿Qué cambia?
+- Se ajustó `/marketplace` y `/marketplace/[slug]` para elegir una sola estrategia de render por request:
+  - `NEXT_PUBLIC_MARKETPLACE_LOCAL_FALLBACK !== "true"` → render server.
+  - `NEXT_PUBLIC_MARKETPLACE_LOCAL_FALLBACK === "true"` → render client.
+- Se eliminó la estrategia anterior de montar ambos árboles (server + client) y ocultar uno por CSS.
+- `MarketplaceClientEnhancer` ahora renderiza desde una sola fuente activa (`overrideProducts ?? initialProducts`) y cubre tanto listado como detalle sin depender de `html.marketplace-overrides-active`.
+- Se removió el override CSS `html.marketplace-overrides-active #marketplace-server-content { display:none; }` porque ya no es necesario.
+
+### ¿Cómo se probó?
+- `npm run lint`
+- `npx tsc --noEmit`
+
+### Impacto
+- Evita doble montaje de árboles completos con imágenes en marketplace.
+- Reduce costo de render/hidratación y elimina descargas de imágenes ocultas por CSS en fallback cliente.
+- Mantiene soporte de personalizaciones locales (`localStorage`) cuando el fallback está activo.
