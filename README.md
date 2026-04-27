@@ -232,6 +232,18 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 ### Impacto
 - El equipo puede decidir y aplicar incrementos de versión de forma consistente según magnitud del cambio.
 - Cada release deja trazabilidad clara y consultable por versión en un único archivo de bitácora (`CHANGELOG.md`).
+## PR: Ajuste tipográfico global para una estética más elegante
+### ¿Qué cambia?
+- Se redujo la escala tipográfica global del sitio ajustando `html { font-size: 93.75%; }` en `src/app/globals.css`.
+- Al estar basada en `rem`, la reducción impacta de forma consistente títulos, párrafos, botones, formularios y textos auxiliares sin reescribir cada componente.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El sitio mantiene la misma jerarquía visual y layout, pero con una lectura menos dominante y una percepción más sobria/elegante.
+- El cambio es global y centralizado, facilitando futuros ajustes finos de tipografía desde un solo punto.
 
 ### Documentación actualizada
 - AGENTS.md: Sí

@@ -1708,6 +1708,28 @@ Un PR se considera terminado solo si:
 - AGENTS actualizado: Sí
 - Notas: README incluye el fix, su impacto y el flujo de validación aplicado en frontend/backend.
 
+## PR: Ajuste tipográfico global para una estética más elegante
+- Fecha: 2026-04-27
+- Objetivo: Reducir el tamaño de letra de forma global para que el sitio se perciba más sobrio y elegante sin alterar estructura ni flujos funcionales.
+
+### Lo aprendido
+- En una base visual construida mayormente con unidades `rem`, un ajuste del `font-size` raíz permite escalar tipografía en todo el sitio de manera consistente y de bajo riesgo.
+- Para cambios de dirección visual (más editorial, menos dominante), conviene priorizar ajustes globales antes de microajustes por componente.
+- Qué no funcionó y por qué: bajar tamaños de forma aislada por módulo incrementa costo de mantenimiento y puede romper coherencia tipográfica entre rutas.
+
+### Decisiones técnicas
+- Se aplicó `html { font-size: 93.75%; }` en `src/app/globals.css` para reducir la escala tipográfica global.
+- Se evitó modificar uno por uno los `font-size` de componentes porque el sitio ya usa una jerarquía basada en `rem`.
+- Razón de la decisión final: obtener un resultado uniforme en todo el sitio con el cambio mínimo, reversible y fácil de calibrar.
+
+### Riesgos y mitigaciones
+- Riesgo: que algunos textos de apoyo queden demasiado pequeños en pantallas reducidas.
+- Mitigación: reducción moderada (6.25%) para conservar legibilidad y jerarquía visual.
+- Pendientes: validar en una iteración posterior si se requiere ajuste puntual en labels o captions de módulos específicos.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: proyecto sin errores de lint/tipos después del ajuste tipográfico global.
 ## PR: Fix de "Producto inválido" en checkout por carrito desactualizado
 - Fecha: 2026-04-27
 - Objetivo: Evitar que el checkout falle cuando `localStorage` conserva productos antiguos o slugs que ya no existen en el catálogo actual.
@@ -1738,6 +1760,7 @@ Un PR se considera terminado solo si:
 ### Documentación
 - README actualizado: Sí
 - AGENTS actualizado: Sí
+- Notas: README registra el ajuste tipográfico global y su impacto visual para trazabilidad de diseño.
 - Notas: README incluye el comportamiento de saneamiento de carrito y clasificación de errores de validación en checkout.
 
 ## PR: Flujo de versionado SemVer + bitácora de versiones
