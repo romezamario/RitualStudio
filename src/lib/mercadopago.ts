@@ -19,6 +19,7 @@ export type MpCreateOrderInput = {
   payment_method_id: string;
   payment_method_type?: string;
   installments: number;
+  issuer_id?: string | number;
   payer: {
     email: string;
   };

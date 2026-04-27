@@ -14,6 +14,21 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+
+function normalizeIssuerId(rawIssuerId: string | number | undefined) {
+  if (rawIssuerId === undefined || rawIssuerId === null || rawIssuerId === "") {
+    return undefined;
+  }
+
+  const parsed = Number(rawIssuerId);
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return undefined;
+  }
+
+  return Math.trunc(parsed);
+}
+
 function getValidationErrorStatus(message: string) {
   const knownValidationMessages = [
     "Debes enviar al menos un producto",
@@ -33,7 +48,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
   }
 
-  const { token, payment_method_id, installments, payer, items } = body;
+  const { token, payment_method_id, installments, issuer_id, payer, items } = body;
 
   if (!token || !payment_method_id || !payer?.email) {
     return NextResponse.json({ error: "Faltan datos obligatorios del pago." }, { status: 400 });
@@ -53,11 +68,14 @@ export async function POST(request: Request) {
     const externalReference = `ritual-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const idempotencyKey = randomUUID();
 
+    const normalizedIssuerId = normalizeIssuerId(issuer_id);
+
     const paymentPayload = {
       token,
       transaction_amount: totalAmount,
       installments,
       payment_method_id,
+      ...(normalizedIssuerId ? { issuer_id: normalizedIssuerId } : {}),
       payer: {
         email: payer.email,
       },
@@ -71,6 +89,7 @@ export async function POST(request: Request) {
       installments,
       payment_method_id,
       payer_email: payer.email,
+      issuer_id: normalizeIssuerId(issuer_id) ?? null,
       items: lineItems.map((item) => ({
         slug: item.slug,
         quantity: item.quantity,

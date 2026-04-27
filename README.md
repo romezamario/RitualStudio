@@ -1626,3 +1626,21 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fix de `internal_error` persistente en checkout (issuer_id + mensaje accionable)
+### ¿Qué cambia?
+- En `src/components/checkout-client.tsx` ahora se envía `issuer_id` (cuando el Brick lo proporciona) al backend de pago para mejorar compatibilidad con emisores de tarjeta que lo requieren al crear el pago.
+- En `src/app/api/mercadopago/create-order/route.ts` se normaliza y reenvía `issuer_id` al payload de `POST /v1/payments` de Mercado Pago.
+- Se evitó mostrar el texto crudo `internal_error` al cliente: cuando Mercado Pago devuelve ese mensaje genérico, el checkout ahora muestra una explicación accionable y contextual.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Reduce rechazos opacos en tarjetas que dependen de `issuer_id` en el cobro.
+- Mejora diagnóstico de soporte al reemplazar el error genérico por una guía clara de reintento/configuración.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

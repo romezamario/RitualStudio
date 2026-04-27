@@ -88,6 +88,21 @@ function getCheckoutFeedbackByResult(normalizedStatus: CheckoutStatus, statusDet
   return "No pudimos confirmar el pago. Intenta nuevamente en unos minutos.";
 }
 
+
+function getCheckoutSubmissionErrorMessage(error: unknown) {
+  if (!(error instanceof Error)) {
+    return "No fue posible procesar el pago en este momento. Intenta nuevamente.";
+  }
+
+  const normalizedMessage = error.message.trim().toLowerCase();
+
+  if (!normalizedMessage || normalizedMessage === "internal_error") {
+    return "Mercado Pago no pudo autorizar este intento por un error interno. Reintenta en unos segundos; si persiste, usa otra tarjeta o verifica que tus credenciales MP (public key/access token) pertenezcan al mismo entorno.";
+  }
+
+  return error.message;
+}
+
 function getHumanReadableBrickError(error: unknown, isProductionKey: boolean) {
   const fallback = "Hubo un problema en el formulario de pago. Verifica tus datos e intenta de nuevo.";
 
@@ -120,6 +135,7 @@ type MpBrickFormData = {
   token: string;
   payment_method_id: string;
   payment_method_type?: string;
+  issuer_id?: string | number;
   installments: number;
   payer: {
     email: string;
@@ -225,6 +241,7 @@ export default function CheckoutClient() {
                   payment_method_id: formData.payment_method_id,
                   payment_method_type: formData.payment_method_type,
                   installments: formData.installments,
+                  issuer_id: formData.issuer_id,
                   payer: {
                     email: formData.payer.email,
                   },
@@ -265,7 +282,7 @@ export default function CheckoutClient() {
                 })
                 .catch((error: unknown) => {
                   setCheckoutStatus("error");
-                  setFeedback(error instanceof Error ? error.message : "Error inesperado al enviar el pago.");
+                  setFeedback(getCheckoutSubmissionErrorMessage(error));
                   resolve();
                 });
             });
