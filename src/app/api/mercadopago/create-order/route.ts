@@ -4,7 +4,7 @@ import {
   mapPaymentStatus,
   mpApiFetch,
   type MpCreateOrderInput,
-  type MpOrderResponse,
+  type MpPaymentResponse,
   validateAndPriceLineItems,
 } from "@/lib/mercadopago";
 import { supabaseAdminRequest } from "@/lib/supabase-admin";
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
   }
 
-  const { token, payment_method_id, payment_method_type, installments, payer, items } = body;
+  const { token, payment_method_id, installments, payer, items } = body;
 
   if (!token || !payment_method_id || !payer?.email) {
     return NextResponse.json({ error: "Faltan datos obligatorios del pago." }, { status: 400 });
@@ -34,61 +34,47 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Cuotas inválidas." }, { status: 400 });
   }
 
-  const resolvedPaymentMethodType = payment_method_type || "credit_card";
-
   try {
     const { lineItems, totalAmount } = validateAndPriceLineItems(items);
     const externalReference = `ritual-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const idempotencyKey = randomUUID();
 
-    const orderPayload = {
-      type: "online",
-      processing_mode: "automatic",
-      external_reference: externalReference,
-      total_amount: totalAmount,
+    const paymentPayload = {
+      token,
+      transaction_amount: totalAmount,
+      installments,
+      payment_method_id,
       payer: {
         email: payer.email,
       },
-      transactions: {
-        payments: [
-          {
-            amount: totalAmount,
-            payment_method: {
-              id: payment_method_id,
-              type: resolvedPaymentMethodType,
-            },
-            token,
-            installments,
-          },
-        ],
-      },
+      external_reference: externalReference,
+      description: lineItems.map((item) => `${item.quantity}x ${item.name}`).join(" | ").slice(0, 240),
     };
 
-    const order = await mpApiFetch<MpOrderResponse>("/v1/orders", {
+    const payment = await mpApiFetch<MpPaymentResponse>("/v1/payments", {
       method: "POST",
       headers: {
         "X-Idempotency-Key": idempotencyKey,
       },
-      body: JSON.stringify(orderPayload),
+      body: JSON.stringify(paymentPayload),
     });
 
-    const payment = order.transactions?.payments?.[0];
-    const normalizedStatus = mapPaymentStatus(payment?.status ?? order.status);
+    const normalizedStatus = mapPaymentStatus(payment.status);
+    const mercadoPagoOrderId = payment.order?.id ? String(payment.order.id) : `payment-${String(payment.id ?? "")}`;
 
     const orderInsert = {
       external_reference: externalReference,
-      mercado_pago_order_id: String(order.id ?? ""),
-      status: order.status ?? payment?.status ?? "unknown",
-      total_amount: totalAmount,
+      mercado_pago_order_id: mercadoPagoOrderId,
+      status: payment.status ?? "unknown",
+      total_amount: payment.transaction_amount ?? totalAmount,
       customer_email: payer.email,
       metadata: {
         items: lineItems,
         installments,
         payment_method_id,
-        payment_method_type,
-        resolved_payment_method_type: resolvedPaymentMethodType,
+        source: "checkout-bricks-card-payment",
       },
-      raw_response: order,
+      raw_response: payment,
     };
 
     const { error: orderError } = await supabaseAdminRequest<unknown[]>("/rest/v1/orders", {
@@ -103,12 +89,12 @@ export async function POST(request: Request) {
     if (payment?.id) {
       const paymentRow = {
         mercado_pago_payment_id: String(payment.id),
-        mercado_pago_order_id: String(order.id ?? ""),
-        status: payment.status ?? order.status ?? "unknown",
-        status_detail: payment.status_detail ?? order.status_detail ?? null,
-        payment_method: payment.payment_method?.id ?? payment_method_id,
-        payment_method_type: payment.payment_method?.type ?? resolvedPaymentMethodType,
-        amount: payment.amount ?? totalAmount,
+        mercado_pago_order_id: mercadoPagoOrderId,
+        status: payment.status ?? "unknown",
+        status_detail: payment.status_detail ?? null,
+        payment_method: payment.payment_method_id ?? payment_method_id,
+        payment_method_type: payment.payment_type_id ?? null,
+        amount: payment.transaction_amount ?? totalAmount,
         raw_response: payment,
       };
 
@@ -123,13 +109,13 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      order_id: order.id,
-      payment_id: payment?.id,
-      status: payment?.status ?? order.status ?? "unknown",
-      status_detail: payment?.status_detail ?? order.status_detail ?? null,
+      order_id: payment.order?.id,
+      payment_id: payment.id,
+      status: payment.status ?? "unknown",
+      status_detail: payment.status_detail ?? null,
       external_reference: externalReference,
       normalized_status: normalizedStatus,
-      total_amount: totalAmount,
+      total_amount: payment.transaction_amount ?? totalAmount,
     });
   } catch (error) {
     console.error("[MP create-order] Error procesando orden:", error);

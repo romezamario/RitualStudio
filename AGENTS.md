@@ -1583,3 +1583,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README ahora documenta `NEXT_PUBLIC_SITE_VERSION` y el comportamiento de fallback con `package.json`.
+
+## PR: Corrección de request 400 en checkout Mercado Pago
+- Fecha: 2026-04-26
+- Objetivo: Corregir el payload enviado a Mercado Pago durante el pago con tarjeta para evitar errores 400 por estructura inválida en la API.
+
+### Lo aprendido
+- Para Card Payment Brick, el backend debe procesar el pago con el contrato mínimo documentado de `POST /v1/payments` y no asumir que el payload de Orders API aplica igual en todos los casos.
+- Incluir detalles de `cause` en errores de la API acelera diagnóstico cuando Mercado Pago rechaza campos por formato o propiedades no soportadas.
+- Mantener recalculo de monto desde catálogo backend sigue siendo clave incluso al cambiar de endpoint, para no confiar en montos del frontend.
+
+### Decisiones técnicas
+- Se migró la llamada de backend de `POST /v1/orders` a `POST /v1/payments` en `create-order`, manteniendo la misma ruta interna para no romper el frontend.
+- Se ajustó persistencia para guardar `payment.id`, `payment.order.id` (si existe) y fallback estable cuando no llega `order.id`.
+- Se amplió el parser de errores de Mercado Pago para adjuntar `cause.code` y `cause.description` en excepciones backend.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación estática de TypeScript.
+- Resultado: Lint y chequeo de tipos sin errores.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó el ajuste de endpoint y la razón del fix para troubleshooting de errores 400 en pagos.

@@ -1198,3 +1198,22 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Corrección de request 400 en pago con Mercado Pago
+### ¿Qué cambia?
+- Se corrigió el backend de checkout para enviar el pago al endpoint recomendado por Card Payment Brick (`POST /v1/payments`) con payload mínimo obligatorio: `token`, `transaction_amount`, `installments`, `payment_method_id` y `payer.email`.
+- Se eliminó del request de pago la estructura anidada de `orders.transactions.payments` que podía provocar rechazos `400` por propiedades no esperadas en este flujo.
+- Se mejoró el parseo de errores de Mercado Pago para incluir `cause.code` y `cause.description` cuando existan, facilitando diagnóstico de payload mal formado.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+- Validación estática del payload en `src/app/api/mercadopago/create-order/route.ts` para confirmar que coincide con los campos mínimos documentados por Card Payment Brick.
+
+### Impacto
+- Disminuye el riesgo de `400 Bad Request` al pagar con tarjeta en checkout embebido.
+- Los errores devueltos por Mercado Pago ahora son más accionables para soporte y debugging.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
