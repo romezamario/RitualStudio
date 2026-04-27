@@ -2212,3 +2212,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta el motivo del cambio y su impacto directo en UX de checkout embebido.
+
+## PR: Fix de `internal_error` persistente en checkout (issuer_id + fallback de mensaje)
+- Fecha: 2026-04-27
+- Objetivo: Corregir la falla persistente reportada en checkout embebido donde el pago respondía `internal_error`, incorporando datos de emisor cuando estén disponibles y mejorando el mensaje mostrado en UI.
+
+### Lo aprendido
+- Algunos flujos de tarjeta dependen de `issuer_id` para resolver correctamente el emisor en `POST /v1/payments`; omitirlo puede degradar la autorización en escenarios específicos.
+- Mostrar el string crudo `internal_error` al usuario final no aporta contexto operativo; un fallback accionable reduce fricción de reintento.
+- Qué no funcionó y por qué: mantener únicamente `payment_method_id` + `installments` + `payer.email` no cubre todos los casos de emisor que el Brick sí puede entregar en `onSubmit`.
+
+### Decisiones técnicas
+- Se amplió el contrato de `MpBrickFormData` y `MpCreateOrderInput` para incluir `issuer_id` opcional.
+- Se implementó `normalizeIssuerId` en backend para enviar `issuer_id` solo si es numérico válido y evitar payloads inconsistentes.
+- Se agregó `getCheckoutSubmissionErrorMessage` en frontend para transformar `internal_error` en un mensaje claro de reintento/configuración.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación estática de TypeScript.
+- Resultado esperado: checks en verde y checkout con mejor tolerancia en autorización de tarjeta sin mostrar mensaje crudo `internal_error`.
+- Resultado obtenido: checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó el envío opcional de `issuer_id` y la mejora de UX/error handling para soporte operativo.
