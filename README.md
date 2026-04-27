@@ -1644,3 +1644,21 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Persistencia de carrito al refrescar con catálogo dinámico
+### ¿Qué cambia?
+- En `src/components/cart-context.tsx` se corrigió el saneamiento del carrito para no depender de `marketplaceProducts` (catálogo estático) al restaurar desde `localStorage`.
+- Ahora los items se validan por su estructura serializada (`slug`, `name`, `price`, `image`, `category`, `quantity`) y se preservan aunque provengan de catálogo dinámico/backend.
+- Se añadió `clamp` de cantidad en restauración y en `addToCart` para mantener un máximo de 10 unidades por producto sin romper persistencia.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El carrito ya no se vacía al refrescar cuando contiene productos que no existen en el fallback local estático.
+- Se mantiene consistencia entre sesiones con datos de catálogo dinámico.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
