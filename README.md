@@ -1432,6 +1432,7 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 - El gestor admin de productos dejó de usar `readAsDataURL`; ahora sube el `File` al bucket y guarda en `image` solo la referencia de storage (path/URL).
 - Las APIs de alta/edición de productos ahora rechazan data URLs base64 (`data:image/...`) y normalizan `image` como URL/path.
 - Se robusteció el fallback local (`localStorage`) para persistir solo metadatos ligeros y referencias de imagen válidas, nunca blobs base64.
+- `next.config.ts` permite explícitamente imágenes remotas de `images.unsplash.com` y de Supabase (`**.supabase.co` + hostname exacto derivado de `NEXT_PUBLIC_SUPABASE_URL`) para compatibilidad con `next/image`.
 
 ### ¿Cómo se probó?
 - `npm run lint`.
@@ -1448,6 +1449,19 @@ SUPABASE_PRODUCT_IMAGES_BUCKET=product-images
 ```
 
 Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se requiere bucket privado, se puede migrar a URLs firmadas en el endpoint server-side.
+
+### Mantenimiento de `images.remotePatterns` (Next.js)
+- `toRenderableProductImageUrl` (`src/lib/product-image-storage.ts`) genera URLs con este formato para paths relativos:  
+  `<NEXT_PUBLIC_SUPABASE_URL>/storage/v1/object/public/<bucket>/<path>`.
+- Para que `next/image` renderice esas URLs sin error, el hostname final debe estar incluido en `next.config.ts > images.remotePatterns`.
+- Política actual recomendada:
+  - mantener `images.unsplash.com` para assets editoriales temporales;
+  - mantener wildcard `**.supabase.co` para proyectos estándar de Supabase;
+  - mantener también el hostname exacto derivado de `NEXT_PUBLIC_SUPABASE_URL` (útil si cambias de proveedor o usas dominio custom/CDN).
+- Cuando cambie el proyecto de Supabase o agregues CDN propio:
+  1. actualiza `NEXT_PUBLIC_SUPABASE_URL`;
+  2. agrega el nuevo hostname remoto en `images.remotePatterns` (si no queda cubierto por wildcard);
+  3. valida que una imagen de producto cargue correctamente en `/marketplace` y en `/admin/productos`.
 
 
 ## PR: Fix de versión duplicada en migración de Storage
