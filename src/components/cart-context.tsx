@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { marketplaceProducts, type MarketplaceProduct } from "@/data/marketplace-products";
+import type { MarketplaceProduct } from "@/data/marketplace-products";
 
 const CART_STORAGE_KEY = "ritual-studio-cart";
 
@@ -29,8 +29,6 @@ function sanitizeCartItems(rawItems: unknown): CartItem[] {
     return [];
   }
 
-  const productBySlug = new Map(marketplaceProducts.map((product) => [product.slug, product]));
-
   return rawItems
     .map((entry) => {
       if (!entry || typeof entry !== "object") {
@@ -38,25 +36,33 @@ function sanitizeCartItems(rawItems: unknown): CartItem[] {
       }
 
       const maybeSlug = "slug" in entry ? String(entry.slug) : "";
+      const maybeName = "name" in entry ? String(entry.name) : "";
+      const maybePrice = "price" in entry ? String(entry.price) : "";
+      const maybeImage = "image" in entry ? String(entry.image) : "";
+      const maybeCategory = "category" in entry ? String(entry.category) : "";
       const maybeQuantity = "quantity" in entry ? Number(entry.quantity) : 0;
 
-      if (!maybeSlug || !Number.isInteger(maybeQuantity) || maybeQuantity < 1 || maybeQuantity > 10) {
+      if (
+        !maybeSlug ||
+        !maybeName ||
+        !maybePrice ||
+        !maybeImage ||
+        !maybeCategory ||
+        !Number.isInteger(maybeQuantity) ||
+        maybeQuantity < 1
+      ) {
         return null;
       }
 
-      const product = productBySlug.get(maybeSlug as MarketplaceProduct["slug"]);
-
-      if (!product) {
-        return null;
-      }
+      const normalizedQuantity = Math.min(maybeQuantity, 10);
 
       return {
-        slug: product.slug,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        category: product.category,
-        quantity: maybeQuantity,
+        slug: maybeSlug,
+        name: maybeName,
+        price: maybePrice,
+        image: maybeImage,
+        category: maybeCategory,
+        quantity: normalizedQuantity,
       };
     })
     .filter((item): item is CartItem => item !== null);
@@ -102,7 +108,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
           if (item) {
             return currentItems.map((entry) =>
-              entry.slug === product.slug ? { ...entry, quantity: entry.quantity + 1 } : entry
+              entry.slug === product.slug ? { ...entry, quantity: Math.min(entry.quantity + 1, 10) } : entry
             );
           }
 

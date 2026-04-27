@@ -2239,3 +2239,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó el envío opcional de `issuer_id` y la mejora de UX/error handling para soporte operativo.
+
+## PR: Persistencia de carrito al refrescar con catálogo dinámico
+- Fecha: 2026-04-27
+- Objetivo: Evitar que el carrito se vacíe al refrescar cuando contiene productos creados en catálogo dinámico (no presentes en el fallback estático).
+
+### Lo aprendido
+- Validar el carrito contra un catálogo estático elimina productos válidos cuando el inventario real proviene de backend y cambia con el tiempo.
+- Para persistencia robusta en `localStorage`, conviene sanitizar estructura/campos mínimos y no depender de una lista cerrada de slugs.
+- Qué no funcionó y por qué: el saneamiento anterior descartaba cualquier item cuyo `slug` no existiera en `marketplaceProducts`, provocando “carrito vacío” tras recargar.
+
+### Decisiones técnicas
+- Se eliminó la validación por mapa estático de `marketplaceProducts` dentro de `sanitizeCartItems`.
+- Se pasó a validar por campos serializados del propio carrito (`slug`, `name`, `price`, `image`, `category`, `quantity`) y se mantuvo límite superior de cantidad con clamp a `10`.
+- Se ajustó `addToCart` para impedir que una entrada supere `10` unidades y mantener consistencia con el saneamiento de persistencia.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación estática de TypeScript.
+- Resultado esperado: conservar items válidos del carrito después de refrescar y mantener checks de calidad sin errores.
+- Resultado obtenido: lint y type-check en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta explícitamente la corrección de persistencia para catálogo dinámico.
