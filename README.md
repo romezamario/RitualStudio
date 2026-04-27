@@ -1569,3 +1569,21 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 - Evita doble montaje de árboles completos con imágenes en marketplace.
 - Reduce costo de render/hidratación y elimina descargas de imágenes ocultas por CSS en fallback cliente.
 - Mantiene soporte de personalizaciones locales (`localStorage`) cuando el fallback está activo.
+
+## PR: Separación cliente público/admin para catálogo con caché en render
+### ¿Qué cambia?
+- Se separó la lectura pública del catálogo hacia un cliente de solo lectura (`src/lib/supabase-public.ts`) usando `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`/`NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Se mantuvo el cliente admin (`supabaseAdminRequest`) para operaciones sensibles con `cache: "no-store"`.
+- `getMarketplaceProductsForRender` ahora usa fetch cacheable con `next.revalidate` (300s) y etiqueta `marketplace-products`, evitando que `/marketplace` y `/marketplace/[slug]` dependan de lecturas `no-store`.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Reduce latencia/costo en render server del catálogo público.
+- Mantiene el perfil de seguridad para operaciones administrativas y de backend sensible.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

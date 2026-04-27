@@ -2135,3 +2135,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye el cambio de estrategia de render para marketplace y su impacto en rendimiento/carga de imágenes.
+
+## PR: Separar cliente público/admin para catálogo con caché en App Router
+- Fecha: 2026-04-27
+- Objetivo: Evitar que `/marketplace` y `/marketplace/[slug]` dependan de lecturas `no-store`, separando la lectura pública cacheable del cliente administrativo sensible.
+
+### Lo aprendido
+- Separar explícitamente cliente admin y cliente público evita mezclar requisitos de seguridad (no-store) con necesidades de performance (ISR/revalidate).
+- `next: { revalidate, tags }` sobre lecturas server-side del catálogo mejora estabilidad de render en rutas públicas sin perder fallback local.
+- Mantener un helper público de solo lectura reduce el riesgo de reutilizar llaves privilegiadas en caminos de consulta no sensibles.
+
+### Decisiones técnicas
+- Se creó `supabasePublicReadRequest` en un módulo dedicado (`src/lib/supabase-public.ts`) usando `publishable/anon key` y opción `next` para caché de Next.js.
+- Se conservó `supabaseAdminRequest` con `cache: "no-store"` para operaciones administrativas y de backend sensible.
+- `getMarketplaceProductsForRender` migró a `fetchPublicMarketplaceProductsFromBackend` con `revalidate: 300` y tag `marketplace-products`.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado: Lint y chequeo de tipos sin errores.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Queda habilitado patrón para invalidación por tag en actualizaciones futuras de productos (`marketplace-products`).
