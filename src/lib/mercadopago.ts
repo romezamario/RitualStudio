@@ -24,22 +24,16 @@ export type MpCreateOrderInput = {
   items: CheckoutLineItemInput[];
 };
 
-export type MpOrderResponse = {
-  id?: string;
+export type MpPaymentResponse = {
+  id?: string | number;
   status?: string;
   status_detail?: string;
   external_reference?: string;
-  transactions?: {
-    payments?: Array<{
-      id?: string | number;
-      status?: string;
-      status_detail?: string;
-      payment_method?: {
-        id?: string;
-        type?: string;
-      };
-      amount?: number;
-    }>;
+  payment_method_id?: string;
+  payment_type_id?: string;
+  transaction_amount?: number;
+  order?: {
+    id?: string | number;
   };
   [key: string]: unknown;
 };
@@ -156,7 +150,14 @@ export async function mpApiFetch<T>(
     cache: "no-store",
   });
 
-  const data = (await response.json().catch(() => null)) as T | { message?: string } | null;
+  const data = (await response.json().catch(() => null)) as
+    | T
+    | {
+        message?: string;
+        error?: string;
+        cause?: Array<{ code?: string; description?: string }>;
+      }
+    | null;
 
   if (!response.ok) {
     if (response.status === 401) {
@@ -165,8 +166,23 @@ export async function mpApiFetch<T>(
       );
     }
 
-    const errorMessage =
-      (data as { message?: string } | null)?.message ?? `Mercado Pago respondió con ${response.status}.`;
+    const errorData = data as
+      | {
+          message?: string;
+          error?: string;
+          cause?: Array<{ code?: string; description?: string }>;
+        }
+      | null;
+
+    const causeDetails = errorData?.cause
+      ?.map((cause) => [cause.code, cause.description].filter(Boolean).join(": "))
+      .filter(Boolean)
+      .join(" | ");
+
+    const baseMessage =
+      errorData?.message ?? errorData?.error ?? `Mercado Pago respondió con ${response.status}.`;
+
+    const errorMessage = causeDetails ? `${baseMessage} (${causeDetails})` : baseMessage;
     throw new Error(errorMessage);
   }
 
