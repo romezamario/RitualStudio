@@ -1353,3 +1353,21 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Diagnóstico de request en checkout Mercado Pago para "Producto inválido"
+### ¿Qué cambia?
+- Se reforzó la validación server-side de `items` en `validateAndPriceLineItems` normalizando `slug` (`trim + lowercase`) antes de resolver productos del catálogo.
+- Cuando un `slug` no existe, ahora se devuelve un mensaje explícito que aclara que el checkout envía slugs y que el valor recibido no está en el catálogo actual.
+- Se agregó logging estructurado en `POST /api/mercadopago/create-order` para inspeccionar cómo se está construyendo el request que se envía a Mercado Pago (monto, cuotas, método de pago, email y líneas valorizadas), sin exponer token de tarjeta.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Facilita diagnosticar el error reportado `Producto inválido: producto-de-prueba` con trazabilidad clara en logs backend.
+- Reduce falsos negativos por variaciones menores de formato en `slug` dentro del payload de checkout.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

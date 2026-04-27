@@ -1796,3 +1796,29 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó convención de incrementos, comandos operativos de release y uso de `CHANGELOG.md` como bitácora por versión.
+
+## PR: Diagnóstico de request para error "Producto inválido" en checkout Mercado Pago
+- Fecha: 2026-04-27
+- Objetivo: Revisar y dejar trazabilidad de cómo se construye el request de pago hacia Mercado Pago cuando aparece `Producto inválido: producto-de-prueba`.
+
+### Lo aprendido
+- El checkout embebido envía únicamente `slug` + `quantity` de cada línea, y el backend recalcula precio/nombre desde catálogo para evitar manipulación de montos.
+- El error `Producto inválido` ocurre antes de llamar a Mercado Pago cuando el `slug` recibido no existe en `marketplaceProducts` del backend.
+- Incluir logs estructurados del payload valorizado (sin token) acelera diagnóstico entre frontend, API y catálogo publicado.
+
+### Decisiones técnicas
+- Se normalizó el `slug` en validación server-side (`trim` + `lowercase`) para tolerar variaciones de formato no maliciosas.
+- Se mejoró el mensaje de error para indicar explícitamente que el valor enviado no existe en el catálogo actual.
+- Se agregó `console.info` en `create-order` con `transaction_amount`, `installments`, `payment_method_id`, `payer_email` e items valorizados para revisar construcción real del request saliente a Mercado Pago.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + tipado estático.
+- Resultado: Lint y TypeScript sin errores tras ajustes de validación/logging.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documenta la ruta exacta de validación y los campos logueados para troubleshooting del checkout.

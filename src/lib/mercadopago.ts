@@ -81,11 +81,19 @@ export function validateAndPriceLineItems(items: CheckoutLineItemInput[]): {
     throw new Error("Debes enviar al menos un producto para procesar el pago.");
   }
 
+  const catalogByNormalizedSlug = new Map(
+    marketplaceProducts.map((product) => [normalizeSlug(product.slug), product])
+  );
+
   const lineItems = items.map((entry) => {
-    const product = marketplaceProducts.find((item) => item.slug === entry.slug);
+    const rawSlug = typeof entry.slug === "string" ? entry.slug : "";
+    const normalizedSlug = normalizeSlug(rawSlug);
+    const product = catalogByNormalizedSlug.get(normalizedSlug);
 
     if (!product) {
-      throw new Error(`Producto inválido: ${entry.slug}`);
+      throw new Error(
+        `Producto inválido: ${rawSlug}. El checkout envía slugs y este valor no existe en el catálogo actual.`
+      );
     }
 
     if (!Number.isInteger(entry.quantity) || entry.quantity < 1 || entry.quantity > 10) {
@@ -114,6 +122,10 @@ export function validateAndPriceLineItems(items: CheckoutLineItemInput[]): {
     lineItems,
     totalAmount,
   };
+}
+
+function normalizeSlug(slug: string) {
+  return slug.trim().toLowerCase();
 }
 
 export function validateMercadoPagoAmount(totalAmount: number) {
