@@ -15,6 +15,8 @@ Starter oficial del sitio de **Ritual Studio**, un estudio floral premium enfoca
 - ` /marketplace ` Tienda con exploración por scroll, categorización y acciones de compra (`Agregar al carrito` / `Comprar ahora`).
 - ` /marketplace/[slug] ` Página de detalle por producto con ficha ampliada y acciones de carrito/compra directa.
 - ` /carrito ` Vista de carrito de compras con resumen de productos agregados y checkout por WhatsApp.
+- ` /checkout ` Pago con tarjeta embebido (Mercado Pago Card Payment Brick).
+- ` /checkout/exito ` Confirmación post-pago con resumen de compra, referencias del pago y detalle de productos consultado desde `orders.metadata.items`.
 - ` /arreglos ` Colección inicial de arreglos signature.
 - ` /custom ` Flujo base de briefing para diseño a medida.
 - ` /eventos ` Servicio para bodas y activaciones.
@@ -1475,3 +1477,19 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Pantalla de éxito para checkout con resumen persistido de orden
+### ¿Qué cambia?
+- Se agrega la nueva ruta ` /checkout/exito ` para mostrar confirmación de pago acreditado con tono editorial más espiritual y menos transaccional.
+- La pantalla de éxito lee parámetros de checkout (`external_reference`, `payment_id`, `status`, `total_amount`, `email`) y consulta `orders` para recuperar productos comprados desde metadatos persistidos.
+- Se agrega bloque de “Resumen de tu compra” con identificadores clave, total pagado y fecha/hora de confirmación en formato consistente (UTC).
+- El checkout embebido ahora redirige automáticamente a la nueva ruta cuando el pago queda `approved`, enviando parámetros mínimos y limpiando carrito después de iniciar la navegación.
+- Se incorporan estilos dedicados para tarjeta de éxito y tabla de productos comprados en `globals.css`.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El usuario recibe una confirmación clara y confiable de pago acreditado en una vista final más alineada con la narrativa de marca.
+- El detalle de productos no depende del carrito local (que se limpia), evitando pérdida de trazabilidad después del pago.

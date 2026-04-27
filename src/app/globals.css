@@ -1056,9 +1056,73 @@ html.marketplace-overrides-active #marketplace-server-content {
   max-width: 620px;
 }
 
+.checkout-success-card {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.checkout-success-summary h3,
+.checkout-success-products h3 {
+  margin-bottom: 0.7rem;
+}
+
+.checkout-success-summary ul {
+  display: grid;
+  gap: 0.6rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.checkout-success-summary li {
+  align-items: center;
+  background: color-mix(in srgb, var(--sand) 62%, white);
+  border: 1px solid color-mix(in srgb, var(--smoke) 24%, white);
+  border-radius: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+}
+
+.checkout-success-summary span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.checkout-success-table-wrapper {
+  overflow-x: auto;
+}
+
+.checkout-success-table {
+  border-collapse: collapse;
+  min-width: 560px;
+  width: 100%;
+}
+
+.checkout-success-table th,
+.checkout-success-table td {
+  border-bottom: 1px solid color-mix(in srgb, var(--smoke) 26%, white);
+  padding: 0.65rem 0.5rem;
+  text-align: left;
+}
+
+.checkout-success-table th {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 980px) {
   .checkout-layout {
     grid-template-columns: 1fr;
+  }
+
+  .checkout-success-summary li {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 

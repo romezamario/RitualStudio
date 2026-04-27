@@ -3,14 +3,18 @@
 import Script from "next/script";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/components/cart-context";
 import { MIN_MX_CARD_PAYMENT_AMOUNT, parseMxPrice } from "@/lib/mercadopago";
 
 type CheckoutStatus = "idle" | "loading" | "approved" | "pending" | "rejected" | "error";
 
 type CreateOrderResponse = {
+  external_reference?: string;
+  payment_id?: string | number;
   status?: string;
   status_detail?: string | null;
+  total_amount?: number;
   normalized_status?: CheckoutStatus;
   error?: string;
 };
@@ -77,6 +81,7 @@ declare global {
 
 export default function CheckoutClient() {
   const { items, clearCart } = useCart();
+  const router = useRouter();
   const [checkoutStatus, setCheckoutStatus] = useState<CheckoutStatus>("idle");
   const [feedback, setFeedback] = useState("Completa tus datos para procesar el pago con tarjeta sin salir del sitio.");
   const isBrickMounted = useRef(false);
@@ -173,8 +178,22 @@ export default function CheckoutClient() {
                   setCheckoutStatus(normalized);
 
                   if (normalized === "approved") {
-                    clearCart();
-                    setFeedback("Pago aprobado. Tu orden quedó confirmada y en proceso de preparación.");
+                    const successParams = new URLSearchParams({
+                      external_reference: result.external_reference ?? "",
+                      payment_id: String(result.payment_id ?? ""),
+                      status: result.status ?? "approved",
+                      total_amount: String(result.total_amount ?? total),
+                    });
+
+                    if (formData.payer.email) {
+                      successParams.set("email", formData.payer.email);
+                    }
+
+                    router.push(`/checkout/exito?${successParams.toString()}`);
+                    setTimeout(() => {
+                      clearCart();
+                    }, 0);
+                    setFeedback("Pago acreditado. Te estamos llevando al resumen de tu compra.");
                   } else if (normalized === "pending") {
                     setFeedback("Pago pendiente. Estamos esperando confirmación de Mercado Pago.");
                   } else if (normalized === "rejected") {
