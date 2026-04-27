@@ -50,7 +50,7 @@ export default async function MarketplacePage() {
                     <div className="card-image-wrap">
                       <Image
                         className="card-image"
-                        src={toRenderableProductImageUrl(product.image)}
+                        src={toRenderableProductImageUrl(product.image, "marketplace-card")}
                         alt={product.name}
                         width={1200}
                         height={900}

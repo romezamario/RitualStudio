@@ -42,7 +42,7 @@ export default function CartPageClient() {
           <article key={item.slug} className="studio-card cart-item">
             <div className="cart-item-image-wrap">
               <Image
-                src={toRenderableProductImageUrl(item.image)}
+                src={toRenderableProductImageUrl(item.image, "cart")}
                 alt={item.name}
                 width={600}
                 height={420}

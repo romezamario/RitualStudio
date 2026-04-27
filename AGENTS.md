@@ -2084,3 +2084,28 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta el nuevo contrato del endpoint (`variants` y `db.imageVariants`) y las nuevas reglas de validación de peso/formato.
+
+## PR: Helper de render transformado para imágenes de producto
+- Fecha: 2026-04-27
+- Objetivo: Centralizar construcción de URLs de imágenes transformadas de Supabase Storage y aplicarlas por contexto visual (tarjeta, detalle, carrito y preview admin).
+
+### Lo aprendido
+- Definir presets por uso en un helper único evita que cada componente “adivine” tamaño/calidad, y reduce riesgo de inconsistencias al crecer el catálogo.
+- Alinear `width/height/quality` de transformación con el `sizes` real de cada vista mejora coherencia de performance percibida sin cambiar markup de layout.
+- Mantener fallback para URLs HTTP absolutas permite compatibilidad retroactiva con imágenes externas mientras se migra completamente a storage interno.
+
+### Decisiones técnicas
+- Se añadió `buildSupabaseStorageRenderUrl` en `src/lib/product-image-storage.ts` para emitir rutas `/storage/v1/render/image/public/...` con query params de transformación.
+- Se definió el tipo `ProductImageRenderUsage` con cuatro presets: `marketplace-card`, `product-detail`, `cart`, `admin-preview`.
+- Se actualizaron componentes de render de imagen para solicitar explícitamente su preset, manteniendo los `sizes` existentes y agregando `sizes` al preview admin.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad (lint).
+- Resultado: Sin errores de lint tras integrar helper y ajustes de uso en componentes.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta el nuevo helper y el impacto en optimización de imágenes por contexto.

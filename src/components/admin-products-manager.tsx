@@ -21,6 +21,8 @@ type FormState = {
   offerPrice: string;
 };
 
+const ADMIN_PREVIEW_IMAGE_SIZES = "(max-width: 900px) 100vw, 50vw";
+
 const initialForm: FormState = {
   slug: "",
   name: "",
@@ -300,12 +302,13 @@ export default function AdminProductsManager() {
 
           {form.image ? (
             <Image
-              src={toRenderableProductImageUrl(form.image)}
+              src={toRenderableProductImageUrl(form.image, "admin-preview")}
               alt="Vista previa"
               className="admin-product-preview"
               width={1200}
               height={900}
               unoptimized
+              sizes={ADMIN_PREVIEW_IMAGE_SIZES}
             />
           ) : null}
 
