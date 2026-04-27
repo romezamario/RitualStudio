@@ -1491,3 +1491,17 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 - Ejemplo de uso:
   - `/api/mercadopago/order-summary?external_reference=ritual-...`
   - `/api/mercadopago/order-summary?payment_id=1234567890`
+
+## PR: Resiliencia en `/checkout/exito` cuando la orden aún no aparece en Supabase
+### ¿Qué cambia?
+- El endpoint `GET /api/mercadopago/order-summary` ahora intenta primero con Supabase y, si no encuentra orden/pago local pero sí hay `payment_id`, hace fallback a Mercado Pago (`/v1/payments/{payment_id}`).
+- Con ese fallback, la pantalla de resultado puede mostrar un comprobante mínimo (estado, total, método, email y timestamps) en vez de bloquearse con “No pudimos localizar tu orden”.
+- La ruta `/checkout/exito` ahora acepta también `collection_id` como alias de `payment_id` para mayor compatibilidad con retornos de Mercado Pago.
+
+### ¿Cómo se probó?
+- `npm run lint`
+- `npx tsc --noEmit`
+
+### Impacto
+- Menos falsos errores después de compras aprobadas.
+- Mejor experiencia post-pago en escenarios de sincronización tardía de la base local.

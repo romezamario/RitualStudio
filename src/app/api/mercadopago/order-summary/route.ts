@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { mpApiFetch } from "@/lib/mercadopago";
 import { supabaseAdminRequest } from "@/lib/supabase-admin";
 
 type PurchasedItem = {
@@ -32,6 +33,20 @@ type PaymentRow = {
   amount?: number | string | null;
   created_at?: string;
   updated_at?: string;
+};
+
+type MpPaymentLookup = {
+  id?: string | number;
+  status?: string | null;
+  status_detail?: string | null;
+  payment_method_id?: string | null;
+  transaction_amount?: number | null;
+  external_reference?: string | null;
+  date_created?: string | null;
+  date_last_updated?: string | null;
+  payer?: {
+    email?: string | null;
+  } | null;
 };
 
 function normalizeLookupValue(value?: string | null) {
@@ -180,10 +195,50 @@ export async function GET(request: Request) {
   }
 
   if (!order && !payment) {
-    return NextResponse.json(
-      { found: false, error: "No encontramos una orden con los identificadores proporcionados." },
-      { status: 404 }
-    );
+    if (!paymentId) {
+      return NextResponse.json(
+        { found: false, error: "No encontramos una orden con los identificadores proporcionados." },
+        { status: 404 }
+      );
+    }
+
+    try {
+      const mpPayment = await mpApiFetch<MpPaymentLookup>(`/v1/payments/${encodeURIComponent(paymentId)}`);
+      const fallbackStatus = consolidateStatus(null, mpPayment.status ?? null);
+
+      return NextResponse.json({
+        found: true,
+        receipt: {
+          external_reference: mpPayment.external_reference ?? (externalReference || null),
+          payment_id: String(mpPayment.id ?? paymentId),
+          consolidated_status: fallbackStatus,
+          order_status: null,
+          payment_status: mpPayment.status ?? null,
+          payment_status_detail: mpPayment.status_detail ?? null,
+          total: toAmount(mpPayment.transaction_amount),
+          customer_email: mpPayment.payer?.email ?? null,
+          payment_method: mpPayment.payment_method_id ?? null,
+          items: [],
+          timestamps: {
+            order_created_at: null,
+            order_updated_at: null,
+            payment_created_at: mpPayment.date_created ?? null,
+            payment_updated_at: mpPayment.date_last_updated ?? null,
+          },
+        },
+      });
+    } catch (error) {
+      return NextResponse.json(
+        {
+          found: false,
+          error:
+            error instanceof Error
+              ? `No encontramos la orden en base local y Mercado Pago devolvió: ${error.message}`
+              : "No encontramos una orden con los identificadores proporcionados.",
+        },
+        { status: 404 }
+      );
+    }
   }
 
   const items = Array.isArray(order?.metadata?.items) ? order.metadata.items : [];

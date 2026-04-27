@@ -5,6 +5,7 @@ type CheckoutSuccessPageProps = {
   searchParams?: Promise<{
     external_reference?: string;
     payment_id?: string;
+    collection_id?: string;
   }>;
 };
 
@@ -19,7 +20,7 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
     >
       <CheckoutSuccessClient
         externalReference={params?.external_reference}
-        paymentId={params?.payment_id}
+        paymentId={params?.payment_id ?? params?.collection_id}
       />
     </SiteShell>
   );
