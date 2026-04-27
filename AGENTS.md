@@ -1855,3 +1855,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta el cambio de fuente de catálogo para validación de checkout.
+
+## PR: Pantalla de éxito para checkout con resumen persistido
+- Fecha: 2026-04-27
+- Objetivo: Implementar una ruta de éxito post-pago que confirme explícitamente pago acreditado y muestre resumen de compra + productos desde metadatos persistidos en órdenes.
+
+### Lo aprendido
+- Para evitar perder trazabilidad tras limpiar carrito, el detalle de productos debe recuperarse desde `orders.metadata.items` y no desde estado local.
+- Redirigir desde checkout al éxito con `router.push` y parámetros mínimos simplifica continuidad UX y mantiene desacoplado el render de confirmación.
+- Qué no funcionó y por qué: mantener solo feedback local en `/checkout` no cubría necesidad de comprobante persistente ni CTA de siguiente acción.
+
+### Decisiones técnicas
+- Se creó la ruta `src/app/checkout/exito/page.tsx` con `SiteShell`, lectura de `searchParams` esperados y consulta server-side a `orders` por `external_reference`.
+- Se implementó resumen de pago (ID, referencia, estado, total, fecha/hora) y tabla de productos con nombre/cantidad/precio unitario/subtotal.
+- Se actualizó `checkout-client` para redirigir cuando `normalized === "approved"`, enviar query params mínimos y limpiar carrito tras iniciar navegación.
+- Razón de la decisión final: balancear confirmación transaccional clara y experiencia de cierre emocional sin depender de sesión de carrito.
+
+### Riesgos y mitigaciones
+- Riesgo: orden no encontrada por `external_reference` al llegar a éxito.
+- Mitigación: fallback de UI que conserva resumen mínimo por query params y mensaje de soporte cuando faltan productos.
+- Pendientes: enlazar “Ver mis pedidos” con historial real filtrado por usuario autenticado.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: lint/typecheck en verde y compilación de la nueva ruta de éxito sin errores.
+- Resultado obtenido: checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incorpora la nueva ruta `/checkout/exito`, el flujo de redirección y el uso de metadatos persistidos para el resumen de productos.
