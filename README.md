@@ -226,6 +226,32 @@ SUPABASE_PRODUCT_IMAGES_BUCKET=product-images
   - `PUT /api/admin/products/[slug]`
 - Si el fallback local está activo, sólo se persisten metadatos y URL de imagen; nunca blobs Base64.
 
+### Troubleshooting de migraciones Supabase (Storage)
+
+Si al ejecutar `supabase db push` aparece:
+- `duplicate key value violates unique constraint "schema_migrations_pkey"` con `version=(20260427)`, o
+- `Remote migration versions not found in local migrations directory`,
+
+hay desalineación entre historial remoto y archivos locales.
+
+Pasos sugeridos (CLI):
+
+```bash
+# 1) Ver diferencias local vs remoto
+supabase migration list
+
+# 2) Si existe versión remota que ya no tiene archivo local, márcala como reverted
+supabase migration repair --status reverted <version_remota_faltante>
+
+# 3) Si una versión local ya está aplicada en remoto, márcala como applied
+supabase migration repair --status applied <version_local_ya_aplicada>
+
+# 4) Reintenta push
+supabase db push
+```
+
+Regla para futuras migraciones: usar siempre prefijo único `YYYYMMDDHHMMSS` para evitar colisiones por versión.
+
 ## Nota técnica (build en Vercel)
 Se aplicó una mitigación para desbloquear el build cuando falla la carga de plugins de PostCSS (`@tailwindcss/postcss`) en instalación remota:
 - `postcss.config.mjs` quedó sin plugins externos.
@@ -245,6 +271,7 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 ### ¿Qué cambia?
 - Se renombró la migración del bucket de imágenes a `supabase/migrations/20260427113000_product_images_storage.sql`.
 - Se corrigieron las referencias de documentación para apuntar al nuevo nombre.
+- Se agregó guía de troubleshooting para reparar desalineaciones entre migraciones remotas y locales usando `supabase migration repair`.
 
 ### ¿Cómo se probó?
 - `npm run lint`.

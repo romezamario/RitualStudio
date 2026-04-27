@@ -1919,3 +1919,33 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se dejó explícita la causa del conflicto `schema_migrations_pkey` y la convención recomendada.
+
+## PR: Guía de reparación para migraciones remotas no encontradas
+- Fecha: 2026-04-27
+- Objetivo: Documentar el procedimiento de recuperación cuando Supabase reporta `Remote migration versions not found in local migrations directory` tras cambios de historial de migraciones.
+
+### Lo aprendido
+- El error de versiones remotas faltantes no siempre implica SQL roto: suele ser un desalineamiento de historial entre `schema_migrations` remoto y archivos locales.
+- Qué no funcionó y por qué: intentar seguir con `db push` sin reparar historial mantiene el bloqueo aunque el SQL de migración sea idempotente.
+
+### Decisiones técnicas
+- Se añadió en README una sección de troubleshooting con flujo explícito: `migration list` → `migration repair` (`reverted/applied`) → `db push`.
+- Se dejó explícita la convención de timestamp `YYYYMMDDHHMMSS` como regla preventiva para próximas migraciones.
+- Razón de la decisión final: resolver incidencia operativa actual sin introducir cambios de esquema adicionales.
+
+### Riesgos y mitigaciones
+- Riesgo: ejecutar `migration repair` con versión incorrecta puede desordenar historial.
+- Mitigación: documentar que primero se debe inspeccionar con `supabase migration list` antes de reparar.
+- Pendientes: agregar checklist operativo en runbook interno para producción/staging.
+
+### Pruebas
+- Tipo: Verificación automatizada de calidad sobre documentación/código.
+- Resultado esperado: repo sin errores de lint tras actualización de documentación.
+- Resultado obtenido: lint en verde.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se incluyó guía accionable para resolver específicamente el error reportado por usuario.
