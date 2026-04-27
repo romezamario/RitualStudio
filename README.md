@@ -1371,3 +1371,21 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fix de validación de checkout con catálogo dinámico
+### ¿Qué cambia?
+- El backend de checkout ahora valida los `slug` contra el catálogo dinámico de backend (Supabase) cuando hay productos publicados, y usa catálogo estático solo como fallback.
+- `validateAndPriceLineItems` pasó a flujo asíncrono para poder resolver catálogo vigente antes de calcular montos.
+- Se mantiene la validación estricta de cantidad/monto y el recálculo server-side de precio para evitar manipulación del payload del cliente.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Se evita el falso negativo `Producto inválido: producto-de-prueba` cuando el producto existe en el catálogo administrado en backend pero no en el seed estático.
+- El checkout queda alineado con el mismo origen de catálogo que consume la experiencia de marketplace en render server-side.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
