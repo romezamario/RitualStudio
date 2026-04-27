@@ -2030,3 +2030,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó el fallback operativo para reducir errores visibles en el resultado de pago.
+
+## PR: Permitir imágenes remotas de Supabase en `next/image`
+- Fecha: 2026-04-27
+- Objetivo: Alinear `next.config.ts` con URLs generadas por `toRenderableProductImageUrl` para que imágenes de productos en Supabase Storage sean renderizables en todas las vistas.
+
+### Lo aprendido
+- `toRenderableProductImageUrl` construye URLs públicas con base en `NEXT_PUBLIC_SUPABASE_URL`, por lo que el dominio efectivo puede variar entre proyectos y debe permitirse explícitamente en `images.remotePatterns`.
+- Mantener solo `images.unsplash.com` en configuración de Next.js bloquea render de imágenes de catálogo alojadas en Supabase.
+- Añadir wildcard `**.supabase.co` más hostname exacto derivado de entorno reduce fricción operativa al mover proyecto o habilitar dominio custom/CDN.
+
+### Decisiones técnicas
+- Se agregó `getSupabaseImageHostnames()` en `next.config.ts` para derivar de forma segura hostnames válidos desde `NEXT_PUBLIC_SUPABASE_URL` (incluyendo normalización de sufijos `/auth/v1` y `/rest/v1`).
+- Se mantuvo `images.unsplash.com` y se anexaron patrones de Supabase al arreglo `images.remotePatterns`.
+- Se documentó en README una guía de mantenimiento para actualizar `images.remotePatterns` cuando cambie el proyecto de Supabase o se agregue CDN propio.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada de consistencia de rutas.
+- Resultado esperado: Lint en verde y coherencia entre formato de URL generado por `toRenderableProductImageUrl` y dominios permitidos en Next.js.
+- Resultado obtenido: Checks en verde y patrón de URL compatible con hostnames permitidos.
+- Evidencia:
+  - `npm run lint` OK.
+  - Revisión de formato: `<NEXT_PUBLIC_SUPABASE_URL>/storage/v1/object/public/<bucket>/<path>` coincide con hostnames configurados en `images.remotePatterns`.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se agregó una sección operativa para mantenimiento de hostnames remotos de imágenes según cambios de infraestructura.
