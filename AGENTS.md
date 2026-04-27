@@ -1822,3 +1822,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documenta la ruta exacta de validación y los campos logueados para troubleshooting del checkout.
+
+## PR: Fix de "Producto inválido" en checkout con catálogo dinámico de backend
+- Fecha: 2026-04-27
+- Objetivo: Evitar rechazos de checkout cuando el carrito contiene slugs válidos del catálogo administrado en backend (Supabase) pero no presentes en el catálogo estático local.
+
+### Lo aprendido
+- El catálogo usado por el marketplace puede divergir del seed estático cuando administración ya publica productos en Supabase.
+- Validar checkout solo contra catálogo estático genera falsos negativos de `Producto inválido` aunque el producto sí esté vigente en operación.
+- Qué no funcionó y por qué: usar únicamente `marketplaceProducts` en `validateAndPriceLineItems` ignoraba productos dinámicos creados desde admin.
+
+### Decisiones técnicas
+- Se incorporó una resolución de catálogo para checkout que prioriza productos de backend (`fetchMarketplaceProductsFromBackend`) y conserva fallback estático.
+- Se cambió `validateAndPriceLineItems` a función asíncrona para esperar catálogo vigente antes de valorizar líneas.
+- Se actualizó `POST /api/mercadopago/create-order` para usar `await` al validar y valuar ítems.
+- Razón de la decisión final: mantener seguridad de recálculo server-side sin romper compatibilidad con catálogo administrado en producción.
+
+### Riesgos y mitigaciones
+- Riesgo: dependencia de disponibilidad de lectura backend al momento de checkout.
+- Mitigación: fallback explícito a catálogo estático cuando backend no responde o está vacío.
+- Pendientes: evaluar cache corto en servidor para reducir latencia de lectura de catálogo en picos de checkout.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: compilar/lint sin errores y permitir slugs de catálogo dinámico en validación de checkout.
+- Resultado obtenido: checks en verde; flujo backend actualizado para resolver catálogo vigente.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta el cambio de fuente de catálogo para validación de checkout.

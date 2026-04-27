@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { lineItems, totalAmount } = validateAndPriceLineItems(items);
+    const { lineItems, totalAmount } = await validateAndPriceLineItems(items);
     validateMercadoPagoAmount(totalAmount);
     const externalReference = `ritual-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const idempotencyKey = randomUUID();

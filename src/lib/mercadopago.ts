@@ -1,4 +1,5 @@
 import { marketplaceProducts } from "@/data/marketplace-products";
+import { fetchMarketplaceProductsFromBackend } from "@/lib/marketplace-catalog";
 
 export type CheckoutLineItemInput = {
   slug: string;
@@ -73,17 +74,26 @@ export function parseMxPrice(priceLabel: string): number {
   return Number(match[0].replace(/,/g, ""));
 }
 
-export function validateAndPriceLineItems(items: CheckoutLineItemInput[]): {
+async function getCheckoutCatalog() {
+  const backendProducts = await fetchMarketplaceProductsFromBackend();
+
+  if (backendProducts && backendProducts.length > 0) {
+    return backendProducts;
+  }
+
+  return marketplaceProducts;
+}
+
+export async function validateAndPriceLineItems(items: CheckoutLineItemInput[]): Promise<{
   lineItems: ValidatedLineItem[];
   totalAmount: number;
-} {
+}> {
   if (!Array.isArray(items) || !items.length) {
     throw new Error("Debes enviar al menos un producto para procesar el pago.");
   }
 
-  const catalogByNormalizedSlug = new Map(
-    marketplaceProducts.map((product) => [normalizeSlug(product.slug), product])
-  );
+  const checkoutCatalog = await getCheckoutCatalog();
+  const catalogByNormalizedSlug = new Map(checkoutCatalog.map((product) => [normalizeSlug(product.slug), product]));
 
   const lineItems = items.map((entry) => {
     const rawSlug = typeof entry.slug === "string" ? entry.slug : "";
