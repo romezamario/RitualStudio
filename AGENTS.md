@@ -1762,3 +1762,37 @@ Un PR se considera terminado solo si:
 - AGENTS actualizado: Sí
 - Notas: README registra el ajuste tipográfico global y su impacto visual para trazabilidad de diseño.
 - Notas: README incluye el comportamiento de saneamiento de carrito y clasificación de errores de validación en checkout.
+
+## PR: Flujo de versionado SemVer + bitácora de versiones
+- Fecha: 2026-04-27
+- Objetivo: Implementar un flujo de versionado práctico que incremente versión según magnitud del cambio (pequeño/grande/ruptura) y dejar una bitácora consultable por versión dentro del repositorio.
+
+### Lo aprendido
+- Definir explícitamente niveles operativos (`small`, `big`, `breaking`) reduce ambigüedad al momento de decidir incrementos y evita ediciones manuales inconsistentes en `package.json`.
+- Una bitácora dedicada (`CHANGELOG.md`) funciona mejor para trazabilidad por versión que depender solo del historial largo dentro de `README`.
+- Qué no funcionó y por qué: mantener únicamente `NEXT_PUBLIC_SITE_VERSION` como referencia visual no resolvía el problema de gobernanza de releases ni el registro detallado de cambios por versión.
+
+### Decisiones técnicas
+- Se creó `scripts/release.mjs` para centralizar la lógica de bump SemVer (`patch/minor/major`) con la semántica `small/big/breaking`.
+- Se añadieron scripts `npm` (`release:small`, `release:big`, `release:breaking`) para estandarizar ejecución.
+- Se creó `CHANGELOG.md` como bitácora oficial de versiones y se registró la primera entrada del nuevo flujo (`v0.2.0`).
+- Se evaluó este cambio como **grande** por impacto transversal en operación de releases y documentación del repositorio; por eso se aplicó incremento `minor` (`0.1.0` → `0.2.0`).
+- Razón de la decisión final: resolver versionado y trazabilidad con un mecanismo simple, reproducible y sin dependencias externas.
+
+### Riesgos y mitigaciones
+- Riesgo: ejecutar scripts de release sin notas suficientes puede generar entradas pobres en bitácora.
+- Mitigación: el script exige `--notes` y permite múltiples bullets para documentar alcance.
+- Pendientes: evaluar validación adicional para evitar releases duplicados en la misma fecha y/o integrar este flujo al pipeline CI.
+
+### Pruebas
+- Tipo: Prueba automatizada de flujo + prueba automatizada de calidad.
+- Resultado esperado: incremento de versión correcto y registro automático en bitácora sin romper calidad del proyecto.
+- Resultado obtenido: incremento aplicado a `0.2.0`, bitácora actualizada y lint en verde.
+- Evidencia:
+  - `npm run release:big -- --notes="Implementación del flujo de versionado SemVer con niveles small/big/breaking|Creación de bitácora de versiones persistente en CHANGELOG.md|Documentación de proceso de release en README"` OK.
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se documentó convención de incrementos, comandos operativos de release y uso de `CHANGELOG.md` como bitácora por versión.
