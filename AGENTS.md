@@ -2161,3 +2161,30 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Queda habilitado patrón para invalidación por tag en actualizaciones futuras de productos (`marketplace-products`).
+
+## PR: Control de errores por flujo de respuesta en checkout Mercado Pago
+- Fecha: 2026-04-27
+- Objetivo: Implementar mensajes de control de error/estado para los distintos flujos que devuelve Mercado Pago en checkout (aprobado, pendiente y rechazo por causa específica).
+
+### Lo aprendido
+- El `status_detail` de Mercado Pago es la clave más útil para dar retroalimentación accionable en checkout, especialmente en rechazos de tarjeta.
+- Además de los códigos cortos de operación (ej. `OTHE`, `CALL`, `FUND`), conviene mapear también códigos detallados (`cc_rejected_*`) para cubrir más escenarios reales del API.
+- Qué no funcionó y por qué: un mensaje único de “Pago rechazado” no permite distinguir problemas de autorización bancaria, fondos, CVV o vencimiento, lo que aumenta reintentos fallidos.
+
+### Decisiones técnicas
+- Se agregó una función de normalización de `status_detail` para tolerar variaciones de formato (`lowercase`, espacios/guiones bajos).
+- Se centralizó la traducción de estado a mensaje en `getCheckoutFeedbackByResult(normalizedStatus, statusDetail)` para usar una sola fuente de verdad en `onSubmit`.
+- Se incluyó cobertura para los flujos reportados (`APRO`, `OTHE`, `CONT`, `CALL`, `FUND`, `SECU`, `EXPI`, `FORM`) y para códigos extendidos de rechazo (`cc_rejected_*`).
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación estática de TypeScript.
+- Resultado esperado: compilar/lint sin errores y mantener flujo de checkout con mensajes diferenciados por resultado de pago.
+- Resultado obtenido: checks en verde sin errores de tipado/lint.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye resumen del nuevo mapeo de estados para troubleshooting operativo de cobros rechazados o pendientes.

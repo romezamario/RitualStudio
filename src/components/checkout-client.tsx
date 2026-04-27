@@ -24,6 +24,70 @@ type MpBrickError = {
   cause?: Array<{ code?: string; description?: string }>;
 };
 
+function normalizeStatusDetailCode(statusDetail?: string | null) {
+  return (statusDetail ?? "").trim().toLowerCase().replace(/\s+/g, "_");
+}
+
+function getCheckoutFeedbackByResult(normalizedStatus: CheckoutStatus, statusDetail?: string | null) {
+  const normalizedDetail = normalizeStatusDetailCode(statusDetail);
+
+  if (normalizedStatus === "approved") {
+    return "Pago acreditado. Te estamos llevando al resumen de tu compra.";
+  }
+
+  if (normalizedStatus === "pending") {
+    if (normalizedDetail === "cont" || normalizedDetail === "pending_contingency") {
+      return "Pago pendiente de confirmación. Estamos esperando validación de Mercado Pago.";
+    }
+
+    if (normalizedDetail === "pending_review_manual") {
+      return "Tu pago está en revisión manual. Te avisaremos cuando Mercado Pago lo confirme.";
+    }
+
+    return "Pago pendiente. Estamos esperando confirmación de Mercado Pago.";
+  }
+
+  if (normalizedStatus === "rejected") {
+    const rejectionMessages: Record<string, string> = {
+      othe: "Pago rechazado por un error general. Intenta nuevamente o usa otra tarjeta.",
+      other_reason: "Pago rechazado por un error general. Intenta nuevamente o usa otra tarjeta.",
+      call: "Tu banco requiere autorización. Llama al banco y vuelve a intentar el pago.",
+      cc_rejected_call_for_authorize: "Tu banco requiere autorización. Llama al banco y vuelve a intentar el pago.",
+      fund: "Pago rechazado por fondos insuficientes. Prueba con otra tarjeta o reduce el monto.",
+      cc_rejected_insufficient_amount: "Pago rechazado por fondos insuficientes. Prueba con otra tarjeta o reduce el monto.",
+      secu: "Pago rechazado por código de seguridad inválido. Verifica el CVV e inténtalo de nuevo.",
+      cc_rejected_bad_filled_security_code:
+        "Pago rechazado por código de seguridad inválido. Verifica el CVV e inténtalo de nuevo.",
+      expi: "Pago rechazado por problema con la fecha de vencimiento. Revisa mes/año de la tarjeta.",
+      cc_rejected_bad_filled_date:
+        "Pago rechazado por problema con la fecha de vencimiento. Revisa mes/año de la tarjeta.",
+      cc_rejected_card_expired:
+        "Pago rechazado porque la tarjeta está vencida. Usa otra tarjeta vigente.",
+      form: "Pago rechazado por datos incompletos o inválidos del formulario. Revisa la información e intenta otra vez.",
+      cc_rejected_bad_filled_card_number:
+        "Pago rechazado por número de tarjeta inválido. Verifica los datos e intenta de nuevo.",
+      cc_rejected_bad_filled_other:
+        "Pago rechazado por datos incompletos o inválidos del formulario. Revisa la información e intenta otra vez.",
+      cc_rejected_blacklist:
+        "No fue posible procesar el pago con esta tarjeta. Intenta con otro método de pago.",
+      cc_rejected_high_risk:
+        "El pago fue rechazado por validaciones de seguridad. Prueba con otra tarjeta o método de pago.",
+      cc_rejected_duplicated_payment:
+        "Detectamos un intento de pago duplicado reciente. Espera unos segundos antes de reintentar.",
+      cc_rejected_max_attempts:
+        "Se alcanzó el límite de intentos para esta tarjeta. Intenta más tarde u otro método de pago.",
+    };
+
+    if (rejectionMessages[normalizedDetail]) {
+      return rejectionMessages[normalizedDetail];
+    }
+
+    return "Pago rechazado. Intenta con otra tarjeta o método de pago.";
+  }
+
+  return "No pudimos confirmar el pago. Intenta nuevamente en unos minutos.";
+}
+
 function getHumanReadableBrickError(error: unknown, isProductionKey: boolean) {
   const fallback = "Hubo un problema en el formulario de pago. Verifica tus datos e intenta de nuevo.";
 
@@ -193,14 +257,9 @@ export default function CheckoutClient() {
                     setTimeout(() => {
                       clearCart();
                     }, 0);
-                    setFeedback("Pago acreditado. Te estamos llevando al resumen de tu compra.");
-                  } else if (normalized === "pending") {
-                    setFeedback("Pago pendiente. Estamos esperando confirmación de Mercado Pago.");
-                  } else if (normalized === "rejected") {
-                    setFeedback("Pago rechazado. Intenta con otra tarjeta o método de pago.");
-                  } else {
-                    setFeedback("No pudimos confirmar el pago. Intenta nuevamente en unos minutos.");
                   }
+
+                  setFeedback(getCheckoutFeedbackByResult(normalized, result.status_detail));
 
                   resolve();
                 })
