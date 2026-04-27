@@ -7,6 +7,7 @@ import {
   type EditableMarketplaceProductInput,
 } from "@/lib/marketplace-catalog";
 import { getCurrentUserProfile } from "@/lib/supabase/server";
+import { isDataImageUrl, normalizeProductImageReference } from "@/lib/product-image-storage";
 
 type ProductRow = {
   slug: string;
@@ -50,12 +51,17 @@ function asEditableInput(payload: unknown): EditableMarketplaceProductInput | nu
   const raw = payload as Record<string, unknown>;
   const name = typeof raw.name === "string" ? raw.name : "";
   const description = typeof raw.description === "string" ? raw.description : "";
-  const image = typeof raw.image === "string" ? raw.image : "";
+  const rawImage = typeof raw.image === "string" ? raw.image : "";
+  const image = normalizeProductImageReference(rawImage);
   const price = typeof raw.price === "number" ? raw.price : Number(raw.price);
   const hasOffer = Boolean(raw.hasOffer);
   const offerPrice = typeof raw.offerPrice === "number" ? raw.offerPrice : Number(raw.offerPrice);
 
   if (!name.trim() || !description.trim() || !image.trim() || !Number.isFinite(price) || price <= 0) {
+    return null;
+  }
+
+  if (isDataImageUrl(rawImage)) {
     return null;
   }
 

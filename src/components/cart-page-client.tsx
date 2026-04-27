@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useCart } from "@/components/cart-context";
 import { getWhatsAppHref } from "@/lib/whatsapp";
+import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
 
 const CART_IMAGE_SIZES = "(max-width: 900px) 100vw, 180px";
 
@@ -41,7 +42,7 @@ export default function CartPageClient() {
           <article key={item.slug} className="studio-card cart-item">
             <div className="cart-item-image-wrap">
               <Image
-                src={item.image}
+                src={toRenderableProductImageUrl(item.image)}
                 alt={item.name}
                 width={600}
                 height={420}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { MarketplaceProduct } from "@/data/marketplace-products";
 import ProductPurchaseActions from "@/components/product-purchase-actions";
+import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
 import { getStoredMarketplaceProducts } from "@/lib/marketplace-catalog";
 
 type MarketplaceClientEnhancerProps = {
@@ -99,7 +100,7 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
                   <div className="card-image-wrap">
                     <Image
                       className="card-image"
-                      src={product.image}
+                      src={toRenderableProductImageUrl(product.image)}
                       alt={product.name}
                       width={1200}
                       height={900}
@@ -133,7 +134,7 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
       <article className="product-detail marketplace-client-override" aria-label="Detalle con personalizaciones de admin">
         <div className="product-detail-image-wrap">
           <Image
-            src={detailProduct.image}
+            src={toRenderableProductImageUrl(detailProduct.image)}
             alt={detailProduct.name}
             width={1400}
             height={1000}

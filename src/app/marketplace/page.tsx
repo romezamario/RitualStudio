@@ -4,6 +4,7 @@ import SiteShell from "@/components/site-shell";
 import MarketplaceClientEnhancer from "@/components/marketplace-client-enhancer";
 import ProductPurchaseActions from "@/components/product-purchase-actions";
 import { getMarketplaceProductsForRender, isLocalMarketplaceFallbackEnabled } from "@/lib/marketplace-catalog";
+import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
 
 const CARD_IMAGE_SIZES = "(max-width: 900px) 100vw, (max-width: 1280px) 50vw, 33vw";
 
@@ -49,7 +50,7 @@ export default async function MarketplacePage() {
                     <div className="card-image-wrap">
                       <Image
                         className="card-image"
-                        src={product.image}
+                        src={toRenderableProductImageUrl(product.image)}
                         alt={product.name}
                         width={1200}
                         height={900}
