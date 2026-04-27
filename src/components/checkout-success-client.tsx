@@ -220,6 +220,9 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
 
       <div className="checkout-success-summary" role="status">
         <h3>Resumen canónico de tu compra</h3>
+        <p>
+          Te enviamos el comprobante a <strong>{customerEmail}</strong>.
+        </p>
         <ul>
           <li>
             <span>ID de pago</span>
