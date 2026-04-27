@@ -1609,3 +1609,36 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se documentó el ajuste de endpoint y la razón del fix para troubleshooting de errores 400 en pagos.
+
+## PR: Fix de error al agregar producto por tabla `public.products` faltante
+- Fecha: 2026-04-27
+- Objetivo: Corregir el alta de productos en `/admin/productos` cuando Supabase devuelve `Could not find the table 'public.products' in the schema cache`.
+
+### Lo aprendido
+- El CRUD admin ya estaba implementado contra `/rest/v1/products`, pero faltaba versionar una migración que garantizara la existencia física de `public.products`.
+- PostgREST reporta este caso típicamente con `PGRST205`; mapear ese código a un mensaje funcional acelera diagnóstico para operación.
+- Qué no funcionó y por qué: asumir que el bloque condicional de RLS en la migración de roles era suficiente; ese bloque solo aplica políticas si la tabla ya existe, no la crea.
+
+### Decisiones técnicas
+- Se creó la migración `supabase/migrations/20260427_products_catalog.sql` para declarar explícitamente `public.products` con el contrato de columnas esperado por API/admin/marketplace.
+- Se incluyeron índices básicos (`name`, `category`), trigger `updated_at` y políticas RLS (`Products public read` + `Products admin write`).
+- Se mejoró `src/lib/supabase-admin.ts` para transformar errores de tabla faltante en un mensaje accionable en español.
+- Razón de la decisión final: resolver la causa raíz en base de datos y además mejorar experiencia de soporte cuando una instancia aún no aplicó migraciones.
+
+### Riesgos y mitigaciones
+- Riesgo: ejecutar la migración en una base con políticas personalizadas podría requerir ajuste fino de permisos.
+- Mitigación: uso de `if not exists`/`drop policy if exists` para mantener idempotencia y minimizar choques en re-ejecución.
+- Pendientes: definir si el catálogo debe exponer lectura pública directa por RLS o mantenerse 100% vía backend server-side a largo plazo.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: proyecto sin regresiones de lint/tipos tras incorporar migración y manejo de errores.
+- Resultado obtenido: checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta el paso operativo para aplicar la migración y explica el origen del error de schema cache.

@@ -2,6 +2,28 @@ import { getSupabaseClientInfoHeader } from "@/lib/integration-metadata";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()?.replace(/\/$/, "");
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
+type SupabaseErrorPayload = {
+  message?: string;
+  code?: string;
+  hint?: string;
+  details?: string;
+};
+
+function toSupabaseErrorMessage(status: number, body: SupabaseErrorPayload | null) {
+  const baseMessage = body?.message ?? `Supabase error: ${status}`;
+  const normalizedMessage = baseMessage.toLowerCase();
+
+  if (
+    body?.code === "PGRST205" ||
+    (normalizedMessage.includes("public.products") && normalizedMessage.includes("schema"))
+  ) {
+    return "La tabla public.products no existe en Supabase. Ejecuta la migración pendiente para crearla y vuelve a intentar.";
+  }
+
+  const metadata = [body?.hint, body?.details].filter(Boolean).join(" · ");
+  return metadata ? `${baseMessage} (${metadata})` : baseMessage;
+}
+
 export async function supabaseAdminRequest<T>(
   path: string,
   init: RequestInit = {}
@@ -26,12 +48,12 @@ export async function supabaseAdminRequest<T>(
     cache: "no-store",
   });
 
-  const body = (await response.json().catch(() => null)) as T | { message?: string } | null;
+  const body = (await response.json().catch(() => null)) as T | SupabaseErrorPayload | null;
 
   if (!response.ok) {
     return {
       data: null,
-      error: (body as { message?: string } | null)?.message ?? `Supabase error: ${response.status}`,
+      error: toSupabaseErrorMessage(response.status, body as SupabaseErrorPayload | null),
     };
   }
 
