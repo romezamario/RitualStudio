@@ -23,6 +23,10 @@ body {
   padding: 0;
 }
 
+html {
+  font-size: 93.75%;
+}
+
 body {
   background: radial-gradient(circle at 20% 0%, #f7f3f4 0%, #efeded 40%, #e7e6e6 100%);
   color: var(--ink);
