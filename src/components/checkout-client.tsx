@@ -214,7 +214,7 @@ export default function CheckoutClient() {
           onSubmit: (formData: MpBrickFormData) => {
             setCheckoutStatus("loading");
 
-            return new Promise<void>((resolve, reject) => {
+            return new Promise<void>((resolve) => {
               fetch("/api/mercadopago/create-order", {
                 method: "POST",
                 headers: {
@@ -266,7 +266,7 @@ export default function CheckoutClient() {
                 .catch((error: unknown) => {
                   setCheckoutStatus("error");
                   setFeedback(error instanceof Error ? error.message : "Error inesperado al enviar el pago.");
-                  reject(error);
+                  resolve();
                 });
             });
           },

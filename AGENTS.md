@@ -2188,3 +2188,27 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incluye resumen del nuevo mapeo de estados para troubleshooting operativo de cobros rechazados o pendientes.
+
+## PR: Fix de error visual `internal_error` al pagar
+- Fecha: 2026-04-27
+- Objetivo: Evitar que el Card Payment Brick muestre el banner genérico `internal_error` cuando falla la creación de pago y mantener feedback accionable dentro de la UI propia del checkout.
+
+### Lo aprendido
+- En el Card Payment Brick, rechazar la promesa de `onSubmit` puede detonar un error visual genérico (`internal_error`) incluso cuando la app ya tiene manejo de errores más claro.
+- Resolver la promesa y centralizar el feedback en `checkout-feedback` permite conservar contexto de diagnóstico sin degradar la experiencia del usuario.
+
+### Decisiones técnicas
+- Se eliminó el `reject(error)` en el `catch` de `onSubmit` y se reemplazó por `resolve()` tras actualizar estado/mensaje de error en frontend.
+- Se mantuvo intacta la lógica de estados (`loading`, `approved`, `pending`, `rejected`, `error`) para no alterar contratos de flujo existentes.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación estática de TypeScript.
+- Resultado: Sin errores de lint ni de tipos tras el ajuste de manejo de promesa en checkout.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta el motivo del cambio y su impacto directo en UX de checkout embebido.
