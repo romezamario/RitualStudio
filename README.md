@@ -1217,3 +1217,26 @@ NEXT_PUBLIC_VERCEL_ENV_PREFIX=NEXT_PUBLIC_
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fix de alta de productos cuando falta `public.products` en Supabase
+### ¿Qué cambia?
+- Se agregó la migración `supabase/migrations/20260427_products_catalog.sql` para crear la tabla `public.products` con todos los campos que ya consume el CRUD admin y el render de marketplace.
+- La migración también incluye índices base (`name`, `category`), trigger de `updated_at` y políticas RLS (lectura pública + escritura solo admin con `public.is_admin()`).
+- Se mejoró el parseo de errores en `supabaseAdminRequest` para detectar explícitamente el caso de tabla faltante (`PGRST205` / `public.products` no encontrada) y devolver un mensaje accionable en español.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El error de alta de producto *"Could not find the table 'public.products' in the schema cache"* queda resuelto al ejecutar migraciones pendientes.
+- Si el entorno aún no tiene la migración aplicada, la API responde con un mensaje claro de siguiente paso en lugar del error crudo de PostgREST.
+
+### Paso operativo obligatorio
+- Ejecutar migraciones de Supabase en el entorno correspondiente antes de volver a probar alta/edición de productos:
+  - `supabase db push` (CLI), o
+  - ejecutar manualmente el SQL de `supabase/migrations/20260427_products_catalog.sql` en Supabase SQL Editor.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
