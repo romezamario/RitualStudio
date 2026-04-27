@@ -36,6 +36,7 @@ export default function AdminProductsManager() {
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(true);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -95,18 +96,38 @@ export default function AdminProductsManager() {
     setEditingSlug(null);
   };
 
-  const handleImageUpload = (file?: File | null) => {
+  const handleImageUpload = async (file?: File | null) => {
     if (!file) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = typeof reader.result === "string" ? reader.result : "";
-      setForm((current) => ({ ...current, image: dataUrl }));
-    };
+    try {
+      setUploadingImage(true);
+      setFeedback("Subiendo imagen...");
 
-    reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/admin/products/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const body = (await response.json().catch(() => null)) as
+        | { data?: { publicUrl?: string; path?: string }; error?: string }
+        | null;
+
+      if (!response.ok || !body?.data?.publicUrl) {
+        throw new Error(body?.error ?? "No fue posible subir la imagen.");
+      }
+
+      setForm((current) => ({ ...current, image: body.data?.publicUrl ?? "" }));
+      setFeedback("Imagen subida correctamente.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "No fue posible subir la imagen.");
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -260,8 +281,24 @@ export default function AdminProductsManager() {
           </label>
 
           <label>
+            URL de imagen (Supabase Storage)
+            <input
+              required
+              type="url"
+              placeholder="https://<project-ref>.supabase.co/storage/v1/object/public/product-images/..."
+              value={form.image}
+              onChange={(event) => setForm((current) => ({ ...current, image: event.target.value }))}
+            />
+          </label>
+
+          <label>
             Foto del producto
-            <input type="file" accept="image/*" onChange={(event) => handleImageUpload(event.target.files?.[0])} />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(event) => void handleImageUpload(event.target.files?.[0])}
+              disabled={uploadingImage}
+            />
           </label>
 
           {form.image ? (
@@ -309,8 +346,8 @@ export default function AdminProductsManager() {
           ) : null}
 
           <div className="cta-row">
-            <button type="submit" className="btn btn-primary">
-              {editingSlug ? "Guardar cambios" : "Dar de alta"}
+            <button type="submit" className="btn btn-primary" disabled={uploadingImage}>
+              {uploadingImage ? "Subiendo imagen..." : editingSlug ? "Guardar cambios" : "Dar de alta"}
             </button>
             {editingSlug ? (
               <button type="button" className="btn btn-ghost" onClick={resetForm}>

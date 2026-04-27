@@ -5,6 +5,7 @@ import {
   buildMarketplaceProduct,
   toSupabaseMarketplaceProductRecord,
   type EditableMarketplaceProductInput,
+  isBase64DataImageUrl,
 } from "@/lib/marketplace-catalog";
 import { getCurrentUserProfile } from "@/lib/supabase/server";
 
@@ -56,6 +57,10 @@ function asEditableInput(payload: unknown): EditableMarketplaceProductInput | nu
   const offerPrice = typeof raw.offerPrice === "number" ? raw.offerPrice : Number(raw.offerPrice);
 
   if (!name.trim() || !description.trim() || !image.trim() || !Number.isFinite(price) || price <= 0) {
+    return null;
+  }
+
+  if (isBase64DataImageUrl(image)) {
     return null;
   }
 

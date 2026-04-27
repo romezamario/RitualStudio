@@ -1856,6 +1856,30 @@ Un PR se considera terminado solo si:
 - AGENTS actualizado: Sí
 - Notas: README documenta el cambio de fuente de catálogo para validación de checkout.
 
+## PR: Imágenes de catálogo en Supabase Storage sin Base64
+- Fecha: 2026-04-27
+- Objetivo: Migrar el flujo de imágenes de productos admin para subir archivos a Supabase Storage y guardar en catálogo únicamente URL/path (rechazando `data:image/...`).
+
+### Lo aprendido
+- Reemplazar `FileReader.readAsDataURL` por una subida server-side evita payloads pesados y reduce riesgo de saturar `localStorage` o requests API.
+- Validar explícitamente `data:image/` en API de productos corta regresiones aunque UI cambie en el futuro.
+- Qué no funcionó y por qué: conservar la previsualización basada en Base64 mezclaba responsabilidades de vista y persistencia, y terminaba guardando blobs codificados en cliente.
+
+### Decisiones técnicas
+- Se creó `POST /api/admin/products/upload-image` protegido por sesión admin para subir `File` al bucket `product-images` con `SUPABASE_SERVICE_ROLE_KEY`.
+- Se añadió migración `supabase/migrations/20260427113000_product_images_storage.sql` para crear/configurar bucket dedicado y policies (lectura pública + escritura admin).
+- Se rechazó `image` en formato data URL en `POST /api/admin/products` y `PUT /api/admin/products/[slug]`.
+- Se sanitizó persistencia de fallback local para conservar sólo metadatos ligeros y URL de imagen.
+- Razón de la decisión final: mantener seguridad y trazabilidad de assets sin romper la operación actual del panel admin.
+
+### Riesgos y mitigaciones
+- Riesgo: ausencia de variables server (`NEXT_PUBLIC_SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`) impide upload.
+- Mitigación: endpoint responde error accionable y no persiste estado inválido.
+- Pendientes: evaluar variante con bucket privado + signed URLs si negocio requiere ocultar assets públicos.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: compilar/lint sin errores y flujo admin sin Base64.
 ## PR: Pantalla de éxito para checkout con resumen persistido
 - Fecha: 2026-04-27
 - Objetivo: Implementar una ruta de éxito post-pago que confirme explícitamente pago acreditado y muestre resumen de compra + productos desde metadatos persistidos en órdenes.
@@ -1887,4 +1911,65 @@ Un PR se considera terminado solo si:
 ### Documentación
 - README actualizado: Sí
 - AGENTS actualizado: Sí
+- Notas: README documenta bucket, endpoint de subida y regla de rechazo de `data:image/...` en payload admin.
+
+## PR: Fix de versión duplicada en migración de Storage
+- Fecha: 2026-04-27
+- Objetivo: Corregir el error `duplicate key value violates unique constraint schema_migrations_pkey` al aplicar la migración del bucket de imágenes.
+
+### Lo aprendido
+- En Supabase, el prefijo numérico del archivo de migración define `version` en `schema_migrations`; repetirlo provoca colisión aunque el nombre descriptivo sea distinto.
+- Qué no funcionó y por qué: usar `20260427_...` en dos migraciones distintas generó el mismo `version=20260427`.
+
+### Decisiones técnicas
+- Se renombró la migración de Storage a `20260427113000_product_images_storage.sql` para garantizar unicidad de versión.
+- Se actualizaron referencias documentales en README y AGENTS al nuevo nombre de archivo.
+- Razón de la decisión final: resolver la causa raíz sin cambiar el contenido SQL ya validado.
+
+### Riesgos y mitigaciones
+- Riesgo: documentación desalineada con el archivo real tras renombre.
+- Mitigación: actualización de todas las referencias en repo en el mismo commit.
+- Pendientes: mantener convención de timestamps completos (`YYYYMMDDHHMMSS`) para nuevas migraciones.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad.
+- Resultado esperado: proyecto en verde tras renombre/documentación.
+- Resultado obtenido: lint sin errores.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se dejó explícita la causa del conflicto `schema_migrations_pkey` y la convención recomendada.
+
+## PR: Guía de reparación para migraciones remotas no encontradas
+- Fecha: 2026-04-27
+- Objetivo: Documentar el procedimiento de recuperación cuando Supabase reporta `Remote migration versions not found in local migrations directory` tras cambios de historial de migraciones.
+
+### Lo aprendido
+- El error de versiones remotas faltantes no siempre implica SQL roto: suele ser un desalineamiento de historial entre `schema_migrations` remoto y archivos locales.
+- Qué no funcionó y por qué: intentar seguir con `db push` sin reparar historial mantiene el bloqueo aunque el SQL de migración sea idempotente.
+
+### Decisiones técnicas
+- Se añadió en README una sección de troubleshooting con flujo explícito: `migration list` → `migration repair` (`reverted/applied`) → `db push`.
+- Se dejó explícita la convención de timestamp `YYYYMMDDHHMMSS` como regla preventiva para próximas migraciones.
+- Razón de la decisión final: resolver incidencia operativa actual sin introducir cambios de esquema adicionales.
+
+### Riesgos y mitigaciones
+- Riesgo: ejecutar `migration repair` con versión incorrecta puede desordenar historial.
+- Mitigación: documentar que primero se debe inspeccionar con `supabase migration list` antes de reparar.
+- Pendientes: agregar checklist operativo en runbook interno para producción/staging.
+
+### Pruebas
+- Tipo: Verificación automatizada de calidad sobre documentación/código.
+- Resultado esperado: repo sin errores de lint tras actualización de documentación.
+- Resultado obtenido: lint en verde.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se incluyó guía accionable para resolver específicamente el error reportado por usuario.
 - Notas: README incorpora la nueva ruta `/checkout/exito`, el flujo de redirección y el uso de metadatos persistidos para el resumen de productos.

@@ -205,6 +205,55 @@ Notas operativas:
 - Si la confirmación crea sesión, el usuario se sincroniza automáticamente en la app al llegar a `/correo-confirmado`.
 - El footer muestra la versión del sitio (`vX.Y.Z`): usa `NEXT_PUBLIC_SITE_VERSION` si está definida; si no, usa automáticamente la versión de `package.json`.
 
+## Supabase Storage para imágenes de catálogo admin
+
+El flujo de alta/edición de productos en `/admin/productos` ahora sube imágenes al bucket dedicado `product-images` en Supabase Storage y guarda en `public.products.image` únicamente URL/path de Storage (no Base64).
+
+### Configuración recomendada
+- Migración SQL: `supabase/migrations/20260427113000_product_images_storage.sql`.
+- Bucket: `product-images` (público para lectura por URL directa).
+- Escritura: restringida por policy a usuarios autenticados con rol admin.
+- Backend seguro de subida: `POST /api/admin/products/upload-image` (valida sesión admin y tipo/tamaño de archivo).
+
+### Variables de entorno
+```bash
+# opcional: override del nombre de bucket
+SUPABASE_PRODUCT_IMAGES_BUCKET=product-images
+```
+
+### Regla operativa de payload admin
+- `image` debe ser una URL/path de Storage.
+- Se rechazan payloads con `image` tipo data URL (`data:image/...`) en:
+  - `POST /api/admin/products`
+  - `PUT /api/admin/products/[slug]`
+- Si el fallback local está activo, sólo se persisten metadatos y URL de imagen; nunca blobs Base64.
+
+### Troubleshooting de migraciones Supabase (Storage)
+
+Si al ejecutar `supabase db push` aparece:
+- `duplicate key value violates unique constraint "schema_migrations_pkey"` con `version=(20260427)`, o
+- `Remote migration versions not found in local migrations directory`,
+
+hay desalineación entre historial remoto y archivos locales.
+
+Pasos sugeridos (CLI):
+
+```bash
+# 1) Ver diferencias local vs remoto
+supabase migration list
+
+# 2) Si existe versión remota que ya no tiene archivo local, márcala como reverted
+supabase migration repair --status reverted <version_remota_faltante>
+
+# 3) Si una versión local ya está aplicada en remoto, márcala como applied
+supabase migration repair --status applied <version_local_ya_aplicada>
+
+# 4) Reintenta push
+supabase db push
+```
+
+Regla para futuras migraciones: usar siempre prefijo único `YYYYMMDDHHMMSS` para evitar colisiones por versión.
+
 ## Nota técnica (build en Vercel)
 Se aplicó una mitigación para desbloquear el build cuando falla la carga de plugins de PostCSS (`@tailwindcss/postcss`) en instalación remota:
 - `postcss.config.mjs` quedó sin plugins externos.
@@ -219,6 +268,43 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 - Se incorporó una galería moodboard con imágenes de referencia floral (Unsplash) para acelerar revisión visual con cliente antes de sesión fotográfica final.
 
 ## Historial de cambios
+
+## PR: Fix de versión duplicada en migración de Storage
+### ¿Qué cambia?
+- Se renombró la migración del bucket de imágenes a `supabase/migrations/20260427113000_product_images_storage.sql`.
+- Se corrigieron las referencias de documentación para apuntar al nuevo nombre.
+- Se agregó guía de troubleshooting para reparar desalineaciones entre migraciones remotas y locales usando `supabase migration repair`.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+
+### Impacto
+- Se evita la colisión de versión en `supabase_migrations.schema_migrations` (`version=20260427`) al aplicar migraciones en Supabase.
+- Queda establecida la convención recomendada de timestamps completos para nuevas migraciones.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
+
+## PR: Imágenes de productos en Supabase Storage (sin Base64)
+### ¿Qué cambia?
+- Se agregó una ruta server-side segura `POST /api/admin/products/upload-image` para subir archivos `File` a Supabase Storage (`product-images`) y devolver `publicUrl/path`.
+- El gestor admin de productos reemplazó `readAsDataURL` por flujo de upload real y ahora captura URL de Storage.
+- Las APIs admin de productos (`POST`/`PUT`) rechazan payloads con `image` en formato `data:image/...`.
+- Se añadió migración para bucket/policies de Storage y se reforzó que el fallback local persista sólo metadatos ligeros + URL.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Se evita inflar payloads y `localStorage` con blobs Base64.
+- El catálogo mantiene referencias de imagen estables y operables desde Storage.
+- Se reduce riesgo de consumo excesivo de memoria/almacenamiento en cliente.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
 
 ## PR: Flujo de versionado SemVer + bitácora de versiones
 ### ¿Qué cambia?
