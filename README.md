@@ -1587,3 +1587,24 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Control de errores por flujos de estado en checkout Mercado Pago
+### ¿Qué cambia?
+- Se implementó en `src/components/checkout-client.tsx` un mapeo explícito de mensajes por resultado de pago usando `normalized_status` + `status_detail`.
+- Se cubren los flujos operativos solicitados para respuesta de pago:
+  - `APRO` (aprobado),
+  - `CONT` (pendiente),
+  - `OTHE`, `CALL`, `FUND`, `SECU`, `EXPI`, `FORM` (rechazos con causa específica).
+- También se añadieron alias para códigos extendidos de Mercado Pago (`cc_rejected_*`, `pending_contingency`, `pending_review_manual`) para mayor robustez en producción.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El checkout deja de mostrar un único mensaje genérico para rechazos/pending y guía al cliente con acciones concretas según causa (autorizar con banco, revisar CVV/fecha, fondos, etc.).
+- Reduce fricción en soporte y mejora tasa de reintento exitoso al hacer más claro el motivo de no aprobación.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
