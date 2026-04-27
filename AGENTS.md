@@ -1970,3 +1970,37 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README incorpora nuevo endpoint, parámetros soportados y comportamiento de la pantalla de éxito por estado.
+
+## PR: Comprobante por correo post-pago aprobado (webhook Mercado Pago)
+- Fecha: 2026-04-27
+- Objetivo: Enviar comprobante de compra por correo cuando Mercado Pago confirme estado `approved`, con trazabilidad de envío en metadata de la orden y mensaje visible en `/checkout/exito`.
+
+### Lo aprendido
+- El punto más confiable para correo transaccional en este flujo es el webhook asíncrono de Mercado Pago, no el callback inmediato del frontend.
+- Para evitar duplicados en reintentos de webhook, conviene persistir una bandera de idempotencia (`orders.metadata.email_confirmation.sent`) y contar intentos.
+- Qué no funcionó y por qué: sobreescribir `orders.metadata` desde webhook sin merge elimina campos previos (ej. `items`), afectando comprobante y resumen de compra.
+
+### Decisiones técnicas
+- Se creó `src/lib/email.ts` con `sendPurchaseConfirmationEmail(...)`, soporte de proveedor por `EMAIL_PROVIDER` y primer driver para Resend (`RESEND_API_KEY` + `EMAIL_FROM`).
+- Se disparó el envío en `src/app/api/mercadopago/webhook/route.ts` solo cuando el pago está `approved`, leyendo datos canónicos de `orders` para construir plantilla HTML/texto (folio, `payment_id`, fecha, desglose y total).
+- Se implementó merge explícito de `orders.metadata` durante reconciliación webhook para preservar `items` y agregar `email_confirmation` sin perder datos existentes.
+- Se registró resultado de envío en `orders.metadata.email_confirmation` (`sent`, `provider`, `message_id`, `error`, `attempts`, `last_attempt_at`).
+- Se añadió nota en `/checkout/exito`: “Te enviamos el comprobante a <email>”.
+
+### Riesgos y mitigaciones
+- Riesgo: eventos webhook duplicados o fuera de orden.
+- Mitigación: guardado de bandera `sent` + contador de intentos en metadata para idempotencia práctica.
+- Pendientes: evaluar mover histórico de notificaciones a tabla dedicada si se requiere auditoría detallada por múltiples proveedores/eventos.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación estática de TypeScript.
+- Resultado esperado: integración compila/lint sin errores y deja flujo de envío trazable en metadata.
+- Resultado obtenido: checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README incluye variables de entorno de correo y troubleshooting de comprobante post-pago.

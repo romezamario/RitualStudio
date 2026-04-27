@@ -1040,6 +1040,14 @@ MP_WEBHOOK_SECRET=xxxxxxxx
 # Supabase backend (persistencia de órdenes/pagos/eventos)
 NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+
+# Correo transaccional de comprobante
+# proveedor soportado actualmente: resend
+EMAIL_PROVIDER=resend
+EMAIL_FROM="Ritual Studio <comprobantes@tu-dominio.com>"
+RESEND_API_KEY=re_xxxxxxxx
+# opcional, texto libre para pie de soporte en el comprobante
+EMAIL_SUPPORT_CHANNEL="WhatsApp 55 2090 4940"
 ```
 
 ### Rutas incluidas
@@ -1055,6 +1063,7 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 5. Backend crea orden en Mercado Pago (`/v1/orders`) y guarda datos en `orders`.
 6. Si hay info de pago, también registra `payments`.
 7. El webhook recibe eventos, guarda `payment_events`, consulta estado real en MP y reconcilia `orders/payments`.
+8. Cuando el pago queda `approved` (fuente de verdad asíncrona), el webhook dispara envío de comprobante por correo y registra resultado en `orders.metadata.email_confirmation`.
 
 ### Pruebas en sandbox
 1. Configura llaves `TEST-` en Vercel/local.
@@ -1094,6 +1103,14 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 - El backend ahora normaliza `MP_ACCESS_TOKEN` por seguridad (remueve comillas, BOM y un `Bearer` accidental con espacio o `:`), pero la recomendación sigue siendo guardar solo el token plano en Vercel.
 - Si hay llaves mezcladas (por ejemplo `NEXT_PUBLIC_MP_PUBLIC_KEY` de sandbox con `MP_ACCESS_TOKEN` de producción), Mercado Pago puede rechazar la operación. Usa ambos del mismo entorno.
 - Si mezclas entornos (`TEST-` vs `APP_USR-`), el backend devolverá un error explícito antes de llamar a Mercado Pago para facilitar diagnóstico.
+
+### Troubleshooting de comprobante por correo
+- Si no se envía correo al aprobarse el pago, revisa que existan `EMAIL_PROVIDER`, `EMAIL_FROM` y `RESEND_API_KEY` en el entorno donde corre webhook.
+- Verifica en `orders.metadata.email_confirmation`:
+  - `sent: true` indica envío exitoso.
+  - `error` incluye causa si falló (ej. variables faltantes, proveedor no soportado o error HTTP del proveedor).
+  - `attempts` y `last_attempt_at` ayudan a diagnosticar reintentos/idempotencia.
+- Si necesitas desactivar envío temporalmente sin tocar código, usa `EMAIL_PROVIDER=disabled`.
 
 ## PR: Registro técnico de integraciones GitHub↔Supabase y Supabase↔Vercel
 ### ¿Qué cambia?
