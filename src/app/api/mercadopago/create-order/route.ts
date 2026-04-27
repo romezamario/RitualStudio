@@ -6,6 +6,7 @@ import {
   type MpCreateOrderInput,
   type MpPaymentResponse,
   validateAndPriceLineItems,
+  validateMercadoPagoAmount,
 } from "@/lib/mercadopago";
 import { supabaseAdminRequest } from "@/lib/supabase-admin";
 
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
 
   try {
     const { lineItems, totalAmount } = validateAndPriceLineItems(items);
+    validateMercadoPagoAmount(totalAmount);
     const externalReference = `ritual-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const idempotencyKey = randomUUID();
 

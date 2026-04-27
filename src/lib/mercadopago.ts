@@ -39,6 +39,7 @@ export type MpPaymentResponse = {
 };
 
 const MP_API_BASE = "https://api.mercadopago.com";
+export const MIN_MX_CARD_PAYMENT_AMOUNT = 10;
 
 export function getMercadoPagoPublicKey() {
   return process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim() ?? "";
@@ -113,6 +114,18 @@ export function validateAndPriceLineItems(items: CheckoutLineItemInput[]): {
     lineItems,
     totalAmount,
   };
+}
+
+export function validateMercadoPagoAmount(totalAmount: number) {
+  if (Number.isNaN(totalAmount) || totalAmount <= 0) {
+    throw new Error("No fue posible calcular el total de la orden.");
+  }
+
+  if (totalAmount < MIN_MX_CARD_PAYMENT_AMOUNT) {
+    throw new Error(
+      `El monto mínimo para pagar con tarjeta en este checkout es de $${MIN_MX_CARD_PAYMENT_AMOUNT} MXN.`
+    );
+  }
 }
 
 export async function mpApiFetch<T>(
