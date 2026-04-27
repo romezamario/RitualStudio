@@ -13,6 +13,7 @@ function getCategoryId(category: string) {
 }
 
 export default async function MarketplacePage() {
+  const useClientFallback = isLocalMarketplaceFallbackEnabled();
   const products = await getMarketplaceProductsForRender();
   const categories = Array.from(new Set(products.map((product) => product.category)));
 
@@ -22,63 +23,65 @@ export default async function MarketplacePage() {
       title="Explora productos con scroll y categorías"
       subtitle="Desliza hacia abajo para descubrir ramos, centros de mesa, eventos y regalos. Cada producto tiene su ficha de detalle con información ampliada."
     >
-      <div id="marketplace-server-content">
-        <div className="marketplace-topbar" aria-label="Categorías de productos">
-          {categories.map((category) => (
-            <a key={category} href={`#${getCategoryId(category)}`} className="chip-link">
-              {category}
-            </a>
-          ))}
+      {useClientFallback ? (
+        <MarketplaceClientEnhancer mode="list" initialProducts={products} />
+      ) : (
+        <div>
+          <div className="marketplace-topbar" aria-label="Categorías de productos">
+            {categories.map((category) => (
+              <a key={category} href={`#${getCategoryId(category)}`} className="chip-link">
+                {category}
+              </a>
+            ))}
+          </div>
+
+          <p className="scroll-hint">Scroll down ↓ para seguir explorando el catálogo completo.</p>
+
+          {categories.map((category) => {
+            const categoryProducts = products.filter((product) => product.category === category);
+
+            return (
+              <section
+                key={category}
+                id={getCategoryId(category)}
+                className="marketplace-section"
+                aria-label={`Categoría ${category}`}
+              >
+                <h2>{category}</h2>
+                <div className="feature-grid">
+                  {categoryProducts.map((product) => (
+                    <article key={product.slug} className="studio-card marketplace-card">
+                      <div className="card-image-wrap">
+                        <Image
+                          className="card-image"
+                          src={toRenderableProductImageUrl(product.image, "marketplace-card")}
+                          alt={product.name}
+                          width={1200}
+                          height={900}
+                          sizes={CARD_IMAGE_SIZES}
+                        />
+                      </div>
+                      <p className="card-label">{product.category}</p>
+                      <h3>{product.name}</h3>
+                      <p>{product.shortDescription}</p>
+                      <div className="price-stack">
+                        {product.originalPrice ? <span className="price-old">{product.originalPrice}</span> : null}
+                        <strong className="price-tag">{product.price}</strong>
+                      </div>
+                      <div className="marketplace-card-actions">
+                        <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
+                          Ver detalle
+                        </Link>
+                        <ProductPurchaseActions product={product} />
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
-
-        <p className="scroll-hint">Scroll down ↓ para seguir explorando el catálogo completo.</p>
-
-        {categories.map((category) => {
-          const categoryProducts = products.filter((product) => product.category === category);
-
-          return (
-            <section
-              key={category}
-              id={getCategoryId(category)}
-              className="marketplace-section"
-              aria-label={`Categoría ${category}`}
-            >
-              <h2>{category}</h2>
-              <div className="feature-grid">
-                {categoryProducts.map((product) => (
-                  <article key={product.slug} className="studio-card marketplace-card">
-                    <div className="card-image-wrap">
-                      <Image
-                        className="card-image"
-                        src={toRenderableProductImageUrl(product.image, "marketplace-card")}
-                        alt={product.name}
-                        width={1200}
-                        height={900}
-                        sizes={CARD_IMAGE_SIZES}
-                      />
-                    </div>
-                    <p className="card-label">{product.category}</p>
-                    <h3>{product.name}</h3>
-                    <p>{product.shortDescription}</p>
-                    <div className="price-stack">
-                      {product.originalPrice ? <span className="price-old">{product.originalPrice}</span> : null}
-                      <strong className="price-tag">{product.price}</strong>
-                    </div>
-                    <div className="marketplace-card-actions">
-                      <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
-                        Ver detalle
-                      </Link>
-                      <ProductPurchaseActions product={product} />
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-          );
-        })}
-      </div>
-
-      {isLocalMarketplaceFallbackEnabled() ? <MarketplaceClientEnhancer mode="list" initialProducts={products} /> : null}
+      )}
     </SiteShell>
   );
 }
