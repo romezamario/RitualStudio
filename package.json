@@ -1,12 +1,15 @@
 {
   "name": "ritual-studio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "release:small": "node scripts/release.mjs --size=small",
+    "release:big": "node scripts/release.mjs --size=big",
+    "release:breaking": "node scripts/release.mjs --size=breaking"
   },
   "dependencies": {
     "react": "19.0.0",

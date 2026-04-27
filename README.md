@@ -131,6 +131,33 @@ Regla operativa:
 - Marca `priority` **solo** en la imagen principal above-the-fold de la vista (ej. hero/imagen principal de detalle).
 - Mantén el resto de imágenes en carga lazy (comportamiento por defecto de `next/image`).
 
+
+## Versionado y bitácora de versiones
+
+El repositorio ahora usa una convención SemVer operativa para decidir incrementos según tamaño de cambio:
+
+- `small` ⇒ `patch` (`x.y.Z`): fixes o mejoras pequeñas sin impacto amplio.
+- `big` ⇒ `minor` (`x.Y.0`): cambios funcionales relevantes y compatibles hacia atrás.
+- `breaking` ⇒ `major` (`X.0.0`): cambios incompatibles.
+
+### Comandos de release
+
+```bash
+# cambio pequeño
+npm run release:small -- --notes="fix puntual|ajuste menor"
+
+# cambio grande
+npm run release:big -- --notes="nueva capacidad|mejora funcional"
+
+# cambio incompatible
+npm run release:breaking -- --notes="cambio incompatible|migración requerida"
+```
+
+Notas:
+- `--notes` acepta múltiples bullets separados por `|`.
+- Cada ejecución incrementa `package.json` y agrega entrada en `CHANGELOG.md`.
+- `CHANGELOG.md` es la bitácora oficial por versión para consulta histórica en el repo.
+
 ## Flujo GitHub → Vercel
 1. Conectar repositorio en Vercel (New Project).
 2. Verificar que detecte framework **Next.js**.
@@ -165,7 +192,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<tu_anon_key>
 # recomendado para producción y previews
 NEXT_PUBLIC_SITE_URL=https://tu-dominio.com
 # opcional para mostrar una versión manual en footer
-NEXT_PUBLIC_SITE_VERSION=0.1.0
+NEXT_PUBLIC_SITE_VERSION=0.2.0
 ```
 
 Notas operativas:
@@ -190,6 +217,25 @@ Esto evita el error de webpack por `Require stack ... css/plugins.js` durante `n
 - Se incorporó una galería moodboard con imágenes de referencia floral (Unsplash) para acelerar revisión visual con cliente antes de sesión fotográfica final.
 
 ## Historial de cambios
+
+## PR: Flujo de versionado SemVer + bitácora de versiones
+### ¿Qué cambia?
+- Se agregó una automatización de release en `scripts/release.mjs` para incrementar versión según tamaño del cambio (`small`, `big`, `breaking`).
+- Se añadieron scripts de npm (`release:small`, `release:big`, `release:breaking`) para operar el versionado sin editar manualmente `package.json`.
+- Se creó `CHANGELOG.md` como bitácora oficial versionada en el repositorio para consultar qué incluye cada versión.
+- Se ejecutó un incremento `big` para publicar esta mejora y pasar de `0.1.0` a `0.2.0`.
+
+### ¿Cómo se probó?
+- `npm run release:big -- --notes="..."`.
+- `npm run lint`.
+
+### Impacto
+- El equipo puede decidir y aplicar incrementos de versión de forma consistente según magnitud del cambio.
+- Cada release deja trazabilidad clara y consultable por versión en un único archivo de bitácora (`CHANGELOG.md`).
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
 
 ## PR: Acceso directo a gestión de productos desde dashboard admin
 ### ¿Qué cambia?
