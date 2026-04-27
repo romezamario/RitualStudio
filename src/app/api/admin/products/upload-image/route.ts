@@ -9,6 +9,33 @@ import {
   toRenderableProductImageUrl,
 } from "@/lib/product-image-storage";
 
+type ProductImageVariant = "thumb" | "card" | "detail";
+
+type UploadImageResult = {
+  variant: ProductImageVariant | "original";
+  objectPath: string;
+  publicUrl: string;
+  renderUrl: string;
+};
+
+const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
+
+const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/webp", "image/avif", "image/png"]);
+const BLOCKED_IMAGE_TYPES = new Set([
+  "image/heic",
+  "image/heif",
+  "image/tiff",
+  "image/bmp",
+  "image/gif",
+  "image/svg+xml",
+]);
+
+const VARIANT_CONFIG: Array<{ name: ProductImageVariant; width: number; quality: number }> = [
+  { name: "thumb", width: 320, quality: 70 },
+  { name: "card", width: 720, quality: 78 },
+  { name: "detail", width: 1440, quality: 84 },
+];
+
 function sanitizeFileName(fileName: string) {
   return fileName
     .normalize("NFD")
@@ -17,6 +44,11 @@ function sanitizeFileName(fileName: string) {
     .replace(/-{2,}/g, "-")
     .replace(/(^-|-$)+/g, "")
     .toLowerCase();
+}
+
+function sanitizeStorageSegment(value: string) {
+  const sanitized = sanitizeFileName(value).replace(/\.+/g, "-");
+  return sanitized || randomUUID();
 }
 
 async function assertAdmin() {
@@ -31,6 +63,47 @@ async function assertAdmin() {
   }
 
   return null;
+}
+
+function buildObjectPath(entityKey: string, fileName: string) {
+  return `catalog/${entityKey}/${fileName}`;
+}
+
+function toUploadResult(variant: UploadImageResult["variant"], objectPath: string): UploadImageResult {
+  const normalizedPath = normalizeProductImageReference(objectPath);
+  const publicUrl = buildSupabaseStoragePublicUrl(normalizedPath);
+  const renderUrl = isLikelyHttpUrl(publicUrl) ? publicUrl : toRenderableProductImageUrl(normalizedPath);
+
+  return {
+    variant,
+    objectPath: normalizedPath,
+    publicUrl,
+    renderUrl,
+  };
+}
+
+async function uploadObjectToStorage(params: {
+  supabaseUrl: string;
+  serviceRoleKey: string;
+  bucket: string;
+  objectPath: string;
+  body: Blob;
+  contentType: string;
+}) {
+  return fetch(
+    `${params.supabaseUrl}/storage/v1/object/${params.bucket}/${encodeURIComponent(params.objectPath).replace(/%2F/g, "/")}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: params.serviceRoleKey,
+        Authorization: `Bearer ${params.serviceRoleKey}`,
+        "Content-Type": params.contentType,
+        "x-upsert": "true",
+      },
+      body: params.body,
+      cache: "no-store",
+    },
+  );
 }
 
 export async function POST(request: Request) {
@@ -61,54 +134,150 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Solo se permiten archivos de imagen." }, { status: 400 });
   }
 
-  const maxFileSizeBytes = 8 * 1024 * 1024;
-
-  if (file.size > maxFileSizeBytes) {
-    return NextResponse.json({ error: "La imagen excede el límite de 8MB." }, { status: 400 });
+  if (BLOCKED_IMAGE_TYPES.has(file.type)) {
+    return NextResponse.json(
+      {
+        error:
+          "Formato no recomendado para web. Usa JPG, WEBP o AVIF para mantener peso y rendimiento en catálogo.",
+      },
+      { status: 400 },
+    );
   }
 
-  const bucket = getProductImagesBucket();
-  const timestamp = Date.now();
-  const safeName = sanitizeFileName(file.name || "producto");
-  const objectPath = `catalog/${timestamp}-${randomUUID()}-${safeName || "producto"}`;
-
-  const uploadResponse = await fetch(
-    `${supabaseUrl}/storage/v1/object/${bucket}/${encodeURIComponent(objectPath).replace(/%2F/g, "/")}`,
-    {
-      method: "POST",
-      headers: {
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
-        "Content-Type": file.type || "application/octet-stream",
-        "x-upsert": "true",
+  if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
+    return NextResponse.json(
+      {
+        error:
+          "Formato no soportado para carga de catálogo. Formatos permitidos: image/jpeg, image/webp, image/avif, image/png.",
       },
-      body: file,
-      cache: "no-store",
-    },
-  );
+      { status: 400 },
+    );
+  }
 
-  if (!uploadResponse.ok) {
-    const errorBody = (await uploadResponse.json().catch(() => null)) as { message?: string } | null;
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    return NextResponse.json({ error: "La imagen excede el límite de 4MB." }, { status: 400 });
+  }
+
+  if (file.type === "image/png" && file.size > 2 * 1024 * 1024) {
+    return NextResponse.json(
+      {
+        error:
+          "PNG demasiado pesado para catálogo web. Convierte a WEBP/AVIF o comprime el archivo por debajo de 2MB.",
+      },
+      { status: 400 },
+    );
+  }
+
+  const rawSlug = typeof formData?.get("slug") === "string" ? String(formData.get("slug")) : "";
+  const rawProductId = typeof formData?.get("productId") === "string" ? String(formData.get("productId")) : "";
+  const entityKey = sanitizeStorageSegment(rawSlug || rawProductId || `${Date.now()}-${randomUUID()}`);
+  const safeName = sanitizeFileName(file.name || "producto");
+  const bucket = getProductImagesBucket();
+
+  const extensionByType: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/avif": "avif",
+  };
+
+  const sourceExtension = extensionByType[file.type] ?? "bin";
+  const sourcePath = buildObjectPath(entityKey, `original-${safeName || "producto"}.${sourceExtension}`);
+
+  const originalUpload = await uploadObjectToStorage({
+    supabaseUrl,
+    serviceRoleKey,
+    bucket,
+    objectPath: sourcePath,
+    body: file,
+    contentType: file.type || "application/octet-stream",
+  });
+
+  if (!originalUpload.ok) {
+    const errorBody = (await originalUpload.json().catch(() => null)) as { message?: string } | null;
     return NextResponse.json(
       {
         error:
           errorBody?.message ??
-          "No fue posible subir la imagen. Verifica que el bucket exista y que la política permita escritura desde backend.",
+          "No fue posible subir la imagen original. Verifica bucket/permisos de Supabase Storage.",
       },
       { status: 500 },
     );
   }
 
-  const normalizedPath = normalizeProductImageReference(objectPath);
-  const publicUrl = buildSupabaseStoragePublicUrl(normalizedPath);
-  const renderUrl = isLikelyHttpUrl(publicUrl) ? publicUrl : toRenderableProductImageUrl(normalizedPath);
+  const transformedVariants = await Promise.all(
+    VARIANT_CONFIG.map(async (variant) => {
+      const renderUrl = `${supabaseUrl}/storage/v1/render/image/public/${bucket}/${encodeURIComponent(sourcePath).replace(/%2F/g, "/")}?width=${variant.width}&quality=${variant.quality}&format=webp`;
+
+      const rendered = await fetch(renderUrl, {
+        method: "GET",
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+        },
+        cache: "no-store",
+      });
+
+      if (!rendered.ok) {
+        const errorBody = await rendered.text().catch(() => "");
+        throw new Error(`No fue posible generar variante ${variant.name}. ${errorBody}`.trim());
+      }
+
+      const variantBlob = await rendered.blob();
+      const variantPath = buildObjectPath(entityKey, `${variant.name}.webp`);
+      const uploaded = await uploadObjectToStorage({
+        supabaseUrl,
+        serviceRoleKey,
+        bucket,
+        objectPath: variantPath,
+        body: variantBlob,
+        contentType: "image/webp",
+      });
+
+      if (!uploaded.ok) {
+        const errorBody = (await uploaded.json().catch(() => null)) as { message?: string } | null;
+        throw new Error(
+          errorBody?.message ?? `No fue posible subir la variante ${variant.name} al bucket ${bucket}.`,
+        );
+      }
+
+      return toUploadResult(variant.name, variantPath);
+    }),
+  ).catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : "Error desconocido al generar variantes.";
+    return message;
+  });
+
+  if (typeof transformedVariants === "string") {
+    return NextResponse.json(
+      {
+        error: transformedVariants,
+      },
+      { status: 500 },
+    );
+  }
+
+  const variants = Object.fromEntries(transformedVariants.map((item) => [item.variant, item.objectPath])) as Record<
+    ProductImageVariant,
+    string
+  >;
 
   return NextResponse.json(
     {
       data: {
-        image: normalizedPath,
-        publicUrl,
-        renderUrl,
+        image: variants.detail,
+        folder: `catalog/${entityKey}`,
+        variants,
+        assets: {
+          original: toUploadResult("original", sourcePath),
+          thumb: transformedVariants.find((item) => item.variant === "thumb") ?? null,
+          card: transformedVariants.find((item) => item.variant === "card") ?? null,
+          detail: transformedVariants.find((item) => item.variant === "detail") ?? null,
+        },
+        db: {
+          image: variants.detail,
+          imageVariants: variants,
+        },
       },
     },
     { status: 201 },

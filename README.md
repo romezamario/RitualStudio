@@ -1519,3 +1519,18 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Impacto
 - Menos falsos errores después de compras aprobadas.
 - Mejor experiencia post-pago en escenarios de sincronización tardía de la base local.
+
+## PR: Variantes de imagen en upload de productos (thumb/card/detail)
+### ¿Qué cambia?
+- El endpoint `POST /api/admin/products/upload-image` ahora crea una carpeta por producto en Storage con convención `catalog/<slug-o-id>/`.
+- Se sube un archivo fuente (`original-*`) y se generan 3 variantes web optimizadas en WebP: `thumb.webp`, `card.webp` y `detail.webp`.
+- La respuesta incluye un objeto listo para persistir en base de datos con rutas por tamaño: `db.image` + `db.imageVariants`.
+- Se endureció la validación de entrada: límite práctico de 4MB, rechazo de formatos no convenientes para web (HEIC/HEIF/TIFF/BMP/GIF/SVG) y regla estricta para PNG pesados (>2MB).
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El catálogo puede consumir imágenes por contexto visual (miniatura/tarjeta/detalle) sin sobrecargar la UI con un único asset pesado.
+- El backend devuelve estructura explícita para guardar referencias por variante en DB en un JSON (`imageVariants`) o columnas separadas si se decide en una migración posterior.
