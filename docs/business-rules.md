@@ -48,6 +48,12 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - Rutas `/admin/*` requieren sesión válida y rol admin.
 - Si no hay sesión: redirección a login con redirect.
 - Si hay sesión sin privilegios admin: redirección a `/unauthorized`.
+- La vista `/mi-cuenta/pedidos` solo debe exponer órdenes del usuario autenticado: se consulta server-side con token de sesión, RLS y filtro explícito por `orders.user_id`.
+- `/mi-cuenta/pedidos` permite filtrar por estado y buscar por `external_reference`.
+- Cada orden en `/mi-cuenta/pedidos` muestra resumen (referencia, fecha, estado, total, método de pago) y detalle de líneas:
+  - productos desde `orders.metadata.mixed_items_summary.products`,
+  - cursos/sesiones desde `order_course_items`,
+  - participantes registrados desde `course_participants`.
 
 ## Operational Rule
 Los cambios en lógica comercial deben reflejarse en este archivo.
