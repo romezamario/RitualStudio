@@ -20,6 +20,11 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 3. Backend llama `POST /v1/payments` de Mercado Pago con idempotency key.
 4. Backend persiste datos de orden/pago en Supabase (si hay conectividad y credenciales).
 
+## Checkout Embebido (Card Payment Brick)
+- El script `https://sdk.mercadopago.com/js/v2` se carga una sola vez por sesión en el cliente.
+- Al volver a `/checkout` después de una compra, el frontend intenta montar el Brick otra vez si `window.MercadoPago` ya está disponible (sin depender de un segundo `onLoad`).
+- El desmontaje del Brick se realiza al salir de la pantalla para evitar controladores duplicados en navegaciones posteriores.
+
 ## Webhook Validation Flow
 - Se valida firma usando `MP_WEBHOOK_SECRET`.
 - Se consideran headers de firma + `request-id` + `data.id`.
