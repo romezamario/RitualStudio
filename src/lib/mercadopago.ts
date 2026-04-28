@@ -23,6 +23,7 @@ export type MpCreateOrderInput = {
   payer: {
     email: string;
   };
+  receipt_email?: string;
   items: CheckoutLineItemInput[];
 };
 
