@@ -19,6 +19,8 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - Email del comprador es obligatorio y debe ser válido.
 - Email alterno de comprobante es opcional, pero si se envía debe ser válido.
 - Cuotas (`installments`) permitidas: 1 a 24.
+- Si el carrito contiene cursos, checkout exige captura de nombres de participantes por sesión (`quantity` nombres por cada línea de curso).
+- Validaciones de participantes (frontend y backend): nombres no vacíos, mínimo 2 caracteres y sin duplicados exactos por sesión.
 
 ## Order Lifecycle (Current)
 - Al crear orden de pago se genera `external_reference` único.

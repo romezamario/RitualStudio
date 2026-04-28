@@ -15,6 +15,7 @@ export type CheckoutLineItemInput =
       course_session_id: string;
       session_starts_at: string;
       quantity: number;
+      course_participants?: string[];
     };
 
 export type ValidatedLineItem = {
@@ -29,6 +30,8 @@ export type ValidatedLineItem = {
   sessionStartsAt?: string;
 };
 
+export type CourseParticipantsBySession = Record<string, string[]>;
+
 export type MpCreateOrderInput = {
   token: string;
   payment_method_id: string;
@@ -40,6 +43,7 @@ export type MpCreateOrderInput = {
   };
   receipt_email?: string;
   items: CheckoutLineItemInput[];
+  course_participants?: CourseParticipantsBySession;
 };
 
 type CourseRow = {

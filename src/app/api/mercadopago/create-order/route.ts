@@ -5,6 +5,7 @@ import {
   mpApiFetch,
   type MpCreateOrderInput,
   type MpPaymentResponse,
+  type ValidatedLineItem,
   validateAndPriceLineItems,
   validateMercadoPagoAmount,
 } from "@/lib/mercadopago";
@@ -13,7 +14,6 @@ import { supabaseAdminRequest } from "@/lib/supabase-admin";
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
-
 
 function normalizeIssuerId(rawIssuerId: string | number | undefined) {
   if (rawIssuerId === undefined || rawIssuerId === null || rawIssuerId === "") {
@@ -40,9 +40,126 @@ function getValidationErrorStatus(message: string) {
     "Cantidad inválida",
     "No fue posible calcular el total de la orden",
     "El monto mínimo para pagar con tarjeta en este checkout",
+    "Participantes inválidos",
   ];
 
   return knownValidationMessages.some((knownMessage) => message.includes(knownMessage)) ? 400 : 500;
+}
+
+function validateCourseParticipantsBySession(input: MpCreateOrderInput, lineItems: ValidatedLineItem[]) {
+  const participantsBySession = input.course_participants ?? {};
+
+  if (input.course_participants && typeof input.course_participants !== "object") {
+    throw new Error("Participantes inválidos: formato no soportado.");
+  }
+
+  const normalizedBySession = new Map<string, string[]>();
+
+  for (const lineItem of lineItems) {
+    if (lineItem.kind !== "course" || !lineItem.courseSessionId) {
+      continue;
+    }
+
+    const originalCourseLine = input.items.find(
+      (entry): entry is Extract<MpCreateOrderInput["items"][number], { kind: "course" }> =>
+        entry.kind === "course" && entry.course_session_id === lineItem.courseSessionId,
+    );
+
+    const fromItemLine = Array.isArray(originalCourseLine?.course_participants)
+      ? originalCourseLine.course_participants
+      : undefined;
+    const fromPayloadMap = Array.isArray(participantsBySession[lineItem.courseSessionId])
+      ? participantsBySession[lineItem.courseSessionId]
+      : undefined;
+    const submittedParticipants = fromItemLine ?? fromPayloadMap ?? [];
+
+    if (submittedParticipants.length !== lineItem.quantity) {
+      throw new Error(
+        `Participantes inválidos para ${lineItem.slug}: recibimos ${submittedParticipants.length} y se requieren ${lineItem.quantity}.`,
+      );
+    }
+
+    const normalizedNames = submittedParticipants.map((name: string) => name.trim());
+
+    if (normalizedNames.some((name) => name.length < 2)) {
+      throw new Error(`Participantes inválidos para ${lineItem.slug}: cada nombre debe tener al menos 2 caracteres.`);
+    }
+
+    const dedup = new Set(normalizedNames.map((name: string) => name.toLocaleLowerCase("es-MX")));
+
+    if (dedup.size !== normalizedNames.length) {
+      throw new Error(`Participantes inválidos para ${lineItem.slug}: no se permiten nombres duplicados.`);
+    }
+
+    normalizedBySession.set(lineItem.courseSessionId, normalizedNames);
+  }
+
+  return normalizedBySession;
+}
+
+type OrderInsertRow = {
+  id: string;
+};
+
+type OrderCourseItemInsertRow = {
+  id: string;
+};
+
+async function persistCourseParticipants(
+  orderId: string,
+  lineItems: ValidatedLineItem[],
+  participantsBySession: Map<string, string[]>,
+) {
+  for (const lineItem of lineItems) {
+    if (lineItem.kind !== "course" || !lineItem.courseId || !lineItem.courseSessionId) {
+      continue;
+    }
+
+    const lineParticipants = participantsBySession.get(lineItem.courseSessionId) ?? [];
+
+    const orderCourseItemPayload = {
+      order_id: orderId,
+      course_id: lineItem.courseId,
+      course_session_id: lineItem.courseSessionId,
+      quantity: lineItem.quantity,
+      unit_price: lineItem.unitPrice,
+      subtotal: lineItem.subtotal,
+      metadata: {
+        source: "checkout-bricks-card-payment",
+      },
+    };
+
+    const { data: orderCourseItems, error: orderCourseItemError } = await supabaseAdminRequest<OrderCourseItemInsertRow[]>(
+      "/rest/v1/order_course_items",
+      {
+        method: "POST",
+        body: JSON.stringify(orderCourseItemPayload),
+      },
+    );
+
+    if (orderCourseItemError || !orderCourseItems?.[0]?.id) {
+      console.error("[MP create-order] No se pudo guardar order_course_items en Supabase:", orderCourseItemError);
+      continue;
+    }
+
+    if (!lineParticipants.length) {
+      continue;
+    }
+
+    const participantsPayload = lineParticipants.map((fullName) => ({
+      order_course_item_id: orderCourseItems[0].id,
+      full_name: fullName,
+    }));
+
+    const { error: participantsError } = await supabaseAdminRequest<unknown[]>("/rest/v1/course_participants", {
+      method: "POST",
+      body: JSON.stringify(participantsPayload),
+    });
+
+    if (participantsError) {
+      console.error("[MP create-order] No se pudo guardar course_participants en Supabase:", participantsError);
+    }
+  }
 }
 
 export async function POST(request: Request) {
@@ -74,6 +191,7 @@ export async function POST(request: Request) {
 
   try {
     const { lineItems, totalAmount } = await validateAndPriceLineItems(items);
+    const validatedCourseParticipants = validateCourseParticipantsBySession(body, lineItems);
     validateMercadoPagoAmount(totalAmount);
     const externalReference = `ritual-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const idempotencyKey = randomUUID();
@@ -136,17 +254,22 @@ export async function POST(request: Request) {
         payer_email: payer.email,
         receipt_email: normalizedReceiptEmail ?? payer.email,
         source: "checkout-bricks-card-payment",
+        course_participants: Object.fromEntries(validatedCourseParticipants),
       },
       raw_response: payment,
     };
 
-    const { error: orderError } = await supabaseAdminRequest<unknown[]>("/rest/v1/orders", {
+    const { data: orderRows, error: orderError } = await supabaseAdminRequest<OrderInsertRow[]>("/rest/v1/orders", {
       method: "POST",
       body: JSON.stringify(orderInsert),
     });
 
     if (orderError) {
       console.error("[MP create-order] No se pudo guardar order en Supabase:", orderError);
+    }
+
+    if (orderRows?.[0]?.id) {
+      await persistCourseParticipants(orderRows[0].id, lineItems, validatedCourseParticipants);
     }
 
     if (payment?.id) {
@@ -186,9 +309,6 @@ export async function POST(request: Request) {
       error instanceof Error ? error.message : "No fue posible procesar el pago en este momento. Intenta nuevamente.";
     const status = getValidationErrorStatus(errorMessage);
 
-    return NextResponse.json(
-      { error: errorMessage },
-      { status }
-    );
+    return NextResponse.json({ error: errorMessage }, { status });
   }
 }

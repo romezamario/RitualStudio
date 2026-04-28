@@ -59,7 +59,7 @@ function clampQuantityByKind(kind: CartItem["kind"], quantity: number) {
   return Math.min(Math.max(quantity, 1), cap);
 }
 
-export function getCartItemLineKey(item: Pick<CartItem, "kind" | "slug"> & Partial<CourseCartItem>) {
+export function getCartItemLineKey(item: { kind: CartItem["kind"]; slug: string; courseSessionId?: string }) {
   if (item.kind === "course") {
     return `course:${item.slug}:${item.courseSessionId}`;
   }
