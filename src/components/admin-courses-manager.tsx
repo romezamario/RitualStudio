@@ -217,19 +217,13 @@ export default function AdminCoursesManager() {
       const payload = new FormData();
       payload.set("file", file);
 
-      if (courseForm.slug.trim()) {
-        payload.set("slug", courseForm.slug.trim());
-      } else if (editingCourseId) {
-        payload.set("productId", editingCourseId);
-      }
-
       const response = await fetch("/api/admin/products/upload-image", {
         method: "POST",
         body: payload,
       });
 
       const body = (await response.json().catch(() => null)) as
-        | { data?: { image?: string }; error?: string }
+        | { data?: { image?: string; publicUrl?: string; renderUrl?: string }; error?: string }
         | null;
 
       if (!response.ok || !body?.data?.image) {
@@ -237,7 +231,7 @@ export default function AdminCoursesManager() {
       }
 
       setCourseForm((current) => ({ ...current, imageUrl: body.data?.image ?? "" }));
-      setFeedback("Imagen del curso subida correctamente.");
+      setFeedback("Imagen subida correctamente.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "No fue posible subir la imagen del curso.");
     } finally {
