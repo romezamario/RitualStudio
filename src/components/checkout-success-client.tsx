@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "@/components/auth-context";
 
 type PurchasedItem = {
   slug?: string;
@@ -32,6 +33,12 @@ type OrderSummaryResponse = {
       payment_updated_at?: string | null;
     };
   };
+};
+
+type ClaimOrdersResponse = {
+  linked_orders?: number;
+  message?: string;
+  error?: string;
 };
 
 type CheckoutSuccessClientProps = {
@@ -84,9 +91,15 @@ function formatDate(rawDate?: string | null) {
 }
 
 export default function CheckoutSuccessClient({ externalReference, paymentId }: CheckoutSuccessClientProps) {
+  const { isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<OrderSummaryResponse["receipt"] | null>(null);
+  const [claimMessage, setClaimMessage] = useState<string | null>(null);
+  const [claimError, setClaimError] = useState<string | null>(null);
+  const [linkedOrdersCount, setLinkedOrdersCount] = useState<number | null>(null);
+  const [isClaimingOrders, setIsClaimingOrders] = useState(false);
+  const hasAttemptedClaimRef = useRef(false);
 
   const fallbackExternalReference = externalReference?.trim() || "No disponible";
   const fallbackPaymentId = paymentId?.trim() || "No disponible";
@@ -152,6 +165,49 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
     };
   }, [externalReference, paymentId]);
 
+  useEffect(() => {
+    if (!summary || !isAuthenticated || hasAttemptedClaimRef.current) {
+      return;
+    }
+
+    hasAttemptedClaimRef.current = true;
+
+    const checkoutReference = summary.external_reference?.trim() || externalReference?.trim() || undefined;
+
+    const claimOrders = async () => {
+      setIsClaimingOrders(true);
+      setClaimMessage(null);
+      setClaimError(null);
+
+      try {
+        const response = await fetch("/api/auth/claim-orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            external_reference: checkoutReference,
+          }),
+        });
+
+        const result = (await response.json().catch(() => null)) as ClaimOrdersResponse | null;
+
+        if (!response.ok) {
+          throw new Error(result?.error ?? "No fue posible vincular compras con tu cuenta.");
+        }
+
+        setLinkedOrdersCount(Number.isFinite(result?.linked_orders) ? Number(result?.linked_orders) : 0);
+        setClaimMessage(result?.message ?? "Vinculación de compras completada.");
+      } catch (claimOrdersError) {
+        setClaimError(claimOrdersError instanceof Error ? claimOrdersError.message : "No fue posible vincular compras.");
+      } finally {
+        setIsClaimingOrders(false);
+      }
+    };
+
+    void claimOrders();
+  }, [externalReference, isAuthenticated, summary]);
+
   const consolidatedStatus = summary?.consolidated_status ?? null;
 
   const statusMessage = useMemo(() => {
@@ -179,6 +235,17 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
   const total = Number.isFinite(summary?.total) ? Number(summary?.total) : 0;
   const paymentMethod = summary?.payment_method || "No disponible";
   const customerEmail = summary?.customer_email || "No disponible";
+  const loginRedirectQuery = new URLSearchParams();
+
+  if (summary.external_reference?.trim()) {
+    loginRedirectQuery.set("external_reference", summary.external_reference.trim());
+  }
+
+  if (summary.payment_id?.trim()) {
+    loginRedirectQuery.set("payment_id", summary.payment_id.trim());
+  }
+
+  const loginRedirectPath = `/checkout/exito${loginRedirectQuery.toString() ? `?${loginRedirectQuery.toString()}` : ""}`;
 
   if (isLoading) {
     return (
@@ -301,6 +368,38 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
           </p>
         )}
       </div>
+
+      {!isAuthenticated ? (
+        <div className="studio-card" role="status" aria-live="polite">
+          <p>
+            Crear cuenta para ver esta compra en tu historial.
+          </p>
+          <div className="cta-row">
+            <Link
+              href={`/login?mode=signup&redirect=${encodeURIComponent(loginRedirectPath)}`}
+              className="btn btn-primary"
+            >
+              Crear cuenta para ver esta compra en tu historial
+            </Link>
+            <Link href={`/login?redirect=${encodeURIComponent(loginRedirectPath)}`} className="btn btn-ghost">
+              Ya tengo cuenta
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="studio-card" role="status" aria-live="polite">
+          <p className="card-label">Vinculación de historial</p>
+          <h3>Compras y cuenta</h3>
+          <p>
+            {isClaimingOrders
+              ? "Estamos vinculando tus compras con tu cuenta..."
+              : claimError
+                ? claimError
+                : claimMessage ?? "Tu historial está sincronizado."}
+          </p>
+          {linkedOrdersCount !== null ? <p>Compras vinculadas: {linkedOrdersCount}</p> : null}
+        </div>
+      )}
 
       <div className="cta-row">
         <Link href="/mi-cuenta/pedidos" className="btn btn-primary">
