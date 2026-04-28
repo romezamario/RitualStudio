@@ -44,6 +44,11 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - `EMAIL_SUPPORT_CHANNEL`: canal mostrado en comprobantes.
 - `RESEND_API_KEY`: API key de Resend.
 
+## Variables nuevas para cursos (estado actual)
+- Para la venta/admin de cursos **no se agregaron variables nuevas** en esta iteración.
+- La funcionalidad usa variables ya existentes de Supabase y Mercado Pago.
+- Si en el futuro se separa bucket de imágenes de cursos, documentar variable con placeholder (ejemplo: `SUPABASE_COURSE_IMAGES_BUCKET=`) antes de activar en código.
+
 ## Security Rules
 - No versionar `.env*` con valores reales.
 - No copiar llaves privadas en README ni en `/docs`.

@@ -41,6 +41,19 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 - Módulo de cuenta `/mi-cuenta/pedidos` renderizado server-side: usa token de sesión (`sb-access-token`) para consultas REST con RLS y aplica validación defensiva adicional filtrando por `orders.user_id = auth user`.
 - El historial de pedidos consolida `orders` + `payments` + `order_course_items`/`course_participants` para mostrar resumen por orden y detalle de líneas compradas.
 
+## Course Commerce Components
+Nuevos componentes de dominio para venta y operación de cursos:
+- `courses`: entidad catálogo de cursos (datos editoriales/comerciales base).
+- `course_sessions`: agenda de sesiones por curso con control de cupo (`capacity`, `reserved_spots`).
+- `order_course_items`: líneas de orden para cursos, puente entre `orders` y sesión/curso comprado.
+- `course_participants`: participantes capturados por línea de curso para operación y experiencia post-compra.
+
+Relación funcional:
+1. `courses` 1:N `course_sessions`.
+2. `orders` 1:N `order_course_items`.
+3. `order_course_items` 1:N `course_participants`.
+4. `order_course_items` referencia `course_sessions` y `courses` para trazabilidad histórica aunque cambie contenido editorial del curso.
+
 ## Storage
 - Imágenes de producto en bucket de Supabase configurado por variable de entorno.
 - Imágenes de cursos administradas con carga directa desde backend (sin exponer service role en frontend).
