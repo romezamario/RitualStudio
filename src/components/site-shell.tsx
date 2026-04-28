@@ -6,6 +6,7 @@ import packageJson from "../../package.json";
 
 const links = [
   { href: "/marketplace", label: "Tienda" },
+  { href: "/cursos", label: "Cursos" },
   { href: "/custom", label: "Diseño a medida" },
   { href: "/eventos", label: "Eventos" },
   { href: "/nosotros", label: "Nosotros" },

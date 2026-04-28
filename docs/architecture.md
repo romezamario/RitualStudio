@@ -25,7 +25,7 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 - Ejecutar acciones sensibles (upload de imagen admin, etc.).
 
 ## Main Flows (Summary)
-1. Usuario navega catálogo y agrega productos.
+1. Usuario navega catálogo de productos (`/marketplace`) o catálogo de cursos (`/cursos`) y agrega ítems al carrito.
 2. Checkout envía payload a backend (`/api/mercadopago/create-order`).
 3. Backend valida productos/cantidades/monto y llama a Mercado Pago.
 4. Backend persiste `orders` y `payments` en Supabase.
