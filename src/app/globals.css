@@ -91,6 +91,8 @@ p {
 
 .site-header {
   padding: 1.25rem 0;
+  position: relative;
+  z-index: 90;
 }
 
 .nav-wrap {

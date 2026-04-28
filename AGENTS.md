@@ -2329,3 +2329,35 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se dejó trazabilidad explícita de la separación entre navegación principal y acciones de cuenta/carrito para futuras iteraciones de UX.
+
+## PR: Fix de menú de usuario tapado por el contenido (z-index/header)
+- Fecha: 2026-04-28
+- Objetivo: Corregir el bug visual/interactivo donde el menú desplegable de usuario quedaba detrás de bloques del contenido (ej. checkout), impidiendo seleccionar opciones.
+
+### Lo aprendido
+- Aunque el panel de usuario tenga `z-index` propio, puede quedar por debajo si su contenedor padre no vive en una capa superior frente al contenido siguiente en el flujo de render.
+- En layouts con cards/iframes (como checkout embebido), definir explícitamente el stacking context del header evita colisiones de superposición.
+- Qué no funcionó y por qué: mantener solo `z-index` en `.user-menu-panel` no bastó porque el problema estaba en la capa del header completo frente al resto de la página.
+
+### Decisiones técnicas
+- Se elevó `.site-header` con `position: relative` y `z-index: 90` en `src/app/globals.css`.
+- Se mantuvo intacta la estructura del menú y del panel de usuario para minimizar riesgo funcional; el cambio se acotó al stacking context.
+- Se evitó agregar lógica JS adicional (portals o listeners extra) porque el bug era de CSS/layering.
+
+### Riesgos y mitigaciones
+- Riesgo: que elevar el header tape elementos flotantes importantes.
+- Mitigación: se usó un `z-index` moderado y se validó visualmente coexistencia con contenido de checkout.
+- Pendientes: monitorear escenarios con modales futuros para reservar una escala de `z-index` consistente en todo el sistema.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad + validación manual estructurada.
+- Resultado esperado: lint sin errores y menú de usuario totalmente visible/clicable sobre `/checkout`.
+- Resultado obtenido: lint en verde y corrección visual aplicada.
+- Evidencia:
+  - `npm run lint` OK.
+  - Verificación manual del menú desplegado en checkout sin solapamiento de tarjetas sobre opciones.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se registró el ajuste de capas para evitar regresiones en componentes flotantes del header.
