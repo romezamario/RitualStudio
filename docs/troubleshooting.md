@@ -44,6 +44,29 @@
 - Endpoint público accesible.
 - Revisar logs del route handler y respuestas HTTP.
 
+### Inconsistencia de cupo (course_sessions.reserved_spots) vs estado de pago
+**Síntoma:** la orden quedó `rejected/cancelled/expired` pero cupo sigue reservado, o pago `approved` y no hay trazabilidad de confirmación.
+
+**Playbook manual de reconciliación:**
+1. Identificar la orden local por `orders.mercado_pago_order_id`.
+2. Revisar `payment_events` más recientes de esa orden y validar en `payload`:
+   - `webhook_processing.processed`,
+   - `audit.reconciliations`,
+   - `duplicate_notifications`.
+3. Verificar líneas en `order_course_items` y metadata:
+   - `capacity_released`,
+   - `capacity_released_reason`,
+   - `capacity_confirmed`.
+4. Consultar estado final real en Mercado Pago (`approved`, `rejected`, `cancelled`, `expired`).
+5. Si el estado final **no aprobado**, ejecutar RPC:
+   - `select public.release_course_capacity_for_order('<order_id_uuid>', 'manual-reconciliation');`
+6. Si el estado final es **approved**, no decrementar `reserved_spots`; solo asegurar metadata de confirmación (`capacity_confirmed=true`) en `order_course_items`.
+7. Registrar incidente operativo (fecha/hora, `order_id`, estado MP, acción aplicada y evidencia de query) para trazabilidad.
+
+**Notas de seguridad:**
+- La liberación es idempotente (no debe decrementar dos veces si `capacity_released=true`).
+- No confiar en estado de frontend; reconciliar siempre contra backend/webhook + API MP.
+
 ---
 
 ## Supabase Admin / Storage
