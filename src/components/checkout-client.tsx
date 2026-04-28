@@ -316,6 +316,14 @@ export default function CheckoutClient() {
   }, [checkoutItems, clearCart, isBelowMercadoPagoMinAmount, isProductionKey, normalizedUserEmail, publicKey, router, total, items.length]);
 
   useEffect(() => {
+    if (!window.MercadoPago) {
+      return;
+    }
+
+    void mountBrick();
+  }, [mountBrick]);
+
+  useEffect(() => {
     if (!window.MercadoPago || !isBrickMounted.current) {
       return;
     }
