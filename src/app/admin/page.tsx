@@ -35,6 +35,15 @@ export default function AdminHomePage() {
             Ir a gestión de productos
           </Link>
         </article>
+
+        <article className="studio-card">
+          <p className="card-label">Cursos</p>
+          <h2>Gestión de sesiones y cupos</h2>
+          <p>Da de alta cursos, define fechas/horarios y ajusta cupos por sesión.</p>
+          <Link href="/admin/cursos" className="text-link">
+            Ir a gestión de cursos
+          </Link>
+        </article>
       </div>
     </SiteShell>
   );

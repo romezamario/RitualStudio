@@ -27,6 +27,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - `courses.slug` es único y funciona como identificador estable para catálogo de cursos.
 - Cada sesión (`course_sessions`) pertenece a un curso y debe respetar `capacity > 0`.
 - Los cupos reservados (`reserved_spots`) nunca pueden ser negativos.
+- En administración, al editar una sesión no se permite bajar `capacity` por debajo de `reserved_spots` para evitar sobreventa.
 - Las líneas de compra de cursos (`order_course_items`) requieren `quantity >= 1` y se vinculan a `orders`, `courses` y `course_sessions`.
 - Participantes (`course_participants`) se registran por ítem de compra y heredan acceso por propiedad de la orden (`orders.user_id`).
 

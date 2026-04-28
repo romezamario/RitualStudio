@@ -37,6 +37,7 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 - Tabla `public.profiles` vinculada a `auth.users`.
 - Función `public.is_admin()` para políticas RLS.
 - Rutas administrativas protegidas por validación server-side (`/admin/*`).
+- Módulo administrativo de cursos (`/admin/cursos`) con endpoints backend para CRUD de cursos y sesiones (`/api/admin/courses/*`).
 
 ## Storage
 - Imágenes de producto en bucket de Supabase configurado por variable de entorno.

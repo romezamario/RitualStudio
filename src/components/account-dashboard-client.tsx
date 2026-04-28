@@ -40,8 +40,8 @@ export default function AccountDashboardClient() {
           <p className="card-label">Administración</p>
           <h2>Accesos de operación</h2>
           <p>
-            Gestiona pedidos del estudio, el catálogo de productos y cuentas de usuarios con
-            permisos administrativos.
+            Gestiona pedidos del estudio, productos del marketplace, cursos con sesiones/cupos y cuentas de
+            usuarios con permisos administrativos.
           </p>
           <div className="cta-row">
             <Link href="/admin/pedidos" className="btn btn-ghost">
@@ -49,6 +49,9 @@ export default function AccountDashboardClient() {
             </Link>
             <Link href="/admin/productos" className="btn btn-ghost">
               Productos admin
+            </Link>
+            <Link href="/admin/cursos" className="btn btn-ghost">
+              Cursos admin
             </Link>
             <Link href="/admin/usuarios" className="btn btn-ghost">
               Usuarios admin
