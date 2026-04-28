@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
 
 type AdminCourseSession = {
   id: string;
@@ -48,6 +50,8 @@ const initialCourseForm: CourseFormState = {
   isActive: true,
 };
 
+const ADMIN_PREVIEW_IMAGE_SIZES = "(max-width: 900px) 100vw, 50vw";
+
 const initialSessionForm: SessionFormState = {
   startsAt: "",
   endsAt: "",
@@ -94,6 +98,7 @@ export default function AdminCoursesManager() {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [sessionForms, setSessionForms] = useState<Record<string, SessionFormState>>({});
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -155,6 +160,11 @@ export default function AdminCoursesManager() {
   const handleCourseSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (isUploadingImage) {
+      setFeedback("Espera a que termine la subida de imagen.");
+      return;
+    }
+
     const parsedPrice = Number(courseForm.price);
 
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
@@ -192,6 +202,46 @@ export default function AdminCoursesManager() {
       setFeedback(editingCourseId ? "Curso actualizado correctamente." : "Curso creado correctamente.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "No fue posible guardar el curso.");
+    }
+  };
+
+  const handleImageUpload = async (file?: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setFeedback("Subiendo imagen del curso...");
+
+    try {
+      const payload = new FormData();
+      payload.set("file", file);
+
+      if (courseForm.slug.trim()) {
+        payload.set("slug", courseForm.slug.trim());
+      } else if (editingCourseId) {
+        payload.set("productId", editingCourseId);
+      }
+
+      const response = await fetch("/api/admin/products/upload-image", {
+        method: "POST",
+        body: payload,
+      });
+
+      const body = (await response.json().catch(() => null)) as
+        | { data?: { image?: string }; error?: string }
+        | null;
+
+      if (!response.ok || !body?.data?.image) {
+        throw new Error(body?.error ?? "No fue posible subir la imagen del curso.");
+      }
+
+      setCourseForm((current) => ({ ...current, imageUrl: body.data?.image ?? "" }));
+      setFeedback("Imagen del curso subida correctamente.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "No fue posible subir la imagen del curso.");
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -400,13 +450,28 @@ export default function AdminCoursesManager() {
           </label>
 
           <label>
-            URL de imagen (opcional)
+            Imagen del curso
             <input
-              type="url"
-              value={courseForm.imageUrl}
-              onChange={(event) => setCourseForm((current) => ({ ...current, imageUrl: event.target.value }))}
+              type="file"
+              accept="image/*"
+              onChange={(event) => void handleImageUpload(event.target.files?.[0])}
+              disabled={isUploadingImage}
             />
           </label>
+
+          {isUploadingImage ? <p>Subiendo imagen...</p> : null}
+
+          {courseForm.imageUrl ? (
+            <Image
+              src={toRenderableProductImageUrl(courseForm.imageUrl, "admin-preview")}
+              alt="Vista previa del curso"
+              className="admin-product-preview"
+              width={1200}
+              height={900}
+              unoptimized
+              sizes={ADMIN_PREVIEW_IMAGE_SIZES}
+            />
+          ) : null}
 
           <label>
             <input
@@ -418,7 +483,7 @@ export default function AdminCoursesManager() {
           </label>
 
           <div className="cta-row">
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" disabled={isUploadingImage}>
               {editingCourseId ? "Guardar cambios" : "Crear curso"}
             </button>
             {editingCourseId ? (

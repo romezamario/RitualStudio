@@ -36,6 +36,7 @@ export function HeaderInteractive({ links }: HeaderInteractiveProps) {
           { href: "/admin/pedidos", label: "Gestión de pedidos" },
           { href: "/admin/usuarios", label: "Gestión de usuarios" },
           { href: "/admin/productos", label: "Gestión de productos" },
+          { href: "/admin/cursos", label: "Gestión de cursos" },
         ]
       : [
           { href: "/mi-cuenta", label: "Dashboard" },

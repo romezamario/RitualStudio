@@ -41,6 +41,7 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 
 ## Storage
 - Imágenes de producto en bucket de Supabase configurado por variable de entorno.
+- Imágenes de cursos administradas con carga directa desde backend (sin exponer service role en frontend).
 - Operaciones de escritura al storage solo por backend autenticado.
 
 ## Deployment Model
