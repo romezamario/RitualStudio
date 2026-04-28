@@ -236,13 +236,15 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
   const paymentMethod = summary?.payment_method || "No disponible";
   const customerEmail = summary?.customer_email || "No disponible";
   const loginRedirectQuery = new URLSearchParams();
+  const summaryExternalReference = summary?.external_reference?.trim();
+  const summaryPaymentId = summary?.payment_id?.trim();
 
-  if (summary.external_reference?.trim()) {
-    loginRedirectQuery.set("external_reference", summary.external_reference.trim());
+  if (summaryExternalReference) {
+    loginRedirectQuery.set("external_reference", summaryExternalReference);
   }
 
-  if (summary.payment_id?.trim()) {
-    loginRedirectQuery.set("payment_id", summary.payment_id.trim());
+  if (summaryPaymentId) {
+    loginRedirectQuery.set("payment_id", summaryPaymentId);
   }
 
   const loginRedirectPath = `/checkout/exito${loginRedirectQuery.toString() ? `?${loginRedirectQuery.toString()}` : ""}`;
