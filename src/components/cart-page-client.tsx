@@ -3,11 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
-import { useCart } from "@/components/cart-context";
+import { getCartItemLineKey, useCart } from "@/components/cart-context";
 import { getWhatsAppHref } from "@/lib/whatsapp";
 import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
 
 const CART_IMAGE_SIZES = "(max-width: 900px) 100vw, 180px";
+
+function formatCourseSessionDate(startsAt: string) {
+  return new Date(startsAt).toLocaleString("es-MX", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
 
 export default function CartPageClient() {
   const { items, removeFromCart, clearCart, totalItems } = useCart();
@@ -17,8 +24,17 @@ export default function CartPageClient() {
       return getWhatsAppHref("Hola Ritual Studio, quiero cotizar productos del marketplace.");
     }
 
-    const productLines = items.map((item) => `• ${item.name} x${item.quantity} (${item.price})`).join("\n");
-    const message = `Hola Ritual Studio, quiero comprar estos productos:%0A${productLines}`;
+    const lines = items
+      .map((item) => {
+        if (item.kind === "course") {
+          return `• Curso: ${item.name} · Sesión: ${formatCourseSessionDate(item.sessionStartsAt)} · Participantes: ${item.quantity} (${item.price} c/u)`;
+        }
+
+        return `• Producto: ${item.name} x${item.quantity} (${item.price})`;
+      })
+      .join("\n");
+
+    const message = `Hola Ritual Studio, quiero comprar:%0A${lines}`;
 
     return getWhatsAppHref(message);
   }, [items]);
@@ -36,37 +52,55 @@ export default function CartPageClient() {
   }
 
   return (
-    <section className="cart-layout" aria-label="Productos agregados al carrito">
+    <section className="cart-layout" aria-label="Productos y cursos agregados al carrito">
       <div className="cart-items">
-        {items.map((item) => (
-          <article key={item.slug} className="studio-card cart-item">
-            <div className="cart-item-image-wrap">
-              <Image
-                src={toRenderableProductImageUrl(item.image, "cart")}
-                alt={item.name}
-                width={600}
-                height={420}
-                className="cart-item-image"
-                sizes={CART_IMAGE_SIZES}
-              />
-            </div>
-            <div className="cart-item-copy">
-              <p className="card-label">{item.category}</p>
-              <h3>{item.name}</h3>
-              <p>Cantidad: {item.quantity}</p>
-              <strong className="price-tag">{item.price}</strong>
-            </div>
-            <button type="button" className="btn btn-ghost" onClick={() => removeFromCart(item.slug)}>
-              Quitar
-            </button>
-          </article>
-        ))}
+        {items.map((item) => {
+          const lineKey = getCartItemLineKey(item);
+          const imageSource =
+            item.kind === "product"
+              ? toRenderableProductImageUrl(item.image, "cart")
+              : item.image.startsWith("http")
+                ? item.image
+                : toRenderableProductImageUrl(item.image, "cart");
+
+          return (
+            <article key={lineKey} className="studio-card cart-item">
+              <div className="cart-item-image-wrap">
+                <Image
+                  src={imageSource}
+                  alt={item.name}
+                  width={600}
+                  height={420}
+                  className="cart-item-image"
+                  sizes={CART_IMAGE_SIZES}
+                />
+              </div>
+              <div className="cart-item-copy">
+                <p className="card-label">{item.kind === "course" ? "Curso" : item.category}</p>
+                <h3>{item.name}</h3>
+                {item.kind === "course" ? (
+                  <>
+                    <p>Sesión: {formatCourseSessionDate(item.sessionStartsAt)}</p>
+                    <p>Participantes: {item.quantity}</p>
+                    <p>Precio unitario: {item.price}</p>
+                  </>
+                ) : (
+                  <p>Cantidad: {item.quantity}</p>
+                )}
+                <strong className="price-tag">{item.price}</strong>
+              </div>
+              <button type="button" className="btn btn-ghost" onClick={() => removeFromCart(lineKey)}>
+                Quitar
+              </button>
+            </article>
+          );
+        })}
       </div>
 
       <aside className="studio-card cart-summary">
         <p className="card-label">Resumen</p>
         <h2>Ver carrito de compras</h2>
-        <p>Productos agregados: {totalItems}</p>
+        <p>Ítems agregados: {totalItems}</p>
 
         <div className="cta-row">
           <Link className="btn btn-primary" href="/checkout">

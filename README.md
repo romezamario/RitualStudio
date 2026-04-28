@@ -28,7 +28,8 @@ Ritual Studio es una aplicación Next.js (App Router) que actualmente incluye:
 
 - Home y páginas editoriales/comerciales (`/`, `/arreglos`, `/custom`, `/eventos`, `/nosotros`, `/contacto`).
 - Marketplace y detalle de producto (`/marketplace`, `/marketplace/[slug]`).
-- Carrito (`/carrito`).
+- Cursos con detalle por slug y sesiones con cupo (`/cursos/[slug]`).
+- Carrito unificado para productos y cursos (`/carrito`).
 - Checkout con tarjeta (Mercado Pago) y vista de éxito (`/checkout`, `/checkout/exito`).
   - En checkout, usuarios autenticados ven su correo prellenado en modo solo lectura antes del formulario embebido.
 - Autenticación base con Supabase (`/login`, `/auth/callback`, `/actualizar-contrasena`).

@@ -1,17 +1,32 @@
 import { marketplaceProducts } from "@/data/marketplace-products";
 import { fetchMarketplaceProductsFromBackend } from "@/lib/marketplace-catalog";
+import { supabaseAdminRequest } from "@/lib/supabase-admin";
 
-export type CheckoutLineItemInput = {
-  slug: string;
-  quantity: number;
-};
+export type CheckoutLineItemInput =
+  | {
+      kind?: "product";
+      slug: string;
+      quantity: number;
+    }
+  | {
+      kind: "course";
+      slug: string;
+      course_id: string;
+      course_session_id: string;
+      session_starts_at: string;
+      quantity: number;
+    };
 
 export type ValidatedLineItem = {
+  kind: "product" | "course";
   slug: string;
   name: string;
   unitPrice: number;
   quantity: number;
   subtotal: number;
+  courseId?: string;
+  courseSessionId?: string;
+  sessionStartsAt?: string;
 };
 
 export type MpCreateOrderInput = {
@@ -25,6 +40,23 @@ export type MpCreateOrderInput = {
   };
   receipt_email?: string;
   items: CheckoutLineItemInput[];
+};
+
+type CourseRow = {
+  id: string;
+  slug: string;
+  title: string;
+  price: number;
+  is_active: boolean;
+};
+
+type CourseSessionRow = {
+  id: string;
+  course_id: string;
+  starts_at: string;
+  capacity: number;
+  reserved_spots: number;
+  is_active: boolean;
 };
 
 export type MpPaymentResponse = {
@@ -43,6 +75,8 @@ export type MpPaymentResponse = {
 
 const MP_API_BASE = "https://api.mercadopago.com";
 export const MIN_MX_CARD_PAYMENT_AMOUNT = 10;
+const MAX_PRODUCT_QUANTITY_PER_LINE = 10;
+const MAX_COURSE_PARTICIPANTS_PER_LINE = 6;
 
 export function getMercadoPagoPublicKey() {
   return process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim() ?? "";
@@ -86,43 +120,107 @@ async function getCheckoutCatalog() {
   return marketplaceProducts;
 }
 
+async function validateCourseLineItem(entry: Extract<CheckoutLineItemInput, { kind: "course" }>) {
+  if (!entry.course_id || !entry.course_session_id || !entry.session_starts_at || !entry.slug) {
+    throw new Error("Curso inválido: faltan datos de curso/sesión.");
+  }
+
+  if (!Number.isInteger(entry.quantity) || entry.quantity < 1 || entry.quantity > MAX_COURSE_PARTICIPANTS_PER_LINE) {
+    throw new Error(`Cantidad inválida para curso ${entry.slug}.`);
+  }
+
+  const [courseResult, sessionResult] = await Promise.all([
+    supabaseAdminRequest<CourseRow[]>(
+      `/rest/v1/courses?id=eq.${encodeURIComponent(entry.course_id)}&slug=eq.${encodeURIComponent(entry.slug)}&is_active=eq.true&select=id,slug,title,price,is_active&limit=1`,
+      { method: "GET" },
+    ),
+    supabaseAdminRequest<CourseSessionRow[]>(
+      `/rest/v1/course_sessions?id=eq.${encodeURIComponent(entry.course_session_id)}&course_id=eq.${encodeURIComponent(entry.course_id)}&is_active=eq.true&select=id,course_id,starts_at,capacity,reserved_spots,is_active&limit=1`,
+      { method: "GET" },
+    ),
+  ]);
+
+  if (courseResult.error || !courseResult.data?.length) {
+    throw new Error(`Curso inválido: ${entry.slug}.`);
+  }
+
+  if (sessionResult.error || !sessionResult.data?.length) {
+    throw new Error(`Sesión inválida para curso ${entry.slug}.`);
+  }
+
+  const course = courseResult.data[0];
+  const session = sessionResult.data[0];
+
+  if (session.starts_at !== entry.session_starts_at) {
+    throw new Error(`La sesión seleccionada para ${entry.slug} cambió. Actualiza tu carrito.`);
+  }
+
+  const remainingSpots = Math.max(session.capacity - session.reserved_spots, 0);
+
+  if (entry.quantity > remainingSpots) {
+    throw new Error(`Cupo insuficiente para ${entry.slug}. Disponibles: ${remainingSpots}.`);
+  }
+
+  const unitPrice = Number(course.price);
+  const subtotal = unitPrice * entry.quantity;
+
+  return {
+    kind: "course" as const,
+    slug: course.slug,
+    name: course.title,
+    unitPrice,
+    quantity: entry.quantity,
+    subtotal,
+    courseId: course.id,
+    courseSessionId: session.id,
+    sessionStartsAt: session.starts_at,
+  };
+}
+
 export async function validateAndPriceLineItems(items: CheckoutLineItemInput[]): Promise<{
   lineItems: ValidatedLineItem[];
   totalAmount: number;
 }> {
   if (!Array.isArray(items) || !items.length) {
-    throw new Error("Debes enviar al menos un producto para procesar el pago.");
+    throw new Error("Debes enviar al menos un ítem para procesar el pago.");
   }
 
   const checkoutCatalog = await getCheckoutCatalog();
   const catalogByNormalizedSlug = new Map(checkoutCatalog.map((product) => [normalizeSlug(product.slug), product]));
 
-  const lineItems = items.map((entry) => {
-    const rawSlug = typeof entry.slug === "string" ? entry.slug : "";
-    const normalizedSlug = normalizeSlug(rawSlug);
-    const product = catalogByNormalizedSlug.get(normalizedSlug);
+  const lineItems = await Promise.all(
+    items.map(async (entry) => {
+      if (entry.kind === "course") {
+        return validateCourseLineItem(entry);
+      }
 
-    if (!product) {
-      throw new Error(
-        `Producto inválido: ${rawSlug}. El checkout envía slugs y este valor no existe en el catálogo actual.`
-      );
-    }
+      const rawSlug = typeof entry.slug === "string" ? entry.slug : "";
+      const normalizedSlug = normalizeSlug(rawSlug);
+      const product = catalogByNormalizedSlug.get(normalizedSlug);
 
-    if (!Number.isInteger(entry.quantity) || entry.quantity < 1 || entry.quantity > 10) {
-      throw new Error(`Cantidad inválida para ${entry.slug}.`);
-    }
+      if (!product) {
+        throw new Error(
+          `Producto inválido: ${rawSlug}. El checkout envía slugs y este valor no existe en el catálogo actual.`,
+        );
+      }
 
-    const unitPrice = parseMxPrice(product.price);
-    const subtotal = unitPrice * entry.quantity;
+      if (!Number.isInteger(entry.quantity) || entry.quantity < 1 || entry.quantity > MAX_PRODUCT_QUANTITY_PER_LINE) {
+        throw new Error(`Cantidad inválida para ${entry.slug}.`);
+      }
 
-    return {
-      slug: product.slug,
-      name: product.name,
-      unitPrice,
-      quantity: entry.quantity,
-      subtotal,
-    };
-  });
+      const unitPrice = parseMxPrice(product.price);
+      const subtotal = unitPrice * entry.quantity;
+
+      return {
+        kind: "product" as const,
+        slug: product.slug,
+        name: product.name,
+        unitPrice,
+        quantity: entry.quantity,
+        subtotal,
+      };
+    }),
+  );
 
   const totalAmount = lineItems.reduce((sum, item) => sum + item.subtotal, 0);
 
@@ -146,15 +244,13 @@ export function validateMercadoPagoAmount(totalAmount: number) {
   }
 
   if (totalAmount < MIN_MX_CARD_PAYMENT_AMOUNT) {
-    throw new Error(
-      `El monto mínimo para pagar con tarjeta en este checkout es de $${MIN_MX_CARD_PAYMENT_AMOUNT} MXN.`
-    );
+    throw new Error(`El monto mínimo para pagar con tarjeta en este checkout es de $${MIN_MX_CARD_PAYMENT_AMOUNT} MXN.`);
   }
 }
 
 export async function mpApiFetch<T>(
   path: string,
-  init: RequestInit & { accessToken?: string } = {}
+  init: RequestInit & { accessToken?: string } = {},
 ): Promise<T> {
   const accessToken = init.accessToken ?? getMercadoPagoAccessToken();
   const publicKey = getMercadoPagoPublicKey();
@@ -168,12 +264,9 @@ export async function mpApiFetch<T>(
   const publicKeyIsTest = /^TEST-/i.test(publicKey);
   const publicKeyIsProd = /^APP_USR-/i.test(publicKey);
 
-  if (
-    (tokenIsTest && publicKeyIsProd) ||
-    (tokenIsProd && publicKeyIsTest)
-  ) {
+  if ((tokenIsTest && publicKeyIsProd) || (tokenIsProd && publicKeyIsTest)) {
     throw new Error(
-      "Detectamos llaves de Mercado Pago mezcladas: NEXT_PUBLIC_MP_PUBLIC_KEY y MP_ACCESS_TOKEN deben pertenecer al mismo entorno (TEST o APP_USR)."
+      "Detectamos llaves de Mercado Pago mezcladas: NEXT_PUBLIC_MP_PUBLIC_KEY y MP_ACCESS_TOKEN deben pertenecer al mismo entorno (TEST o APP_USR).",
     );
   }
 
@@ -199,7 +292,7 @@ export async function mpApiFetch<T>(
   if (!response.ok) {
     if (response.status === 401) {
       throw new Error(
-        "Mercado Pago respondió con 401 (Unauthorized). Revisa MP_ACCESS_TOKEN en Vercel: debe ser Access Token válido, sin prefijo 'Bearer', y del mismo entorno que NEXT_PUBLIC_MP_PUBLIC_KEY."
+        "Mercado Pago respondió con 401 (Unauthorized). Revisa MP_ACCESS_TOKEN en Vercel: debe ser Access Token válido, sin prefijo 'Bearer', y del mismo entorno que NEXT_PUBLIC_MP_PUBLIC_KEY.",
       );
     }
 
@@ -216,8 +309,7 @@ export async function mpApiFetch<T>(
       .filter(Boolean)
       .join(" | ");
 
-    const baseMessage =
-      errorData?.message ?? errorData?.error ?? `Mercado Pago respondió con ${response.status}.`;
+    const baseMessage = errorData?.message ?? errorData?.error ?? `Mercado Pago respondió con ${response.status}.`;
 
     const errorMessage = causeDetails ? `${baseMessage} (${causeDetails})` : baseMessage;
     throw new Error(errorMessage);

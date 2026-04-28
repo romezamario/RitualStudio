@@ -9,6 +9,10 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - Cada línea de compra debe incluir `slug` válido y `quantity` entera.
 
 ## Cart & Checkout Rules
+- El carrito usa ítems discriminados por `kind` (`product` o `course`) para unificar checkout sin mezclar contratos.
+- Productos mantienen límite por línea de `1..10`; cursos usan límite de participantes por sesión de `1..6`.
+- Para cursos, la clave de línea es compuesta (`slug + course_session_id`) para evitar colisiones entre sesiones del mismo curso.
+- En frontend se muestra cupo como snapshot en tiempo real (refresh de sesiones), pero la validación definitiva de cupo/precio ocurre en backend al crear la orden.
 - Cantidad por producto permitida: mínimo 1, máximo 10.
 - El checkout exige al menos un producto.
 - El monto mínimo para pago con tarjeta en checkout: **$10 MXN**.

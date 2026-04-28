@@ -10,7 +10,7 @@ type ProductPurchaseActionsProps = {
 };
 
 export default function ProductPurchaseActions({ product }: ProductPurchaseActionsProps) {
-  const { addToCart } = useCart();
+  const { addProductToCart } = useCart();
   const [feedback, setFeedback] = useState("");
 
   const buyNowHref = useMemo(() => {
@@ -19,7 +19,7 @@ export default function ProductPurchaseActions({ product }: ProductPurchaseActio
   }, [product.name, product.price]);
 
   const handleAddToCart = () => {
-    addToCart(product);
+    addProductToCart(product);
     setFeedback("Producto agregado al carrito");
 
     window.setTimeout(() => {
