@@ -16,7 +16,8 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
    - cuotas,
    - slugs/cantidades,
    - cálculo de monto con catálogo backend,
-   - monto mínimo permitido.
+   - monto mínimo permitido,
+   - participantes por sesión (`course_participants`) con conteo exacto vs `quantity`, nombres no vacíos/mínimo y sin duplicados exactos.
 3. Backend llama `POST /v1/payments` de Mercado Pago con idempotency key.
 4. Backend persiste datos de orden/pago en Supabase (si hay conectividad y credenciales).
 
@@ -25,6 +26,8 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 - Al volver a `/checkout` después de una compra, el frontend intenta montar el Brick otra vez si `window.MercadoPago` ya está disponible (sin depender de un segundo `onLoad`).
 - El desmontaje del Brick se realiza al salir de la pantalla para evitar controladores duplicados en navegaciones posteriores.
 - Si el usuario está autenticado, el checkout muestra el correo prellenado en un campo de solo lectura antes del Brick para que el dato visible coincida con el email enviado en `payer.email`.
+- Si hay líneas `kind=course`, checkout renderiza sección **Participantes** y bloquea el envío al Brick hasta capturar `quantity` nombres por sesión.
+- El payload del checkout envía `course_participants` por `course_session_id` (también embebido por línea) para reforzar trazabilidad de validación.
 
 ## Webhook Validation Flow
 - Se valida firma usando `MP_WEBHOOK_SECRET`.
@@ -35,6 +38,7 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 ## Persistence Strategy
 - Tabla `orders`: referencia externa, estado, total, metadata y raw response.
 - Tabla `payments`: id de pago MP, método, estado, monto y raw response.
+- Para líneas de curso se intenta persistir `order_course_items` y `course_participants` con la captura validada del checkout.
 - Estrategia de upsert en webhook para idempotencia y convergencia de estado.
 
 ## Critical Security Rules

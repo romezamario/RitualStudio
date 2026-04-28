@@ -4,7 +4,7 @@ import Script from "next/script";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCart } from "@/components/cart-context";
+import { getCartItemLineKey, useCart } from "@/components/cart-context";
 import { useAuth } from "@/components/auth-context";
 import { MIN_MX_CARD_PAYMENT_AMOUNT, parseMxPrice } from "@/lib/mercadopago";
 
@@ -24,6 +24,11 @@ type MpBrickError = {
   message?: string;
   cause?: Array<{ code?: string; description?: string }>;
 };
+
+type CourseParticipantsByLine = Record<string, string[]>;
+type CourseErrorsByLine = Record<string, string | null>;
+
+const MIN_PARTICIPANT_NAME_LENGTH = 2;
 
 function normalizeStatusDetailCode(statusDetail?: string | null) {
   return (statusDetail ?? "").trim().toLowerCase().replace(/\s+/g, "_");
@@ -62,15 +67,13 @@ function getCheckoutFeedbackByResult(normalizedStatus: CheckoutStatus, statusDet
       expi: "Pago rechazado por problema con la fecha de vencimiento. Revisa mes/año de la tarjeta.",
       cc_rejected_bad_filled_date:
         "Pago rechazado por problema con la fecha de vencimiento. Revisa mes/año de la tarjeta.",
-      cc_rejected_card_expired:
-        "Pago rechazado porque la tarjeta está vencida. Usa otra tarjeta vigente.",
+      cc_rejected_card_expired: "Pago rechazado porque la tarjeta está vencida. Usa otra tarjeta vigente.",
       form: "Pago rechazado por datos incompletos o inválidos del formulario. Revisa la información e intenta otra vez.",
       cc_rejected_bad_filled_card_number:
         "Pago rechazado por número de tarjeta inválido. Verifica los datos e intenta de nuevo.",
       cc_rejected_bad_filled_other:
         "Pago rechazado por datos incompletos o inválidos del formulario. Revisa la información e intenta otra vez.",
-      cc_rejected_blacklist:
-        "No fue posible procesar el pago con esta tarjeta. Intenta con otro método de pago.",
+      cc_rejected_blacklist: "No fue posible procesar el pago con esta tarjeta. Intenta con otro método de pago.",
       cc_rejected_high_risk:
         "El pago fue rechazado por validaciones de seguridad. Prueba con otra tarjeta o método de pago.",
       cc_rejected_duplicated_payment:
@@ -88,7 +91,6 @@ function getCheckoutFeedbackByResult(normalizedStatus: CheckoutStatus, statusDet
 
   return "No pudimos confirmar el pago. Intenta nuevamente en unos minutos.";
 }
-
 
 function getCheckoutSubmissionErrorMessage(error: unknown) {
   if (!(error instanceof Error)) {
@@ -130,6 +132,35 @@ function getHumanReadableBrickError(error: unknown, isProductionKey: boolean) {
   }
 
   return fallback;
+}
+
+function validateCourseParticipants(courseParticipantsByLine: CourseParticipantsByLine) {
+  const errorsByLine: CourseErrorsByLine = {};
+
+  for (const [lineKey, participants] of Object.entries(courseParticipantsByLine)) {
+    if (!participants.length) {
+      errorsByLine[lineKey] = "Debes registrar al menos un participante.";
+      continue;
+    }
+
+    const normalized = participants.map((participant) => participant.trim());
+
+    if (normalized.some((participant) => participant.length < MIN_PARTICIPANT_NAME_LENGTH)) {
+      errorsByLine[lineKey] = `Cada nombre debe tener al menos ${MIN_PARTICIPANT_NAME_LENGTH} caracteres.`;
+      continue;
+    }
+
+    const duplicates = new Set(normalized.map((participant) => participant.toLocaleLowerCase("es-MX")));
+
+    if (duplicates.size !== normalized.length) {
+      errorsByLine[lineKey] = "No se permiten nombres duplicados exactos dentro de la misma sesión.";
+      continue;
+    }
+
+    errorsByLine[lineKey] = null;
+  }
+
+  return errorsByLine;
 }
 
 type MpBrickFormData = {
@@ -196,10 +227,74 @@ export default function CheckoutClient() {
     [items]
   );
 
+  const courseLines = useMemo(
+    () =>
+      items
+        .map((item) => {
+          if (item.kind !== "course") {
+            return null;
+          }
+
+          const lineKey = getCartItemLineKey(item);
+
+          return {
+            lineKey,
+            courseSessionId: item.courseSessionId,
+            courseTitle: item.name,
+            quantity: item.quantity,
+          };
+        })
+        .filter((line): line is { lineKey: string; courseSessionId: string; courseTitle: string; quantity: number } =>
+          Boolean(line),
+        ),
+    [items],
+  );
+
+  const [courseParticipantsByLine, setCourseParticipantsByLine] = useState<CourseParticipantsByLine>({});
+  const [courseErrorsByLine, setCourseErrorsByLine] = useState<CourseErrorsByLine>({});
+
+  useEffect(() => {
+    setCourseParticipantsByLine((current) => {
+      const nextState: CourseParticipantsByLine = {};
+
+      for (const line of courseLines) {
+        const existingNames = current[line.lineKey] ?? [];
+        nextState[line.lineKey] = Array.from({ length: line.quantity }, (_, index) => existingNames[index] ?? "");
+      }
+
+      return nextState;
+    });
+  }, [courseLines]);
+
+  useEffect(() => {
+    setCourseErrorsByLine((current) => {
+      const nextState: CourseErrorsByLine = {};
+
+      for (const line of courseLines) {
+        nextState[line.lineKey] = current[line.lineKey] ?? null;
+      }
+
+      return nextState;
+    });
+  }, [courseLines]);
+
   const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim();
   const isProductionKey = /^APP_USR-/i.test(publicKey ?? "");
   const isBelowMercadoPagoMinAmount = total < MIN_MX_CARD_PAYMENT_AMOUNT;
   const normalizedUserEmail = user?.email.trim().toLowerCase() ?? "";
+
+  const updateCourseParticipant = useCallback((lineKey: string, index: number, value: string) => {
+    setCourseParticipantsByLine((current) => {
+      const currentLineParticipants = current[lineKey] ?? [];
+      const nextLineParticipants = [...currentLineParticipants];
+      nextLineParticipants[index] = value;
+
+      return {
+        ...current,
+        [lineKey]: nextLineParticipants,
+      };
+    });
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -255,6 +350,23 @@ export default function CheckoutClient() {
             setCheckoutStatus("loading");
 
             return new Promise<void>((resolve) => {
+              const frontendValidationErrors = validateCourseParticipants(courseParticipantsByLine);
+              setCourseErrorsByLine(frontendValidationErrors);
+
+              if (Object.values(frontendValidationErrors).some((errorMessage) => errorMessage)) {
+                setCheckoutStatus("error");
+                setFeedback("Completa los nombres de participantes por sesión antes de continuar con el pago.");
+                resolve();
+                return;
+              }
+
+              const courseParticipantsBySession = Object.fromEntries(
+                courseLines.map((line) => [
+                  line.courseSessionId,
+                  (courseParticipantsByLine[line.lineKey] ?? []).map((fullName) => fullName.trim()),
+                ]),
+              );
+
               fetch("/api/mercadopago/create-order", {
                 method: "POST",
                 headers: {
@@ -270,7 +382,17 @@ export default function CheckoutClient() {
                     email: normalizedPayerEmail,
                   },
                   receipt_email: normalizedPayerEmail,
-                  items: checkoutItems,
+                  items: checkoutItems.map((item) => {
+                    if (item.kind !== "course") {
+                      return item;
+                    }
+
+                    return {
+                      ...item,
+                      course_participants: courseParticipantsBySession[item.course_session_id] ?? [],
+                    };
+                  }),
+                  course_participants: courseParticipantsBySession,
                 }),
               })
                 .then(async (response) => {
@@ -327,7 +449,19 @@ export default function CheckoutClient() {
       setFeedback("No se pudo inicializar Mercado Pago. Intenta recargar la página.");
       console.error("[Checkout] mount brick error:", error);
     }
-  }, [checkoutItems, clearCart, isBelowMercadoPagoMinAmount, isProductionKey, normalizedUserEmail, publicKey, router, total, items.length]);
+  }, [
+    checkoutItems,
+    clearCart,
+    courseLines,
+    courseParticipantsByLine,
+    isBelowMercadoPagoMinAmount,
+    isProductionKey,
+    normalizedUserEmail,
+    publicKey,
+    router,
+    total,
+    items.length,
+  ]);
 
   useEffect(() => {
     if (!window.MercadoPago) {
@@ -405,7 +539,7 @@ export default function CheckoutClient() {
           <h2>Checkout embebido</h2>
           <ul>
             {items.map((item) => (
-              <li key={item.slug}>
+              <li key={getCartItemLineKey(item)}>
                 <span>{item.name}</span>
                 <strong>
                   {item.quantity} x {item.price}
@@ -420,6 +554,37 @@ export default function CheckoutClient() {
           <div className={`checkout-feedback checkout-feedback-${checkoutStatus}`} role="status" aria-live="polite">
             {feedback}
           </div>
+          {courseLines.length ? (
+            <section className="checkout-participants" aria-label="Participantes por sesión">
+              <h3>Participantes</h3>
+              {courseLines.map((line) => (
+                <div key={line.lineKey} className="checkout-participants-line">
+                  <p>
+                    <strong>{line.courseTitle}</strong>
+                  </p>
+                  <div className="checkout-participants-grid">
+                    {Array.from({ length: line.quantity }, (_, index) => (
+                      <label key={`${line.lineKey}-participant-${index}`} className="checkout-participant-input">
+                        <span>Participante {index + 1}</span>
+                        <input
+                          type="text"
+                          value={courseParticipantsByLine[line.lineKey]?.[index] ?? ""}
+                          onChange={(event) => updateCourseParticipant(line.lineKey, index, event.target.value)}
+                          minLength={MIN_PARTICIPANT_NAME_LENGTH}
+                          required
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  {courseErrorsByLine[line.lineKey] ? (
+                    <p className="checkout-participants-error" role="alert">
+                      {courseErrorsByLine[line.lineKey]}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </section>
+          ) : null}
           {normalizedUserEmail ? (
             <label className="checkout-receipt-email">
               <span>Correo electrónico para el pago</span>
