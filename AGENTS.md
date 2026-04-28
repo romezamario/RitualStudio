@@ -2266,3 +2266,35 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta explícitamente la corrección de persistencia para catálogo dinámico.
+
+## PR: Email de comprobante desacoplado del `test_user` de Mercado Pago
+- Fecha: 2026-04-28
+- Objetivo: Evitar que el comprobante se envíe al correo técnico `test_user_*@testuser.com` en flujos de sandbox y permitir capturar explícitamente el correo real del cliente para notificaciones post-pago.
+
+### Lo aprendido
+- El Card Payment Brick puede aportar un `payer.email` técnico de pruebas en sandbox, lo que no siempre representa el destinatario real del comprobante.
+- Separar “email de autorización del pago” y “email de comprobante” reduce confusión operativa y evita tickets de soporte por correos no recibidos.
+- Qué no funcionó y por qué: depender solo de `formData.payer.email` hace que la pantalla de éxito y el envío por webhook reflejen correos de test en lugar del correo real del cliente.
+
+### Decisiones técnicas
+- Se agregó un campo obligatorio en UI (`Email para enviar comprobante`) en `checkout-client` para capturar el destinatario funcional del recibo.
+- Se amplió el payload de `create-order` con `receipt_email`, validándolo en backend antes de persistir.
+- Se priorizó `receipt_email` al guardar `orders.customer_email` (con fallback a `payer.email`) y también se guardó en `orders.metadata` para trazabilidad.
+
+### Riesgos y mitigaciones
+- Riesgo: que el cliente escriba mal su correo de comprobante.
+- Mitigación: validación de formato en frontend (requerido) y backend (`Email de comprobante inválido` si no pasa regex).
+- Pendientes: considerar confirmación doble de correo y/o reenvío manual desde backoffice para mejorar recuperabilidad operativa.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación estática de TypeScript.
+- Resultado esperado: checkout compila con nuevo campo, backend acepta `receipt_email` válido y falla de forma controlada para valores inválidos.
+- Resultado obtenido: checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta que el comprobante ya usa un correo dedicado y no depende del `payer.email` técnico de Mercado Pago en sandbox.

@@ -1662,3 +1662,22 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Correo de comprobante independiente del email técnico de Mercado Pago
+### ¿Qué cambia?
+- Se agregó en `src/components/checkout-client.tsx` un campo obligatorio **"Email para enviar comprobante"** fuera del Card Payment Brick.
+- El checkout ahora envía `receipt_email` al backend (`/api/mercadopago/create-order`) para guardar el destinatario real del comprobante, aunque Mercado Pago en modo sandbox devuelva un `payer.email` tipo `test_user_*`.
+- En `src/app/api/mercadopago/create-order/route.ts` se valida `receipt_email` y se prioriza como `orders.customer_email` (con respaldo de `payer.email`), además de guardarlo en `orders.metadata` para trazabilidad.
+- Se extendió el contrato tipado de checkout (`MpCreateOrderInput`) y se añadieron estilos en `globals.css` para la nueva captura de email de comprobante.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- El correo de comprobante deja de depender únicamente del email técnico que Mercado Pago puede inyectar en pruebas (`test_user_*@testuser.com`).
+- Se mantiene compatibilidad con el flujo actual de pago, pero ahora el destinatario de comprobante es controlado explícitamente por el usuario en el checkout.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

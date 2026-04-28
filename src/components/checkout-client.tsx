@@ -164,6 +164,8 @@ export default function CheckoutClient() {
   const router = useRouter();
   const [checkoutStatus, setCheckoutStatus] = useState<CheckoutStatus>("idle");
   const [feedback, setFeedback] = useState("Completa tus datos para procesar el pago con tarjeta sin salir del sitio.");
+  const [receiptEmail, setReceiptEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const isBrickMounted = useRef(false);
 
   const total = useMemo(() => {
@@ -182,6 +184,7 @@ export default function CheckoutClient() {
   const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim();
   const isProductionKey = /^APP_USR-/i.test(publicKey ?? "");
   const isBelowMercadoPagoMinAmount = total < MIN_MX_CARD_PAYMENT_AMOUNT;
+  const normalizedReceiptEmail = receiptEmail.trim().toLowerCase();
 
   useEffect(() => {
     return () => {
@@ -228,7 +231,15 @@ export default function CheckoutClient() {
             setFeedback("Formulario listo. Puedes pagar con tarjeta y cuotas sin redirecciones.");
           },
           onSubmit: (formData: MpBrickFormData) => {
+            if (!normalizedReceiptEmail) {
+              setCheckoutStatus("error");
+              setEmailError("Escribe el correo donde quieres recibir tu comprobante antes de pagar.");
+              setFeedback("Falta tu correo para comprobante. Completa ese dato e intenta nuevamente.");
+              return Promise.resolve();
+            }
+
             setCheckoutStatus("loading");
+            setEmailError("");
 
             return new Promise<void>((resolve) => {
               fetch("/api/mercadopago/create-order", {
@@ -245,6 +256,7 @@ export default function CheckoutClient() {
                   payer: {
                     email: formData.payer.email,
                   },
+                  receipt_email: normalizedReceiptEmail,
                   items: checkoutItems,
                 }),
               })
@@ -266,8 +278,8 @@ export default function CheckoutClient() {
                       total_amount: String(result.total_amount ?? total),
                     });
 
-                    if (formData.payer.email) {
-                      successParams.set("email", formData.payer.email);
+                    if (normalizedReceiptEmail) {
+                      successParams.set("email", normalizedReceiptEmail);
                     }
 
                     router.push(`/checkout/exito?${successParams.toString()}`);
@@ -365,6 +377,28 @@ export default function CheckoutClient() {
         </article>
 
         <article className="studio-card checkout-form-shell">
+          <label className="checkout-receipt-email">
+            <span>Email para enviar comprobante</span>
+            <input
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              required
+              value={receiptEmail}
+              onChange={(event) => {
+                setReceiptEmail(event.target.value);
+                if (emailError) {
+                  setEmailError("");
+                }
+              }}
+              placeholder="tu-correo@dominio.com"
+            />
+          </label>
+          {emailError ? (
+            <p className="checkout-receipt-email-error" role="alert">
+              {emailError}
+            </p>
+          ) : null}
           <div className={`checkout-feedback checkout-feedback-${checkoutStatus}`} role="status" aria-live="polite">
             {feedback}
           </div>

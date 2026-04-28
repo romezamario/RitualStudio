@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
   }
 
-  const { token, payment_method_id, installments, issuer_id, payer, items } = body;
+  const { token, payment_method_id, installments, issuer_id, payer, receipt_email, items } = body;
 
   if (!token || !payment_method_id || !payer?.email) {
     return NextResponse.json({ error: "Faltan datos obligatorios del pago." }, { status: 400 });
@@ -56,6 +56,12 @@ export async function POST(request: Request) {
 
   if (!isValidEmail(payer.email)) {
     return NextResponse.json({ error: "Email inválido." }, { status: 400 });
+  }
+
+  const normalizedReceiptEmail = receipt_email?.trim().toLowerCase();
+
+  if (normalizedReceiptEmail && !isValidEmail(normalizedReceiptEmail)) {
+    return NextResponse.json({ error: "Email de comprobante inválido." }, { status: 400 });
   }
 
   if (!Number.isInteger(installments) || installments < 1 || installments > 24) {
@@ -89,6 +95,7 @@ export async function POST(request: Request) {
       installments,
       payment_method_id,
       payer_email: payer.email,
+      receipt_email: normalizedReceiptEmail ?? null,
       issuer_id: normalizeIssuerId(issuer_id) ?? null,
       items: lineItems.map((item) => ({
         slug: item.slug,
@@ -114,11 +121,13 @@ export async function POST(request: Request) {
       mercado_pago_order_id: mercadoPagoOrderId,
       status: payment.status ?? "unknown",
       total_amount: payment.transaction_amount ?? totalAmount,
-      customer_email: payer.email,
+      customer_email: normalizedReceiptEmail ?? payer.email,
       metadata: {
         items: lineItems,
         installments,
         payment_method_id,
+        payer_email: payer.email,
+        receipt_email: normalizedReceiptEmail ?? payer.email,
         source: "checkout-bricks-card-payment",
       },
       raw_response: payment,
