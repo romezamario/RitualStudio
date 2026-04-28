@@ -2298,3 +2298,34 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: README documenta que el comprobante ya usa un correo dedicado y no depende del `payer.email` técnico de Mercado Pago en sandbox.
+
+## PR: Separar carrito y acceso de usuario del flujo del menú principal
+- Fecha: 2026-04-28
+- Objetivo: Evitar que el header se deforme al abrir opciones de cuenta/carrito, separando acciones utilitarias de la navegación principal.
+
+### Lo aprendido
+- Cuando el panel de usuario participa del flujo normal del layout (`position: static`), su altura empuja la navegación y distorsiona el header, sobre todo en tablet/mobile.
+- Convertir el panel a popover posicionado (`absolute`) mantiene estable el bloque de navegación principal.
+- Separar acciones utilitarias (carrito/cuenta) de enlaces de navegación mejora legibilidad y reduce ruido visual en apertura de menús.
+
+### Decisiones técnicas
+- Se movieron carrito y cuenta al bloque `header-actions-cluster` dentro de la fila primaria del header.
+- Se eliminó la fila secundaria previa para que el menú principal quede enfocado exclusivamente en links de navegación.
+- Se cambió `user-menu-panel` a posicionamiento absoluto con `max-height` + `overflow-y: auto` para evitar deformación del contenedor.
+
+### Riesgos y mitigaciones
+- Riesgo: que el popover se salga de pantalla en anchos reducidos.
+- Mitigación: se aplicó ancho máximo responsivo (`width: min(86vw, 320px)`) y altura limitada con scroll interno.
+- Pendientes: considerar cierre del popover al hacer click fuera para reforzar UX en sesiones largas.
+
+### Pruebas
+- Tipo: Prueba automatizada de calidad (lint).
+- Resultado esperado: compilar/lint sin errores tras reordenar markup del header y estilos de menú usuario.
+- Resultado obtenido: lint en verde.
+- Evidencia:
+  - `npm run lint` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: Se dejó trazabilidad explícita de la separación entre navegación principal y acciones de cuenta/carrito para futuras iteraciones de UX.

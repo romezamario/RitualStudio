@@ -1681,3 +1681,20 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Separación de accesos de carrito/cuenta para evitar deformación del menú
+### ¿Qué cambia?
+- Se reordenó el header interactivo para que **carrito** y **cuenta de usuario** vivan en un bloque de utilidades independiente (`header-actions-cluster`) junto al botón de menú, en lugar de mezclarse con el flujo del menú principal.
+- El panel de usuario ahora se renderiza como popover posicionado en `absolute` (`top/right`) con altura máxima y scroll interno, evitando empujar/deformar el contenedor de navegación cuando se despliega.
+- Se ajustaron estilos responsive del popover de usuario para que conserve ancho controlado en mobile/tablet sin romper layout del header.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+
+### Impacto
+- El menú principal mantiene su estructura al abrir opciones de usuario.
+- Mejora la UX en pantallas pequeñas al separar claramente navegación principal de acciones utilitarias (carrito/cuenta).
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí

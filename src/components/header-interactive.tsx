@@ -51,18 +51,94 @@ export function HeaderInteractive({ links }: HeaderInteractiveProps) {
           <span className="brand-sub">by Sol</span>
         </Link>
 
-        <button
-          type="button"
-          className={`menu-toggle ${isMenuOpen ? "is-open" : ""}`}
-          aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
-          aria-expanded={isMenuOpen}
-          aria-controls="site-navigation"
-          onClick={() => setIsMenuOpen((current) => !current)}
-        >
-          <span aria-hidden />
-          <span aria-hidden />
-          <span aria-hidden />
-        </button>
+        <div className="header-actions-cluster">
+          <Link
+            href="/carrito"
+            className="cart-access"
+            aria-label={totalItems > 0 ? `Ver carrito con ${totalItems} productos` : "Ver carrito"}
+            onClick={closeMenu}
+          >
+            <CartIcon />
+            <span className="sr-only">Ver carrito</span>
+            {totalItems > 0 ? (
+              <span className="cart-access-badge" aria-label={`${totalItems} productos en el carrito`}>
+                {totalItems}
+              </span>
+            ) : null}
+          </Link>
+
+          <div className="user-menu account-access">
+            <button
+              type="button"
+              className={`user-access-trigger ${isAuthenticated ? "is-authenticated" : ""}`}
+              aria-label={
+                isAuthenticated
+                  ? `Cuenta de ${userDisplayName}. Abrir menú de usuario`
+                  : "Abrir opciones de iniciar sesión o crear usuario"
+              }
+              aria-expanded={isUserMenuOpen}
+              aria-controls="user-menu-panel"
+              onClick={() => setIsUserMenuOpen((current) => !current)}
+            >
+              {isAuthenticated ? (
+                <span className="user-initials" aria-hidden>
+                  {userInitials}
+                </span>
+              ) : (
+                <>
+                  <UserIcon />
+                  <span className="sr-only">Cuenta</span>
+                </>
+              )}
+            </button>
+            {isUserMenuOpen ? (
+              <div id="user-menu-panel" className="user-menu-panel">
+                {isAuthenticated ? (
+                  <>
+                    <p className="user-menu-role">Rol: {user?.role === "admin" ? "Administrador" : "Usuario"}</p>
+                    {userMenuLinks.map((menuLink) => (
+                      <Link key={menuLink.href} href={menuLink.href} onClick={closeMenu} className="user-menu-link">
+                        {menuLink.label}
+                      </Link>
+                    ))}
+                    <button
+                      type="button"
+                      className="user-menu-logout"
+                      onClick={async () => {
+                        await signOut();
+                        closeMenu();
+                      }}
+                    >
+                      Cerrar sesión
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" onClick={closeMenu} className="user-menu-link">
+                      Iniciar sesión
+                    </Link>
+                    <Link href="/login?mode=signup" onClick={closeMenu} className="user-menu-link">
+                      Crear usuario
+                    </Link>
+                  </>
+                )}
+              </div>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            className={`menu-toggle ${isMenuOpen ? "is-open" : ""}`}
+            aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={isMenuOpen}
+            aria-controls="site-navigation"
+            onClick={() => setIsMenuOpen((current) => !current)}
+          >
+            <span aria-hidden />
+            <span aria-hidden />
+            <span aria-hidden />
+          </button>
+        </div>
       </div>
 
       <nav id="site-navigation" className={`nav-links ${isMenuOpen ? "is-open" : ""}`} aria-label="Navegación principal">
@@ -72,82 +148,6 @@ export function HeaderInteractive({ links }: HeaderInteractiveProps) {
           </Link>
         ))}
       </nav>
-
-      <div className="header-secondary-row">
-        <Link
-          href="/carrito"
-          className="cart-access"
-          aria-label={totalItems > 0 ? `Ver carrito con ${totalItems} productos` : "Ver carrito"}
-          onClick={closeMenu}
-        >
-          <CartIcon />
-          <span className="sr-only">Ver carrito</span>
-          {totalItems > 0 ? (
-            <span className="cart-access-badge" aria-label={`${totalItems} productos en el carrito`}>
-              {totalItems}
-            </span>
-          ) : null}
-        </Link>
-
-        <div className="user-menu account-access">
-          <button
-            type="button"
-            className={`user-access-trigger ${isAuthenticated ? "is-authenticated" : ""}`}
-            aria-label={
-              isAuthenticated
-                ? `Cuenta de ${userDisplayName}. Abrir menú de usuario`
-                : "Abrir opciones de iniciar sesión o crear usuario"
-            }
-            aria-expanded={isUserMenuOpen}
-            aria-controls="user-menu-panel"
-            onClick={() => setIsUserMenuOpen((current) => !current)}
-          >
-            {isAuthenticated ? (
-              <span className="user-initials" aria-hidden>
-                {userInitials}
-              </span>
-            ) : (
-              <>
-                <UserIcon />
-                <span className="sr-only">Cuenta</span>
-              </>
-            )}
-          </button>
-          {isUserMenuOpen ? (
-            <div id="user-menu-panel" className="user-menu-panel">
-              {isAuthenticated ? (
-                <>
-                  <p className="user-menu-role">Rol: {user?.role === "admin" ? "Administrador" : "Usuario"}</p>
-                  {userMenuLinks.map((menuLink) => (
-                    <Link key={menuLink.href} href={menuLink.href} onClick={closeMenu} className="user-menu-link">
-                      {menuLink.label}
-                    </Link>
-                  ))}
-                  <button
-                    type="button"
-                    className="user-menu-logout"
-                    onClick={async () => {
-                      await signOut();
-                      closeMenu();
-                    }}
-                  >
-                    Cerrar sesión
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" onClick={closeMenu} className="user-menu-link">
-                    Iniciar sesión
-                  </Link>
-                  <Link href="/login?mode=signup" onClick={closeMenu} className="user-menu-link">
-                    Crear usuario
-                  </Link>
-                </>
-              )}
-            </div>
-          ) : null}
-        </div>
-      </div>
     </div>
   );
 }
