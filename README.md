@@ -1716,3 +1716,23 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fix de correo duplicado en checkout + prefill para usuario logueado
+### ¿Qué cambia?
+- En `src/components/checkout-client.tsx` se eliminó el campo externo **"Email para enviar comprobante"** para evitar duplicidad con el campo `E-mail` del Card Payment Brick.
+- El checkout ahora usa una única fuente de correo: `formData.payer.email` del Brick. Ese mismo valor se envía como `payer.email` y `receipt_email` al backend.
+- Si el usuario tiene sesión activa, el checkout prellena el email en Mercado Pago vía `initialization.payer.email` usando `useAuth()`.
+- Cuando el email de sesión llega después del primer render, el Brick se desmonta/remonta para aplicar el prefill sin intervención manual del cliente.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- `npx tsc --noEmit`.
+
+### Impacto
+- Se elimina el falso error de “falta correo” causado por desincronización entre dos inputs distintos.
+- El correo capturado en checkout es exactamente el correo usado para enviar comprobante de pago.
+- Mejora UX en usuarios autenticados al evitar pedir nuevamente un dato ya disponible en sesión.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
