@@ -2,9 +2,10 @@
 
 import Script from "next/script";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/cart-context";
+import { useAuth } from "@/components/auth-context";
 import { MIN_MX_CARD_PAYMENT_AMOUNT, parseMxPrice } from "@/lib/mercadopago";
 
 type CheckoutStatus = "idle" | "loading" | "approved" | "pending" | "rejected" | "error";
@@ -161,12 +162,12 @@ declare global {
 
 export default function CheckoutClient() {
   const { items, clearCart } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
   const [checkoutStatus, setCheckoutStatus] = useState<CheckoutStatus>("idle");
   const [feedback, setFeedback] = useState("Completa tus datos para procesar el pago con tarjeta sin salir del sitio.");
-  const [receiptEmail, setReceiptEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
   const isBrickMounted = useRef(false);
+  const initializedPayerEmail = useRef("");
 
   const total = useMemo(() => {
     return items.reduce((sum, item) => sum + parseMxPrice(item.price) * item.quantity, 0);
@@ -184,7 +185,7 @@ export default function CheckoutClient() {
   const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim();
   const isProductionKey = /^APP_USR-/i.test(publicKey ?? "");
   const isBelowMercadoPagoMinAmount = total < MIN_MX_CARD_PAYMENT_AMOUNT;
-  const normalizedReceiptEmail = receiptEmail.trim().toLowerCase();
+  const normalizedUserEmail = user?.email.trim().toLowerCase() ?? "";
 
   useEffect(() => {
     return () => {
@@ -196,7 +197,7 @@ export default function CheckoutClient() {
     };
   }, []);
 
-  const mountBrick = async () => {
+  const mountBrick = useCallback(async () => {
     if (
       isBrickMounted.current ||
       !window.MercadoPago ||
@@ -217,6 +218,11 @@ export default function CheckoutClient() {
       window.cardPaymentBrickController = await bricksBuilder.create("cardPayment", "mp-card-payment-brick", {
         initialization: {
           amount: total,
+          payer: normalizedUserEmail
+            ? {
+                email: normalizedUserEmail,
+              }
+            : undefined,
         },
         customization: {
           visual: {
@@ -231,15 +237,8 @@ export default function CheckoutClient() {
             setFeedback("Formulario listo. Puedes pagar con tarjeta y cuotas sin redirecciones.");
           },
           onSubmit: (formData: MpBrickFormData) => {
-            if (!normalizedReceiptEmail) {
-              setCheckoutStatus("error");
-              setEmailError("Escribe el correo donde quieres recibir tu comprobante antes de pagar.");
-              setFeedback("Falta tu correo para comprobante. Completa ese dato e intenta nuevamente.");
-              return Promise.resolve();
-            }
-
+            const normalizedPayerEmail = formData.payer.email.trim().toLowerCase();
             setCheckoutStatus("loading");
-            setEmailError("");
 
             return new Promise<void>((resolve) => {
               fetch("/api/mercadopago/create-order", {
@@ -254,9 +253,9 @@ export default function CheckoutClient() {
                   installments: formData.installments,
                   issuer_id: formData.issuer_id,
                   payer: {
-                    email: formData.payer.email,
+                    email: normalizedPayerEmail,
                   },
-                  receipt_email: normalizedReceiptEmail,
+                  receipt_email: normalizedPayerEmail,
                   items: checkoutItems,
                 }),
               })
@@ -278,8 +277,8 @@ export default function CheckoutClient() {
                       total_amount: String(result.total_amount ?? total),
                     });
 
-                    if (normalizedReceiptEmail) {
-                      successParams.set("email", normalizedReceiptEmail);
+                    if (normalizedPayerEmail) {
+                      successParams.set("email", normalizedPayerEmail);
                     }
 
                     router.push(`/checkout/exito?${successParams.toString()}`);
@@ -308,12 +307,31 @@ export default function CheckoutClient() {
       });
 
       isBrickMounted.current = true;
+      initializedPayerEmail.current = normalizedUserEmail;
     } catch (error) {
       setCheckoutStatus("error");
       setFeedback("No se pudo inicializar Mercado Pago. Intenta recargar la página.");
       console.error("[Checkout] mount brick error:", error);
     }
-  };
+  }, [checkoutItems, clearCart, isBelowMercadoPagoMinAmount, isProductionKey, normalizedUserEmail, publicKey, router, total, items.length]);
+
+  useEffect(() => {
+    if (!window.MercadoPago || !isBrickMounted.current) {
+      return;
+    }
+
+    if (initializedPayerEmail.current === normalizedUserEmail) {
+      return;
+    }
+
+    if (window.cardPaymentBrickController) {
+      window.cardPaymentBrickController.unmount();
+      window.cardPaymentBrickController = undefined;
+    }
+
+    isBrickMounted.current = false;
+    void mountBrick();
+  }, [mountBrick, normalizedUserEmail]);
 
   if (!publicKey) {
     return (
@@ -377,28 +395,6 @@ export default function CheckoutClient() {
         </article>
 
         <article className="studio-card checkout-form-shell">
-          <label className="checkout-receipt-email">
-            <span>Email para enviar comprobante</span>
-            <input
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              required
-              value={receiptEmail}
-              onChange={(event) => {
-                setReceiptEmail(event.target.value);
-                if (emailError) {
-                  setEmailError("");
-                }
-              }}
-              placeholder="tu-correo@dominio.com"
-            />
-          </label>
-          {emailError ? (
-            <p className="checkout-receipt-email-error" role="alert">
-              {emailError}
-            </p>
-          ) : null}
           <div className={`checkout-feedback checkout-feedback-${checkoutStatus}`} role="status" aria-live="polite">
             {feedback}
           </div>

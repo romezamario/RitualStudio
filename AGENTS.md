@@ -2361,3 +2361,35 @@ Un PR se considera terminado solo si:
 - README actualizado: Sí
 - AGENTS actualizado: Sí
 - Notas: Se registró el ajuste de capas para evitar regresiones en componentes flotantes del header.
+
+## PR: Fix de correo duplicado en checkout + prefill para usuario logueado
+- Fecha: 2026-04-28
+- Objetivo: Eliminar la duplicidad de campos de correo en checkout, usar un único email como destinatario del comprobante y prellenarlo cuando el cliente ya inició sesión.
+
+### Lo aprendido
+- Mantener dos fuentes de correo (input externo + campo interno del Brick) introduce desincronización y errores falsos de validación.
+- El Card Payment Brick permite inicializar `payer.email`, lo que habilita prefill automático con el email de sesión sin duplicar UI.
+- Reutilizar `formData.payer.email` como `receipt_email` simplifica el contrato del checkout y evita estados inconsistentes.
+
+### Decisiones técnicas
+- Se removió el input externo `Email para enviar comprobante` para dejar una sola captura de email dentro del Brick.
+- Se agregó lectura de sesión con `useAuth()` en checkout y se inyectó `initialization.payer.email` cuando existe usuario autenticado.
+- En submit, se normaliza `formData.payer.email` y se envía tanto en `payer.email` como en `receipt_email` para que el comprobante use exactamente ese dato.
+
+### Riesgos y mitigaciones
+- Riesgo: la sesión puede cargar después del primer render del checkout y no prellenar el Brick en el primer montaje.
+- Mitigación: cuando cambia el email de sesión, se desmonta/remonta el Brick para reinyectar el `payer.email` inicializado.
+- Pendientes: evaluar persistir el último correo de checkout para usuarios no logueados en futuras iteraciones.
+
+### Pruebas
+- Tipo: Pruebas automatizadas de calidad + validación estática de TypeScript.
+- Resultado esperado: checkout compila sin errores, desaparece el falso error de correo faltante y el flujo usa un solo campo de email.
+- Resultado obtenido: checks en verde.
+- Evidencia:
+  - `npm run lint` OK.
+  - `npx tsc --noEmit` OK.
+
+### Documentación
+- README actualizado: Sí
+- AGENTS actualizado: Sí
+- Notas: README documenta que el correo del Brick es ahora la única fuente para pago/comprobante y que se prellena para usuarios logueados.
