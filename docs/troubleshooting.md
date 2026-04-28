@@ -90,6 +90,17 @@
 - Confirmar en `courses.image_url` si el valor viene vacío/null.
 - Verificar que el frontend use fallback local (`/images/logo.png`) cuando `image_url` no tenga contenido.
 
+### En admin de cursos no se guarda la imagen al seleccionar archivo
+**Síntoma:** en `/admin/cursos`, después de seleccionar imagen y guardar, el curso sigue sin `image_url`.
+
+**Causa frecuente:** el archivo no cumple las reglas del endpoint de carga (se reutiliza el mismo endpoint de productos).
+
+**Revisión rápida:**
+- Verificar formato permitido: `JPG`, `PNG`, `WEBP` o `AVIF` (HEIC/HEIF no se aceptan).
+- Confirmar tamaño máximo (`<= 4MB`; para `PNG`, recomendado `<= 2MB`).
+- Revisar la respuesta de `POST /api/admin/products/upload-image` y confirmar que llegue `data.image`.
+- Validar que en la actualización del curso (`POST/PUT /api/admin/courses*`) se envíe `imageUrl` con el path recibido.
+
 ---
 
 ## Documentation Drift
