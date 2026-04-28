@@ -11,9 +11,7 @@ export type CheckoutLineItemInput =
   | {
       kind: "course";
       slug: string;
-      course_id: string;
       course_session_id: string;
-      session_starts_at: string;
       quantity: number;
       course_participants?: string[];
     };
@@ -125,40 +123,34 @@ async function getCheckoutCatalog() {
 }
 
 async function validateCourseLineItem(entry: Extract<CheckoutLineItemInput, { kind: "course" }>) {
-  if (!entry.course_id || !entry.course_session_id || !entry.session_starts_at || !entry.slug) {
-    throw new Error("Curso inválido: faltan datos de curso/sesión.");
+  if (!entry.course_session_id || !entry.slug) {
+    throw new Error("Curso inválido: faltan datos de sesión.");
   }
 
   if (!Number.isInteger(entry.quantity) || entry.quantity < 1 || entry.quantity > MAX_COURSE_PARTICIPANTS_PER_LINE) {
     throw new Error(`Cantidad inválida para curso ${entry.slug}.`);
   }
 
-  const [courseResult, sessionResult] = await Promise.all([
-    supabaseAdminRequest<CourseRow[]>(
-      `/rest/v1/courses?id=eq.${encodeURIComponent(entry.course_id)}&slug=eq.${encodeURIComponent(entry.slug)}&is_active=eq.true&select=id,slug,title,price,is_active&limit=1`,
-      { method: "GET" },
-    ),
-    supabaseAdminRequest<CourseSessionRow[]>(
-      `/rest/v1/course_sessions?id=eq.${encodeURIComponent(entry.course_session_id)}&course_id=eq.${encodeURIComponent(entry.course_id)}&is_active=eq.true&select=id,course_id,starts_at,capacity,reserved_spots,is_active&limit=1`,
-      { method: "GET" },
-    ),
-  ]);
+  const { data: sessionData, error: sessionError } = await supabaseAdminRequest<CourseSessionRow[]>(
+    `/rest/v1/course_sessions?id=eq.${encodeURIComponent(entry.course_session_id)}&is_active=eq.true&select=id,course_id,starts_at,capacity,reserved_spots,is_active&limit=1`,
+    { method: "GET" },
+  );
 
-  if (courseResult.error || !courseResult.data?.length) {
-    throw new Error(`Curso inválido: ${entry.slug}.`);
-  }
-
-  if (sessionResult.error || !sessionResult.data?.length) {
+  if (sessionError || !sessionData?.length) {
     throw new Error(`Sesión inválida para curso ${entry.slug}.`);
   }
 
-  const course = courseResult.data[0];
-  const session = sessionResult.data[0];
+  const session = sessionData[0];
+  const { data: courseData, error: courseError } = await supabaseAdminRequest<CourseRow[]>(
+    `/rest/v1/courses?id=eq.${encodeURIComponent(session.course_id)}&slug=eq.${encodeURIComponent(entry.slug)}&is_active=eq.true&select=id,slug,title,price,is_active&limit=1`,
+    { method: "GET" },
+  );
 
-  if (session.starts_at !== entry.session_starts_at) {
-    throw new Error(`La sesión seleccionada para ${entry.slug} cambió. Actualiza tu carrito.`);
+  if (courseError || !courseData?.length) {
+    throw new Error(`Curso inválido: ${entry.slug}.`);
   }
 
+  const course = courseData[0];
   const remainingSpots = Math.max(session.capacity - session.reserved_spots, 0);
 
   if (entry.quantity > remainingSpots) {

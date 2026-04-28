@@ -13,6 +13,7 @@ Guía de autenticación, sesiones, perfiles y autorización por rol.
 - La app utiliza cookies de sesión para access/refresh token.
 - Validación server-side de usuario mediante `/auth/v1/user`.
 - Endpoint `GET /api/auth/me` disponible para hidratación de estado autenticado en UI.
+- En `create-order` de Mercado Pago, si hay sesión válida durante checkout, la orden se persiste con `orders.user_id` para trazabilidad y acceso RLS de compras de curso.
 
 ## Roles
 - Roles soportados: `user`, `admin`.

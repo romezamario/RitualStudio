@@ -10,6 +10,7 @@ import {
   validateMercadoPagoAmount,
 } from "@/lib/mercadopago";
 import { supabaseAdminRequest } from "@/lib/supabase-admin";
+import { getServerSessionTokens, getUserFromAccessToken } from "@/lib/supabase/server";
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -101,64 +102,64 @@ type OrderInsertRow = {
   id: string;
 };
 
-type OrderCourseItemInsertRow = {
-  id: string;
+type ReserveCourseSpotsRpcInput = {
+  p_order_id: string;
+  p_course_items: Array<{
+    course_id: string;
+    course_session_id: string;
+    quantity: number;
+    unit_price: number;
+    subtotal: number;
+    participants: string[];
+  }>;
 };
 
-async function persistCourseParticipants(
+const PAYMENT_RELEASE_STATUSES = new Set(["rejected", "cancelled"]);
+
+async function reserveCourseCapacity(
   orderId: string,
   lineItems: ValidatedLineItem[],
   participantsBySession: Map<string, string[]>,
 ) {
-  for (const lineItem of lineItems) {
-    if (lineItem.kind !== "course" || !lineItem.courseId || !lineItem.courseSessionId) {
-      continue;
-    }
-
-    const lineParticipants = participantsBySession.get(lineItem.courseSessionId) ?? [];
-
-    const orderCourseItemPayload = {
-      order_id: orderId,
-      course_id: lineItem.courseId,
-      course_session_id: lineItem.courseSessionId,
-      quantity: lineItem.quantity,
-      unit_price: lineItem.unitPrice,
-      subtotal: lineItem.subtotal,
-      metadata: {
-        source: "checkout-bricks-card-payment",
-      },
-    };
-
-    const { data: orderCourseItems, error: orderCourseItemError } = await supabaseAdminRequest<OrderCourseItemInsertRow[]>(
-      "/rest/v1/order_course_items",
-      {
-        method: "POST",
-        body: JSON.stringify(orderCourseItemPayload),
-      },
-    );
-
-    if (orderCourseItemError || !orderCourseItems?.[0]?.id) {
-      console.error("[MP create-order] No se pudo guardar order_course_items en Supabase:", orderCourseItemError);
-      continue;
-    }
-
-    if (!lineParticipants.length) {
-      continue;
-    }
-
-    const participantsPayload = lineParticipants.map((fullName) => ({
-      order_course_item_id: orderCourseItems[0].id,
-      full_name: fullName,
+  const courseItems = lineItems
+    .filter((item) => item.kind === "course" && item.courseId && item.courseSessionId)
+    .map((item) => ({
+      course_id: item.courseId as string,
+      course_session_id: item.courseSessionId as string,
+      quantity: item.quantity,
+      unit_price: item.unitPrice,
+      subtotal: item.subtotal,
+      participants: participantsBySession.get(item.courseSessionId as string) ?? [],
     }));
 
-    const { error: participantsError } = await supabaseAdminRequest<unknown[]>("/rest/v1/course_participants", {
-      method: "POST",
-      body: JSON.stringify(participantsPayload),
-    });
+  if (!courseItems.length) {
+    return;
+  }
 
-    if (participantsError) {
-      console.error("[MP create-order] No se pudo guardar course_participants en Supabase:", participantsError);
-    }
+  const { error } = await supabaseAdminRequest<unknown[]>("/rest/v1/rpc/reserve_course_capacity_for_order", {
+    method: "POST",
+    body: JSON.stringify({
+      p_order_id: orderId,
+      p_course_items: courseItems,
+    } satisfies ReserveCourseSpotsRpcInput),
+  });
+
+  if (error) {
+    throw new Error(error.includes("Cupo insuficiente") ? error : `No fue posible reservar cupo para el curso. ${error}`);
+  }
+}
+
+async function releaseCourseCapacity(orderId: string, reason: string) {
+  const { error } = await supabaseAdminRequest<unknown[]>("/rest/v1/rpc/release_course_capacity_for_order", {
+    method: "POST",
+    body: JSON.stringify({
+      p_order_id: orderId,
+      p_reason: reason,
+    }),
+  });
+
+  if (error) {
+    console.error("[MP create-order] No se pudo liberar cupo del curso:", error);
   }
 }
 
@@ -190,11 +191,67 @@ export async function POST(request: Request) {
   }
 
   try {
+    const { accessToken } = await getServerSessionTokens();
+    const sessionUser = await getUserFromAccessToken(accessToken);
     const { lineItems, totalAmount } = await validateAndPriceLineItems(items);
     const validatedCourseParticipants = validateCourseParticipantsBySession(body, lineItems);
+
     validateMercadoPagoAmount(totalAmount);
+
     const externalReference = `ritual-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const idempotencyKey = randomUUID();
+
+    const orderInsert = {
+      user_id: sessionUser?.id ?? null,
+      external_reference: externalReference,
+      status: "pending_payment",
+      total_amount: totalAmount,
+      customer_email: normalizedReceiptEmail ?? payer.email,
+      metadata: {
+        source: "checkout-bricks-card-payment",
+        mixed_items_summary: {
+          products: lineItems.filter((item) => item.kind === "product").map((item) => ({
+            slug: item.slug,
+            name: item.name,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            subtotal: item.subtotal,
+          })),
+          courses: lineItems
+            .filter((item) => item.kind === "course")
+            .map((item) => ({
+              slug: item.slug,
+              name: item.name,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              subtotal: item.subtotal,
+              course_id: item.courseId ?? null,
+              course_session_id: item.courseSessionId ?? null,
+              session_starts_at: item.sessionStartsAt ?? null,
+              participants: item.courseSessionId ? validatedCourseParticipants.get(item.courseSessionId) ?? [] : [],
+            })),
+        },
+        installments,
+        payment_method_id,
+        payer_email: payer.email,
+        receipt_email: normalizedReceiptEmail ?? payer.email,
+        idempotency_key: idempotencyKey,
+        course_participants: Object.fromEntries(validatedCourseParticipants),
+      },
+    };
+
+    const { data: orderRows, error: orderCreateError } = await supabaseAdminRequest<OrderInsertRow[]>("/rest/v1/orders", {
+      method: "POST",
+      body: JSON.stringify(orderInsert),
+    });
+
+    if (orderCreateError || !orderRows?.[0]?.id) {
+      throw new Error(orderCreateError ?? "No fue posible crear la orden local antes del pago.");
+    }
+
+    const orderId = orderRows[0].id;
+
+    await reserveCourseCapacity(orderId, lineItems, validatedCourseParticipants);
 
     const normalizedIssuerId = normalizeIssuerId(issuer_id);
 
@@ -211,25 +268,6 @@ export async function POST(request: Request) {
       description: lineItems.map((item) => `${item.quantity}x ${item.name}`).join(" | ").slice(0, 240),
     };
 
-    console.info("[MP create-order] Request a Mercado Pago", {
-      external_reference: externalReference,
-      transaction_amount: totalAmount,
-      installments,
-      payment_method_id,
-      payer_email: payer.email,
-      receipt_email: normalizedReceiptEmail ?? null,
-      issuer_id: normalizeIssuerId(issuer_id) ?? null,
-      items: lineItems.map((item) => ({
-        kind: item.kind,
-        slug: item.slug,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        subtotal: item.subtotal,
-        course_id: item.courseId ?? null,
-        course_session_id: item.courseSessionId ?? null,
-      })),
-    });
-
     const payment = await mpApiFetch<MpPaymentResponse>("/v1/payments", {
       method: "POST",
       headers: {
@@ -241,39 +279,32 @@ export async function POST(request: Request) {
     const normalizedStatus = mapPaymentStatus(payment.status);
     const mercadoPagoOrderId = payment.order?.id ? String(payment.order.id) : `payment-${String(payment.id ?? "")}`;
 
-    const orderInsert = {
-      external_reference: externalReference,
-      mercado_pago_order_id: mercadoPagoOrderId,
-      status: payment.status ?? "unknown",
-      total_amount: payment.transaction_amount ?? totalAmount,
-      customer_email: normalizedReceiptEmail ?? payer.email,
-      metadata: {
-        items: lineItems,
-        installments,
-        payment_method_id,
-        payer_email: payer.email,
-        receipt_email: normalizedReceiptEmail ?? payer.email,
-        source: "checkout-bricks-card-payment",
-        course_participants: Object.fromEntries(validatedCourseParticipants),
+    const { error: orderUpdateError } = await supabaseAdminRequest<unknown[]>(
+      `/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          mercado_pago_order_id: mercadoPagoOrderId,
+          status: payment.status ?? "unknown",
+          total_amount: payment.transaction_amount ?? totalAmount,
+          raw_response: payment,
+          metadata: {
+            ...orderInsert.metadata,
+            items: lineItems,
+            status_detail: payment.status_detail ?? null,
+            external_reference: externalReference,
+          },
+        }),
       },
-      raw_response: payment,
-    };
+    );
 
-    const { data: orderRows, error: orderError } = await supabaseAdminRequest<OrderInsertRow[]>("/rest/v1/orders", {
-      method: "POST",
-      body: JSON.stringify(orderInsert),
-    });
-
-    if (orderError) {
-      console.error("[MP create-order] No se pudo guardar order en Supabase:", orderError);
-    }
-
-    if (orderRows?.[0]?.id) {
-      await persistCourseParticipants(orderRows[0].id, lineItems, validatedCourseParticipants);
+    if (orderUpdateError) {
+      console.error("[MP create-order] No se pudo actualizar order en Supabase:", orderUpdateError);
     }
 
     if (payment?.id) {
       const paymentRow = {
+        order_id: orderId,
         mercado_pago_payment_id: String(payment.id),
         mercado_pago_order_id: mercadoPagoOrderId,
         status: payment.status ?? "unknown",
@@ -292,6 +323,10 @@ export async function POST(request: Request) {
       if (paymentError) {
         console.error("[MP create-order] No se pudo guardar payment en Supabase:", paymentError);
       }
+    }
+
+    if (PAYMENT_RELEASE_STATUSES.has((payment.status ?? "").toLowerCase())) {
+      await releaseCourseCapacity(orderId, `create-order-${String(payment.status ?? "unknown")}`);
     }
 
     return NextResponse.json({
