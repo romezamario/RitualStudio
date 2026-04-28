@@ -38,6 +38,7 @@ Ritual Studio es una aplicación Next.js (App Router) que actualmente incluye:
   - Webhook de Mercado Pago registra auditoría operativa en `payment_events.payload`, deduplica notificaciones repetidas y reconcilia cupos por estado final del pago.
 - Autenticación base con Supabase (`/login`, `/auth/callback`, `/actualizar-contrasena`).
 - Dashboard de cuenta y administración (`/mi-cuenta`, `/admin/*`), incluyendo gestión de cursos y sesiones con cupos por sesión y carga directa de imagen de curso (sin URL manual).
+- Módulo "Mis pedidos" conectado a Supabase con consulta server-side por usuario autenticado, filtros por estado/referencia y detalle de líneas para productos/cursos con participantes registrados.
 - Base de datos preparada para cursos, sesiones y participantes con RLS en Supabase.
 - Aviso de privacidad (`/aviso-de-privacidad`).
 
