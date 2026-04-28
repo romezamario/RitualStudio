@@ -34,7 +34,7 @@ Ritual Studio es una aplicación Next.js (App Router) que actualmente incluye:
   - En checkout, usuarios autenticados ven su correo prellenado en modo solo lectura antes del formulario embebido.
   - Si hay cursos en carrito, checkout exige nombres de participantes por sesión antes de enviar pago.
 - Autenticación base con Supabase (`/login`, `/auth/callback`, `/actualizar-contrasena`).
-- Dashboard de cuenta y administración (`/mi-cuenta`, `/admin/*`), incluyendo gestión de cursos y sesiones con cupos por sesión.
+- Dashboard de cuenta y administración (`/mi-cuenta`, `/admin/*`), incluyendo gestión de cursos y sesiones con cupos por sesión y carga directa de imagen de curso (sin URL manual).
 - Base de datos preparada para cursos, sesiones y participantes con RLS en Supabase.
 - Aviso de privacidad (`/aviso-de-privacidad`).
 

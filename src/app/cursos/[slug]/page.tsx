@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteShell from "@/components/site-shell";
 import CoursePurchaseActions from "@/components/course-purchase-actions";
 import { getPublicCourseBySlug } from "@/lib/courses-catalog";
+import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
 
 type CourseDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -29,13 +30,16 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
   }
 
   const { course, sessions } = data;
+  const courseImage = course.imageUrl
+    ? toRenderableProductImageUrl(course.imageUrl, "product-detail")
+    : "/images/logo.png";
 
   return (
     <SiteShell eyebrow="Cursos Ritual Studio" title={course.title} subtitle={course.description ?? "Curso experiencial presencial."}>
       <article className="product-detail">
         <div className="product-detail-image-wrap">
           <Image
-            src={course.imageUrl ?? "/images/logo.png"}
+            src={courseImage}
             alt={course.title}
             width={1400}
             height={1000}
