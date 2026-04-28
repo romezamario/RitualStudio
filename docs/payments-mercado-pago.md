@@ -15,11 +15,16 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
    - email(s),
    - cuotas,
    - slugs/cantidades,
-   - cálculo de monto con catálogo backend,
+   - cálculo de monto con catálogo backend (productos + cursos),
    - monto mínimo permitido,
    - participantes por sesión (`course_participants`) con conteo exacto vs `quantity`, nombres no vacíos/mínimo y sin duplicados exactos.
-3. Backend llama `POST /v1/payments` de Mercado Pago con idempotency key.
-4. Backend persiste datos de orden/pago en Supabase (si hay conectividad y credenciales).
+3. Backend crea orden local (`orders`) antes de cobrar, asigna `external_reference` e intenta asociar `orders.user_id` si existe sesión autenticada en checkout.
+4. Si hay cursos, backend ejecuta RPC transaccional en Postgres para:
+   - validar sesión activa/cupo restante con lock (`FOR UPDATE`) y evitar sobreventa por concurrencia;
+   - incrementar `course_sessions.reserved_spots`;
+   - persistir `order_course_items` y `course_participants`.
+5. Backend llama `POST /v1/payments` de Mercado Pago con `X-Idempotency-Key`.
+6. Backend actualiza orden/pago en Supabase con respuesta de Mercado Pago.
 
 ## Checkout Embebido (Card Payment Brick)
 - El script `https://sdk.mercadopago.com/js/v2` se carga una sola vez por sesión en el cliente.
@@ -38,8 +43,13 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 ## Persistence Strategy
 - Tabla `orders`: referencia externa, estado, total, metadata y raw response.
 - Tabla `payments`: id de pago MP, método, estado, monto y raw response.
-- Para líneas de curso se intenta persistir `order_course_items` y `course_participants` con la captura validada del checkout.
+- `orders.metadata` incluye `mixed_items_summary` (productos + cursos + participantes) para trazabilidad de checkout mixto.
+- Para líneas de curso, la persistencia de `order_course_items` y `course_participants` se realiza en una operación transaccional vía RPC.
 - Estrategia de upsert en webhook para idempotencia y convergencia de estado.
+- Política de liberación de cupo:
+  - en `create-order`, si MP responde `rejected` o `cancelled`, se ejecuta RPC de liberación inmediata;
+  - en webhook, si llega estado final `rejected`/`cancelled`, se vuelve a ejecutar liberación idempotente;
+  - la liberación marca metadata (`capacity_released`) para evitar doble decremento.
 
 ## Critical Security Rules
 - `MP_ACCESS_TOKEN` solo backend.
@@ -48,5 +58,5 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 - No aceptar monto final calculado en cliente.
 
 ## Pending / TODO
-- Definir formalmente política de reintentos y alertamiento de fallas webhook.
-- Documentar playbook de conciliación manual por referencia externa.
+- Documentar job automático de reconciliación para órdenes pendientes sin confirmación webhook en ventana esperada.
+- Definir política de reintentos y alertamiento de fallas webhook.

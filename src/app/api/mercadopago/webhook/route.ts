@@ -61,6 +61,8 @@ type OrderRecord = {
   created_at?: string | null;
 };
 
+const COURSE_CAPACITY_RELEASE_STATUSES = new Set(["rejected", "cancelled"]);
+
 type MpOrderResponse = {
   id?: string | number;
   status?: string;
@@ -309,6 +311,26 @@ async function persistEmailConfirmationMetadata(orderId: string, metadata: Order
   }
 }
 
+async function releaseCourseCapacityByMercadoPagoOrderId(mercadoPagoOrderId: string, reason: string) {
+  const order = await fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId);
+
+  if (!order?.id) {
+    return;
+  }
+
+  const { error } = await supabaseAdminRequest<unknown[]>("/rest/v1/rpc/release_course_capacity_for_order", {
+    method: "POST",
+    body: JSON.stringify({
+      p_order_id: order.id,
+      p_reason: reason,
+    }),
+  });
+
+  if (error) {
+    console.error("[MP webhook] No se pudo liberar cupo de curso:", error);
+  }
+}
+
 async function trySendPurchaseEmail({
   payment,
   fallbackPaidAt,
@@ -444,6 +466,15 @@ export async function POST(request: Request) {
         method: "GET",
       });
       await upsertOrderFromPayment(payment);
+      const normalizedPaymentStatus = (payment.status ?? "").toLowerCase();
+
+      if (payment.order?.id && COURSE_CAPACITY_RELEASE_STATUSES.has(normalizedPaymentStatus)) {
+        await releaseCourseCapacityByMercadoPagoOrderId(
+          String(payment.order.id),
+          `webhook-payment-${normalizedPaymentStatus}`,
+        );
+      }
+
       await trySendPurchaseEmail({ payment, fallbackPaidAt: payload.date_created });
     }
 
