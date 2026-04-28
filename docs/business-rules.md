@@ -12,6 +12,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - El carrito usa ítems discriminados por `kind` (`product` o `course`) para unificar checkout sin mezclar contratos.
 - Productos mantienen límite por línea de `1..10`; cursos usan límite de participantes por sesión de `1..6`.
 - Para cursos, la clave de línea es compuesta (`slug + course_session_id`) para evitar colisiones entre sesiones del mismo curso.
+- La compra mixta (productos + cursos en una misma orden) es válida y se procesa con un único intento de pago, pero con validaciones diferenciadas por tipo de línea.
 - En frontend se muestra cupo como snapshot en tiempo real (refresh de sesiones), pero la validación definitiva de cupo/precio ocurre en backend al crear la orden.
 - Para cursos, la reserva de cupo debe ejecutarse de forma transaccional para concurrencia (lock de sesión + incremento atómico de `reserved_spots`).
 - Cantidad por producto permitida: mínimo 1, máximo 10.
@@ -22,6 +23,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - Cuotas (`installments`) permitidas: 1 a 24.
 - Si el carrito contiene cursos, checkout exige captura de nombres de participantes por sesión (`quantity` nombres por cada línea de curso).
 - Validaciones de participantes (frontend y backend): nombres no vacíos, mínimo 2 caracteres y sin duplicados exactos por sesión.
+- Regla de consistencia de participantes: el total de participantes capturados por `course_session_id` debe coincidir exactamente con `quantity` de cada línea de curso o la orden se rechaza antes de invocar a Mercado Pago.
 
 ## Order Lifecycle (Current)
 - Al crear orden de pago se genera `external_reference` único.
@@ -38,9 +40,11 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - En administración, la imagen del curso se carga como archivo (upload directo) y no como URL manual.
 - Cada sesión (`course_sessions`) pertenece a un curso y debe respetar `capacity > 0`.
 - Los cupos reservados (`reserved_spots`) nunca pueden ser negativos.
+- Cupo disponible de sesión: `available_spots = capacity - reserved_spots` y no puede resultar negativo en ninguna transición.
 - En administración, al editar una sesión no se permite bajar `capacity` por debajo de `reserved_spots` para evitar sobreventa.
 - Las líneas de compra de cursos (`order_course_items`) requieren `quantity >= 1` y se vinculan a `orders`, `courses` y `course_sessions`.
-- Participantes (`course_participants`) se registran por ítem de compra y heredan acceso por propiedad de la orden (`orders.user_id`).
+- Participantes (`course_participants`) se registran por ítem de compra y heredan acceso por propiedad de la orden (`orders.user_id`); cada registro pertenece a una sola línea de curso.
+- La edición de cursos/sesiones desde admin requiere rol `admin`; usuarios `user` solo pueden consultar sus propias compras/participantes mediante RLS.
 - Si el pago queda `rejected` o `cancelled`, el sistema libera cupo reservado de forma idempotente (create-order/webhook y reconciliación).
 
 ## Account & Role Rules

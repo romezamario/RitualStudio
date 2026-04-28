@@ -28,7 +28,7 @@ Ritual Studio es una aplicación Next.js (App Router) que actualmente incluye:
 
 - Home y páginas editoriales/comerciales (`/`, `/arreglos`, `/custom`, `/eventos`, `/nosotros`, `/contacto`).
 - Marketplace y detalle de producto (`/marketplace`, `/marketplace/[slug]`).
-- Cursos con detalle por slug y sesiones con cupo (`/cursos/[slug]`).
+- Venta de cursos con detalle por slug y sesiones con cupo (`/cursos/[slug]`).
 - Carrito unificado para productos y cursos (`/carrito`).
 - Checkout con tarjeta (Mercado Pago) y vista de éxito (`/checkout`, `/checkout/exito`).
   - Flujo post-compra para invitados: CTA a registro/login y vinculación automática de compras al historial con correo verificado.
@@ -37,7 +37,7 @@ Ritual Studio es una aplicación Next.js (App Router) que actualmente incluye:
   - Backend de pago soporta carrito mixto (productos + cursos), recalcula precios en servidor y reserva/libera cupos de sesión de forma transaccional.
   - Webhook de Mercado Pago registra auditoría operativa en `payment_events.payload`, deduplica notificaciones repetidas y reconcilia cupos por estado final del pago.
 - Autenticación base con Supabase (`/login`, `/auth/callback`, `/actualizar-contrasena`).
-- Dashboard de cuenta y administración (`/mi-cuenta`, `/admin/*`), incluyendo gestión de cursos y sesiones con cupos por sesión y carga directa de imagen de curso (sin URL manual).
+- Dashboard de cuenta y administración (`/mi-cuenta`, `/admin/*`), incluyendo admin de cursos/sesiones con cupos por sesión y carga directa de imagen de curso (sin URL manual).
 - Módulo "Mis pedidos" conectado a Supabase con consulta server-side por usuario autenticado, filtros por estado/referencia y detalle de líneas para productos/cursos con participantes registrados.
 - Base de datos preparada para cursos, sesiones y participantes con RLS en Supabase.
 - Aviso de privacidad (`/aviso-de-privacidad`).
@@ -203,6 +203,11 @@ Documentación detallada del proyecto:
 - [Troubleshooting](./docs/troubleshooting.md)
 
 Regla de gobernanza: cualquier cambio funcional/estructural/integración debe reflejarse también en la documentación aplicable.
+
+Resumen rápido de alcance comercial actual:
+- El checkout soporta venta mixta de productos y cursos.
+- Existe módulo administrativo para operar cursos y sesiones.
+- El detalle funcional/técnico vive en `docs/business-rules.md`, `docs/payments-mercado-pago.md`, `docs/supabase-auth-and-roles.md` y `docs/architecture.md`.
 
 ---
 

@@ -15,6 +15,7 @@ Guía de autenticación, sesiones, perfiles y autorización por rol.
 - Endpoint `GET /api/auth/me` disponible para hidratación de estado autenticado en UI.
 - En `create-order` de Mercado Pago, si hay sesión válida durante checkout, la orden se persiste con `orders.user_id` para trazabilidad y acceso RLS de compras de curso.
 - Endpoint `POST /api/auth/claim-orders` permite vincular compras hechas como invitado (`orders.user_id is null`) cuando el usuario inicia sesión con correo verificado; la acción usa `customer_email` como criterio y opcionalmente exige `external_reference` reciente del checkout success.
+- El claim post-registro/login aplica también para órdenes mixtas con cursos: al reclamar `orders.user_id`, el acceso a `order_course_items` y `course_participants` queda habilitado por RLS para ese usuario.
 
 ## Roles
 - Roles soportados: `user`, `admin`.
@@ -41,7 +42,8 @@ Incluye:
 - tablas `public.courses`, `public.course_sessions`, `public.order_course_items`, `public.course_participants`;
 - RLS habilitado en las cuatro tablas;
 - lectura propia de compras/participantes basada en `orders.user_id = auth.uid()`;
-- escritura administrativa para gestión de cursos y sesiones mediante `public.is_admin()`;
+- escritura administrativa para gestión de cursos y sesiones mediante `public.is_admin()` (incluye alta, edición y baja lógica/física según endpoint);
+- permisos admin para operar cursos/sesiones desde `/admin/cursos` y endpoints `api/admin/courses/*`;
 - trigger `set_updated_at` aplicado en tablas con columna `updated_at`.
 
 ## Promotion to Admin
@@ -61,6 +63,7 @@ No debe existir elevación de rol desde frontend.
   - solo órdenes con `user_id is null` y `customer_email` coincidente (normalizado a minúsculas).
 - Comprobación opcional adicional: si llega `external_reference`, el endpoint exige que exista una orden reciente (ventana de 24 h) con esa referencia para el mismo correo antes de ejecutar el claim.
 - Trazabilidad: cada claim exitoso registra evento en `public.order_claim_events` (orden, usuario que reclamó, método y referencia).
+- Garantía de no sobrescritura: nunca se reasignan órdenes ya vinculadas a otro usuario (`user_id` distinto de `null`).
 
 ## Pending / TODO
 - Documentar matriz de permisos por pantalla/endpoint.

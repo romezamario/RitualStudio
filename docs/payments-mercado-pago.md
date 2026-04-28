@@ -9,6 +9,25 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 - `GET /api/mercadopago/order-summary` (lectura de resumen)
 - Endpoint complementario de autenticación: `POST /api/auth/claim-orders` para asociar compras de invitado al usuario autenticado con correo confirmado y auditoría de claim.
 
+## `create-order` Contract (Current)
+Payload esperado (resumen):
+- `token`: token de tarjeta generado por Brick.
+- `payment_method_id`: método de pago de Mercado Pago.
+- `transaction_amount`: monto visible en checkout (referencia; backend recalcula y decide monto final).
+- `installments`: entero `1..24`.
+- `customer_email`: correo del comprador (obligatorio).
+- `receipt_email`: correo alterno opcional para comprobante.
+- `items`: líneas mixtas del carrito.
+  - Producto: `{ kind: "product", slug, quantity }`
+  - Curso: `{ kind: "course", slug, quantity, course_session_id }`
+- `course_participants` (si hay cursos): mapa/lista por `course_session_id` con exactamente `quantity` nombres por línea.
+
+Respuesta (resumen):
+- `external_reference` de la orden local.
+- `order_id` interno.
+- `payment_status` normalizado (`approved`, `pending`, `rejected`, `error`).
+- `redirect`/metadata operativa para UI de éxito.
+
 ## Create Order Flow
 1. Frontend envía token del Brick + datos de pago y carrito.
 2. Backend valida:
@@ -51,12 +70,21 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 - Estrategia de upsert en webhook para idempotencia y convergencia de estado.
 - Política de liberación de cupo:
   - en `create-order`, si MP responde `rejected` o `cancelled`, se ejecuta RPC de liberación inmediata;
-  - en webhook, si llega estado final `rejected`/`cancelled`/`expired`, se vuelve a ejecutar liberación idempotente;
+  - en webhook, si llega estado final `rejected`/`cancelled`/`expired`, se vuelve a ejecutar liberación idempotente por seguridad (aunque create-order ya haya liberado);
   - en webhook, si llega `approved`, se marca confirmación operativa en metadata de `order_course_items` para trazabilidad de reserva definitiva;
   - la liberación marca metadata (`capacity_released`) para evitar doble decremento.
 - Dedupe de notificaciones webhook:
   - se usa `event_key` como llave de idempotencia;
   - si llega la misma notificación repetida y ya está `processed=true`, se evita reprocesar y solo se incrementa contador de duplicados en `payment_events.payload`.
+
+## Payment State Model & Reconciliation
+- Estado de UI y negocio convergen a 4 estados: `approved`, `pending`, `rejected`, `error`.
+- Fuente de verdad final: webhook + consulta backend a Mercado Pago (no frontend).
+- Reconciliación de órdenes:
+  - órdenes `pending` sin confirmación en ventana esperada se re-evalúan por proceso de reconciliación;
+  - si el estado final converge a rechazo/cancelación/expiración, se asegura liberación de cupo idempotente;
+  - si converge a `approved`, se conserva reserva como cupo consumido y se mantiene trazabilidad en `payment_events`.
+- Objetivo operativo: evitar tanto sobreventa (falta de reserva) como subutilización de cupo (falta de liberación).
 
 ## Critical Security Rules
 - `MP_ACCESS_TOKEN` solo backend.
