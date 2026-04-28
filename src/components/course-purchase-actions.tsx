@@ -90,7 +90,7 @@ export default function CoursePurchaseActions({ course, initialSessions }: Cours
       sessionStartsAt: currentSession.startsAt,
       name: course.title,
       unitPrice: formatCurrency(course.price),
-      image: course.imageUrl ?? "/images/logo.png",
+      image: course.imageUrl || "/images/logo.png",
       participants,
     });
 
