@@ -27,6 +27,15 @@ export default async function MarketplacePage() {
         <MarketplaceClientEnhancer mode="list" initialProducts={products} />
       ) : (
         <div>
+          <article className="studio-card" style={{ marginBottom: "1.2rem" }}>
+            <p className="card-label">También disponible</p>
+            <h2 style={{ marginTop: "0.2rem" }}>Cursos presenciales de diseño floral</h2>
+            <p>Si prefieres aprender paso a paso, revisa los cursos activos y compra tu lugar por sesión.</p>
+            <Link href="/cursos" className="btn btn-ghost">
+              Ver cursos
+            </Link>
+          </article>
+
           <div className="marketplace-topbar" aria-label="Categorías de productos">
             {categories.map((category) => (
               <a key={category} href={`#${getCategoryId(category)}`} className="chip-link">

@@ -30,6 +30,10 @@ type CourseRow = {
   image_url: string | null;
 };
 
+type CourseWithSessionsCountRow = CourseRow & {
+  course_sessions: Array<{ count: number }> | null;
+};
+
 type SessionRow = {
   id: string;
   course_id: string;
@@ -100,4 +104,37 @@ export async function getPublicCourseBySlug(slug: string) {
     },
     error: null,
   };
+}
+
+export type PublicCoursesListItem = CourseCatalogCourse & {
+  sessionsCount: number;
+};
+
+export async function listPublicCourses() {
+  const coursesResult = await supabasePublicReadRequest<CourseWithSessionsCountRow[]>(
+    "/rest/v1/courses?select=id,slug,title,description,price,is_active,image_url,course_sessions(count)&is_active=eq.true&order=title.asc",
+    {
+      next: {
+        revalidate: 60,
+        tags: ["courses:list"],
+      },
+    },
+  );
+
+  if (coursesResult.error || !coursesResult.data) {
+    return { data: [] as PublicCoursesListItem[], error: coursesResult.error ?? "No fue posible cargar cursos." };
+  }
+
+  const data: PublicCoursesListItem[] = coursesResult.data.map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    description: row.description,
+    price: Number(row.price),
+    isActive: row.is_active,
+    imageUrl: row.image_url,
+    sessionsCount: row.course_sessions?.[0]?.count ?? 0,
+  }));
+
+  return { data, error: null };
 }
