@@ -406,6 +406,18 @@ export default function CheckoutClient() {
           <div className={`checkout-feedback checkout-feedback-${checkoutStatus}`} role="status" aria-live="polite">
             {feedback}
           </div>
+          {normalizedUserEmail ? (
+            <label className="checkout-receipt-email">
+              <span>Correo electrónico para el pago</span>
+              <input
+                type="email"
+                value={normalizedUserEmail}
+                readOnly
+                aria-readonly="true"
+                aria-label="Correo electrónico prellenado del usuario autenticado"
+              />
+            </label>
+          ) : null}
           <div id="mp-card-payment-brick" className="mp-brick-container" />
         </article>
       </section>

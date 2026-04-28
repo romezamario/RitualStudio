@@ -24,6 +24,7 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 - El script `https://sdk.mercadopago.com/js/v2` se carga una sola vez por sesión en el cliente.
 - Al volver a `/checkout` después de una compra, el frontend intenta montar el Brick otra vez si `window.MercadoPago` ya está disponible (sin depender de un segundo `onLoad`).
 - El desmontaje del Brick se realiza al salir de la pantalla para evitar controladores duplicados en navegaciones posteriores.
+- Si el usuario está autenticado, el checkout muestra el correo prellenado en un campo de solo lectura antes del Brick para que el dato visible coincida con el email enviado en `payer.email`.
 
 ## Webhook Validation Flow
 - Se valida firma usando `MP_WEBHOOK_SECRET`.
