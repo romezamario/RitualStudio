@@ -61,7 +61,21 @@ type OrderRecord = {
   created_at?: string | null;
 };
 
-const COURSE_CAPACITY_RELEASE_STATUSES = new Set(["rejected", "cancelled"]);
+type OrderCourseItemRecord = {
+  id: string;
+  course_session_id: string;
+  quantity: number;
+  metadata?: Record<string, unknown> | null;
+};
+
+type PaymentEventRow = {
+  id?: string;
+  event_key?: string;
+  payload?: Record<string, unknown> | null;
+};
+
+const COURSE_CAPACITY_RELEASE_STATUSES = new Set(["rejected", "cancelled", "expired"]);
+const FINAL_PAYMENT_STATUSES = new Set(["approved", "rejected", "cancelled", "expired"]);
 
 type MpOrderResponse = {
   id?: string | number;
@@ -276,6 +290,10 @@ function toNumber(value: number | string | null | undefined) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function normalizePaymentStatus(status: string | null | undefined) {
+  return (status ?? "").trim().toLowerCase();
+}
+
 async function fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId: string) {
   if (!mercadoPagoOrderId) {
     return null;
@@ -295,6 +313,19 @@ async function fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId: string) {
   return data?.[0] ?? null;
 }
 
+async function fetchOrderCourseItems(orderId: string) {
+  const { data, error } = await supabaseAdminRequest<OrderCourseItemRecord[]>(
+    `/rest/v1/order_course_items?select=id,course_session_id,quantity,metadata&order_id=eq.${encodeURIComponent(orderId)}`
+  );
+
+  if (error) {
+    console.error("[MP webhook] Error consultando order_course_items:", error);
+    return [];
+  }
+
+  return data ?? [];
+}
+
 async function persistEmailConfirmationMetadata(orderId: string, metadata: OrderMetadata) {
   const { error } = await supabaseAdminRequest<unknown[]>(
     `/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`,
@@ -311,17 +342,11 @@ async function persistEmailConfirmationMetadata(orderId: string, metadata: Order
   }
 }
 
-async function releaseCourseCapacityByMercadoPagoOrderId(mercadoPagoOrderId: string, reason: string) {
-  const order = await fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId);
-
-  if (!order?.id) {
-    return;
-  }
-
+async function releaseCourseCapacityByOrderId(orderId: string, reason: string) {
   const { error } = await supabaseAdminRequest<unknown[]>("/rest/v1/rpc/release_course_capacity_for_order", {
     method: "POST",
     body: JSON.stringify({
-      p_order_id: order.id,
+      p_order_id: orderId,
       p_reason: reason,
     }),
   });
@@ -329,6 +354,140 @@ async function releaseCourseCapacityByMercadoPagoOrderId(mercadoPagoOrderId: str
   if (error) {
     console.error("[MP webhook] No se pudo liberar cupo de curso:", error);
   }
+}
+
+async function confirmCourseCapacityForOrder(items: OrderCourseItemRecord[], reason: string) {
+  for (const item of items) {
+    const mergedMetadata = {
+      ...(item.metadata ?? {}),
+      capacity_confirmed: true,
+      capacity_confirmed_reason: reason,
+      capacity_confirmed_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabaseAdminRequest<unknown[]>(
+      `/rest/v1/order_course_items?id=eq.${encodeURIComponent(item.id)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          metadata: mergedMetadata,
+        }),
+      }
+    );
+
+    if (error) {
+      console.error("[MP webhook] No se pudo confirmar metadata de cupo:", error);
+    }
+  }
+}
+
+async function findPaymentEventByEventKey(eventKey: string) {
+  const { data, error } = await supabaseAdminRequest<PaymentEventRow[]>(
+    `/rest/v1/payment_events?select=id,event_key,payload&event_key=eq.${encodeURIComponent(eventKey)}&limit=1`
+  );
+
+  if (error) {
+    console.error("[MP webhook] Error consultando payment_events por event_key:", error);
+    return null;
+  }
+
+  return data?.[0] ?? null;
+}
+
+async function updatePaymentEventPayload(eventKey: string, payload: Record<string, unknown>) {
+  const { error } = await supabaseAdminRequest<unknown[]>(
+    `/rest/v1/payment_events?event_key=eq.${encodeURIComponent(eventKey)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        payload,
+      }),
+    }
+  );
+
+  if (error) {
+    console.error("[MP webhook] Error actualizando payment_events.payload:", error);
+  }
+}
+
+async function reconcileCourseCapacityForFinalStatus({
+  mercadoPagoOrderId,
+  paymentStatus,
+  source,
+}: {
+  mercadoPagoOrderId: string;
+  paymentStatus: string;
+  source: "payment" | "order";
+}) {
+  const normalizedStatus = normalizePaymentStatus(paymentStatus);
+
+  if (!mercadoPagoOrderId || !FINAL_PAYMENT_STATUSES.has(normalizedStatus)) {
+    return {
+      foundOrder: false,
+      orderId: null,
+      orderCourseItemsCount: 0,
+      action: "ignored-non-final-status",
+      reason: `webhook-${source}-${normalizedStatus || "unknown"}`,
+    };
+  }
+
+  const order = await fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId);
+
+  if (!order?.id) {
+    return {
+      foundOrder: false,
+      orderId: null,
+      orderCourseItemsCount: 0,
+      action: "missing-order",
+      reason: `webhook-${source}-${normalizedStatus}`,
+    };
+  }
+
+  const orderCourseItems = await fetchOrderCourseItems(order.id);
+
+  if (!orderCourseItems.length) {
+    return {
+      foundOrder: true,
+      orderId: order.id,
+      orderCourseItemsCount: 0,
+      action: "order-without-course-items",
+      reason: `webhook-${source}-${normalizedStatus}`,
+    };
+  }
+
+  const reason = `webhook-${source}-${normalizedStatus}`;
+
+  if (normalizedStatus === "approved") {
+    await confirmCourseCapacityForOrder(orderCourseItems, reason);
+
+    return {
+      foundOrder: true,
+      orderId: order.id,
+      orderCourseItemsCount: orderCourseItems.length,
+      action: "capacity-confirmed",
+      reason,
+    };
+  }
+
+  if (COURSE_CAPACITY_RELEASE_STATUSES.has(normalizedStatus)) {
+    await releaseCourseCapacityByOrderId(order.id, reason);
+
+    return {
+      foundOrder: true,
+      orderId: order.id,
+      orderCourseItemsCount: orderCourseItems.length,
+      action: "capacity-release-requested",
+      reason,
+    };
+  }
+
+  return {
+    foundOrder: true,
+    orderId: order.id,
+    orderCourseItemsCount: orderCourseItems.length,
+    action: "final-status-without-capacity-action",
+    reason,
+  };
 }
 
 async function trySendPurchaseEmail({
@@ -433,16 +592,43 @@ export async function POST(request: Request) {
   });
 
   const eventKey = `${payload.type ?? "unknown"}:${payload.data?.id ?? "na"}:${payload.action ?? "na"}`;
+  const existingEvent = await findPaymentEventByEventKey(eventKey);
+  const alreadyProcessed = existingEvent?.payload?.webhook_processing
+    ? (existingEvent.payload.webhook_processing as Record<string, unknown>).processed === true
+    : false;
+
+  if (alreadyProcessed) {
+    const duplicatePayload = {
+      ...(existingEvent?.payload ?? {}),
+      duplicate_notifications: Number(existingEvent?.payload?.duplicate_notifications ?? 0) + 1,
+      last_duplicate_at: new Date().toISOString(),
+    };
+
+    await updatePaymentEventPayload(eventKey, duplicatePayload);
+    return NextResponse.json({ ok: true, deduplicated: true });
+  }
+
+  const initialPayload = {
+    webhook_notification: payload,
+    signature: {
+      valid: signature.validated,
+      reason: signature.reason,
+      request_id: requestId,
+    },
+    webhook_processing: {
+      processed: false,
+      started_at: new Date().toISOString(),
+      idempotency_key: eventKey,
+    },
+    duplicate_notifications: Number(existingEvent?.payload?.duplicate_notifications ?? 0),
+  };
 
   const eventRow = {
     event_key: eventKey,
-    mercado_pago_event_id: payload.id ?? null,
-    event_type: payload.type ?? null,
+    mercado_pago_event_id: payload.id ? String(payload.id) : null,
+    type: payload.type ?? null,
     action: payload.action ?? null,
-    data_id: payload.data?.id ?? null,
-    signature_valid: signature.validated,
-    signature_reason: signature.reason,
-    raw_payload: payload,
+    payload: initialPayload,
   };
 
   const { error: eventError } = await supabaseAdminRequest<unknown[]>("/rest/v1/payment_events?on_conflict=event_key", {
@@ -457,6 +643,13 @@ export async function POST(request: Request) {
     console.error("[MP webhook] No se pudo registrar evento en payment_events:", eventError);
   }
 
+  let audit: Record<string, unknown> = {
+    topic: payload.type ?? payload.action ?? "",
+    data_id: payload.data?.id ?? null,
+    finalized_at: null,
+    reconciliations: [],
+  };
+
   try {
     const topic = payload.type ?? payload.action ?? "";
     const dataId = payload.data?.id;
@@ -465,14 +658,29 @@ export async function POST(request: Request) {
       const payment = await mpApiFetch<MpPaymentResponse>(`/v1/payments/${dataId}`, {
         method: "GET",
       });
-      await upsertOrderFromPayment(payment);
-      const normalizedPaymentStatus = (payment.status ?? "").toLowerCase();
 
-      if (payment.order?.id && COURSE_CAPACITY_RELEASE_STATUSES.has(normalizedPaymentStatus)) {
-        await releaseCourseCapacityByMercadoPagoOrderId(
-          String(payment.order.id),
-          `webhook-payment-${normalizedPaymentStatus}`,
-        );
+      await upsertOrderFromPayment(payment);
+
+      const paymentStatus = normalizePaymentStatus(payment.status);
+      const mercadoPagoOrderId = payment.order?.id ? String(payment.order.id) : "";
+
+      if (mercadoPagoOrderId && FINAL_PAYMENT_STATUSES.has(paymentStatus)) {
+        const reconciliation = await reconcileCourseCapacityForFinalStatus({
+          mercadoPagoOrderId,
+          paymentStatus,
+          source: "payment",
+        });
+
+        audit = {
+          ...audit,
+          payment_snapshot: {
+            payment_id: payment.id ?? null,
+            status: payment.status ?? null,
+            status_detail: payment.status_detail ?? null,
+            mercado_pago_order_id: mercadoPagoOrderId || null,
+          },
+          reconciliations: [...((audit.reconciliations as unknown[]) ?? []), reconciliation],
+        };
       }
 
       await trySendPurchaseEmail({ payment, fallbackPaidAt: payload.date_created });
@@ -482,11 +690,63 @@ export async function POST(request: Request) {
       const order = await mpApiFetch<MpOrderResponse>(`/v1/orders/${dataId}`, {
         method: "GET",
       });
+
       await upsertOrderFromMpOrder(order);
+
+      const orderPaymentStatus = normalizePaymentStatus(order.transactions?.payments?.[0]?.status ?? order.status);
+      const mercadoPagoOrderId = order.id ? String(order.id) : "";
+
+      if (mercadoPagoOrderId && FINAL_PAYMENT_STATUSES.has(orderPaymentStatus)) {
+        const reconciliation = await reconcileCourseCapacityForFinalStatus({
+          mercadoPagoOrderId,
+          paymentStatus: orderPaymentStatus,
+          source: "order",
+        });
+
+        audit = {
+          ...audit,
+          order_snapshot: {
+            mercado_pago_order_id: mercadoPagoOrderId,
+            status: order.status ?? null,
+            payment_status: order.transactions?.payments?.[0]?.status ?? null,
+            status_detail: order.status_detail ?? null,
+          },
+          reconciliations: [...((audit.reconciliations as unknown[]) ?? []), reconciliation],
+        };
+      }
     }
   } catch (error) {
     console.error("[MP webhook] Error al reconciliar datos con Mercado Pago:", error);
+
+    const failedPayload = {
+      ...initialPayload,
+      webhook_processing: {
+        ...(initialPayload.webhook_processing ?? {}),
+        processed: false,
+        failed_at: new Date().toISOString(),
+        error: error instanceof Error ? error.message : "Error desconocido en webhook.",
+      },
+      audit,
+    };
+
+    await updatePaymentEventPayload(eventKey, failedPayload);
+    return NextResponse.json({ ok: true });
   }
+
+  const finalizedPayload = {
+    ...initialPayload,
+    webhook_processing: {
+      ...(initialPayload.webhook_processing ?? {}),
+      processed: true,
+      finished_at: new Date().toISOString(),
+    },
+    audit: {
+      ...audit,
+      finalized_at: new Date().toISOString(),
+    },
+  };
+
+  await updatePaymentEventPayload(eventKey, finalizedPayload);
 
   return NextResponse.json({ ok: true });
 }

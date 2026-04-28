@@ -43,13 +43,18 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 ## Persistence Strategy
 - Tabla `orders`: referencia externa, estado, total, metadata y raw response.
 - Tabla `payments`: id de pago MP, método, estado, monto y raw response.
+- Tabla `payment_events`: auditoría operativa del webhook en `payload` (firma validada, snapshots MP, reconciliación de cupos y resultado de procesamiento).
 - `orders.metadata` incluye `mixed_items_summary` (productos + cursos + participantes) para trazabilidad de checkout mixto.
 - Para líneas de curso, la persistencia de `order_course_items` y `course_participants` se realiza en una operación transaccional vía RPC.
 - Estrategia de upsert en webhook para idempotencia y convergencia de estado.
 - Política de liberación de cupo:
   - en `create-order`, si MP responde `rejected` o `cancelled`, se ejecuta RPC de liberación inmediata;
-  - en webhook, si llega estado final `rejected`/`cancelled`, se vuelve a ejecutar liberación idempotente;
+  - en webhook, si llega estado final `rejected`/`cancelled`/`expired`, se vuelve a ejecutar liberación idempotente;
+  - en webhook, si llega `approved`, se marca confirmación operativa en metadata de `order_course_items` para trazabilidad de reserva definitiva;
   - la liberación marca metadata (`capacity_released`) para evitar doble decremento.
+- Dedupe de notificaciones webhook:
+  - se usa `event_key` como llave de idempotencia;
+  - si llega la misma notificación repetida y ya está `processed=true`, se evita reprocesar y solo se incrementa contador de duplicados en `payment_events.payload`.
 
 ## Critical Security Rules
 - `MP_ACCESS_TOKEN` solo backend.
