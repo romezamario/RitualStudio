@@ -1698,3 +1698,21 @@ Nota: Esta implementación usa lectura pública del bucket para catálogo. Si se
 ### Documentación actualizada
 - AGENTS.md: Sí
 - README.md: Sí
+
+## PR: Fix de superposición del menú de usuario sobre checkout
+### ¿Qué cambia?
+- Se corrigió el contexto de apilamiento del header para que el menú de usuario quede siempre por encima del contenido principal (`checkout`, tarjetas y formularios) al desplegarse.
+- Se actualizó `src/app/globals.css` para que `.site-header` cree una capa superior con `position: relative` y `z-index` alto.
+- Con esto, las opciones inferiores del menú de cuenta (incluyendo acciones admin) dejan de quedar ocultas detrás de bloques del contenido.
+
+### ¿Cómo se probó?
+- `npm run lint`.
+- Validación manual visual del flujo reportado: abrir menú de usuario sobre `/checkout` y verificar que todas las opciones sean visibles/clicables.
+
+### Impacto
+- El dropdown de usuario recupera interacción completa en desktop/tablet donde antes quedaba parcialmente tapado.
+- Se elimina la fricción de navegación en cuentas autenticadas, especialmente para opciones al final del menú.
+
+### Documentación actualizada
+- AGENTS.md: Sí
+- README.md: Sí
