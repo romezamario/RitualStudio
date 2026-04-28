@@ -31,6 +31,7 @@ Ritual Studio es una aplicación Next.js (App Router) que actualmente incluye:
 - Cursos con detalle por slug y sesiones con cupo (`/cursos/[slug]`).
 - Carrito unificado para productos y cursos (`/carrito`).
 - Checkout con tarjeta (Mercado Pago) y vista de éxito (`/checkout`, `/checkout/exito`).
+  - Flujo post-compra para invitados: CTA a registro/login y vinculación automática de compras al historial con correo verificado.
   - En checkout, usuarios autenticados ven su correo prellenado en modo solo lectura antes del formulario embebido.
   - Si hay cursos en carrito, checkout exige nombres de participantes por sesión antes de enviar pago.
   - Backend de pago soporta carrito mixto (productos + cursos), recalcula precios en servidor y reserva/libera cupos de sesión de forma transaccional.

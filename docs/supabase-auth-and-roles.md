@@ -14,6 +14,7 @@ Guía de autenticación, sesiones, perfiles y autorización por rol.
 - Validación server-side de usuario mediante `/auth/v1/user`.
 - Endpoint `GET /api/auth/me` disponible para hidratación de estado autenticado en UI.
 - En `create-order` de Mercado Pago, si hay sesión válida durante checkout, la orden se persiste con `orders.user_id` para trazabilidad y acceso RLS de compras de curso.
+- Endpoint `POST /api/auth/claim-orders` permite vincular compras hechas como invitado (`orders.user_id is null`) cuando el usuario inicia sesión con correo verificado; la acción usa `customer_email` como criterio y opcionalmente exige `external_reference` reciente del checkout success.
 
 ## Roles
 - Roles soportados: `user`, `admin`.
@@ -51,6 +52,15 @@ No debe existir elevación de rol desde frontend.
 - Nunca usar `SUPABASE_SERVICE_ROLE_KEY` en cliente.
 - Validar autorización en servidor para cualquier acción sensible.
 - Mantener RLS activo en tablas con datos de negocio.
+
+## Guest Purchase Claim (Post-checkout)
+- Flujo soportado: compra como invitado → login/registro → vinculación automática de órdenes al historial.
+- Requisitos de seguridad:
+  - sesión autenticada válida;
+  - correo del usuario **confirmado** (`email_confirmed_at`);
+  - solo órdenes con `user_id is null` y `customer_email` coincidente (normalizado a minúsculas).
+- Comprobación opcional adicional: si llega `external_reference`, el endpoint exige que exista una orden reciente (ventana de 24 h) con esa referencia para el mismo correo antes de ejecutar el claim.
+- Trazabilidad: cada claim exitoso registra evento en `public.order_claim_events` (orden, usuario que reclamó, método y referencia).
 
 ## Pending / TODO
 - Documentar matriz de permisos por pantalla/endpoint.

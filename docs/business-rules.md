@@ -29,6 +29,8 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - Se persisten orden y pago en Supabase usando `X-Idempotency-Key` por intento de cobro.
 - El webhook vuelve a sincronizar/actualizar estado para consistencia operativa.
 - Estados normalizados para UI: `approved`, `pending`, `rejected`, `error`.
+- Después de checkout exitoso sin sesión, la UI promueve registro/login y, tras autenticación, ejecuta vinculación automática de compras pendientes al historial de la cuenta.
+- La vinculación de invitado solo procede con correo verificado y nunca sobrescribe órdenes ya asignadas (`orders.user_id` debe ser `null`).
 
 
 ## Courses & Sessions Rules

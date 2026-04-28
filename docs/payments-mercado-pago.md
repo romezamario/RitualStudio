@@ -7,6 +7,7 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 - `POST /api/mercadopago/create-order`
 - `POST /api/mercadopago/webhook`
 - `GET /api/mercadopago/order-summary` (lectura de resumen)
+- Endpoint complementario de autenticación: `POST /api/auth/claim-orders` para asociar compras de invitado al usuario autenticado con correo confirmado y auditoría de claim.
 
 ## Create Order Flow
 1. Frontend envía token del Brick + datos de pago y carrito.
@@ -44,6 +45,7 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 - Tabla `orders`: referencia externa, estado, total, metadata y raw response.
 - Tabla `payments`: id de pago MP, método, estado, monto y raw response.
 - Tabla `payment_events`: auditoría operativa del webhook en `payload` (firma validada, snapshots MP, reconciliación de cupos y resultado de procesamiento).
+- Tabla `order_claim_events`: auditoría de vinculación de órdenes de invitado a cuenta autenticada (quién, cómo y cuándo).
 - `orders.metadata` incluye `mixed_items_summary` (productos + cursos + participantes) para trazabilidad de checkout mixto.
 - Para líneas de curso, la persistencia de `order_course_items` y `course_participants` se realiza en una operación transaccional vía RPC.
 - Estrategia de upsert en webhook para idempotencia y convergencia de estado.
