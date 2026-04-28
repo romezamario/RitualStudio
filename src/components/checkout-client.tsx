@@ -175,10 +175,24 @@ export default function CheckoutClient() {
 
   const checkoutItems = useMemo(
     () =>
-      items.map((item) => ({
-        slug: item.slug,
-        quantity: item.quantity,
-      })),
+      items.map((item) => {
+        if (item.kind === "course") {
+          return {
+            kind: "course" as const,
+            slug: item.slug,
+            course_id: item.courseId,
+            course_session_id: item.courseSessionId,
+            session_starts_at: item.sessionStartsAt,
+            quantity: item.quantity,
+          };
+        }
+
+        return {
+          kind: "product" as const,
+          slug: item.slug,
+          quantity: item.quantity,
+        };
+      }),
     [items]
   );
 

@@ -31,8 +31,12 @@ function normalizeIssuerId(rawIssuerId: string | number | undefined) {
 
 function getValidationErrorStatus(message: string) {
   const knownValidationMessages = [
-    "Debes enviar al menos un producto",
+    "Debes enviar al menos un ítem",
     "Producto inválido",
+    "Curso inválido",
+    "Sesión inválida",
+    "La sesión seleccionada",
+    "Cupo insuficiente",
     "Cantidad inválida",
     "No fue posible calcular el total de la orden",
     "El monto mínimo para pagar con tarjeta en este checkout",
@@ -98,10 +102,13 @@ export async function POST(request: Request) {
       receipt_email: normalizedReceiptEmail ?? null,
       issuer_id: normalizeIssuerId(issuer_id) ?? null,
       items: lineItems.map((item) => ({
+        kind: item.kind,
         slug: item.slug,
         quantity: item.quantity,
         unit_price: item.unitPrice,
         subtotal: item.subtotal,
+        course_id: item.courseId ?? null,
+        course_session_id: item.courseSessionId ?? null,
       })),
     });
 
