@@ -23,32 +23,38 @@ export default async function CoursesPage() {
 
       {courses.length ? (
         <div className="feature-grid">
-          {courses.map((course) => (
-            <article key={course.id} className="studio-card marketplace-card">
-              <div className="card-image-wrap">
-                <Image
-                  className="card-image"
-                  src={toRenderableProductImageUrl(course.imageUrl ?? "/images/logo.png", "marketplace-card")}
-                  alt={course.title}
-                  width={1200}
-                  height={900}
-                  sizes={CARD_IMAGE_SIZES}
-                />
-              </div>
-              <p className="card-label">Curso presencial</p>
-              <h3>{course.title}</h3>
-              <p>{course.description ?? "Experiencia guiada por el equipo floral de Ritual Studio."}</p>
-              <div className="price-stack">
-                <strong className="price-tag">{formatCurrency(course.price)}</strong>
-                <span>{course.sessionsCount} sesiones publicadas</span>
-              </div>
-              <div className="marketplace-card-actions">
-                <Link href={`/cursos/${course.slug}`} className="btn btn-primary">
-                  Ver sesiones y comprar
-                </Link>
-              </div>
-            </article>
-          ))}
+          {courses.map((course) => {
+            const courseImage = course.imageUrl
+              ? toRenderableProductImageUrl(course.imageUrl, "marketplace-card")
+              : "/images/logo.png";
+
+            return (
+              <article key={course.id} className="studio-card marketplace-card">
+                <div className="card-image-wrap">
+                  <Image
+                    className="card-image"
+                    src={courseImage}
+                    alt={course.title}
+                    width={1200}
+                    height={900}
+                    sizes={CARD_IMAGE_SIZES}
+                  />
+                </div>
+                <p className="card-label">Curso presencial</p>
+                <h3>{course.title}</h3>
+                <p>{course.description ?? "Experiencia guiada por el equipo floral de Ritual Studio."}</p>
+                <div className="price-stack">
+                  <strong className="price-tag">{formatCurrency(course.price)}</strong>
+                  <span>{course.sessionsCount} sesiones publicadas</span>
+                </div>
+                <div className="marketplace-card-actions">
+                  <Link href={`/cursos/${course.slug}`} className="btn btn-primary">
+                    Ver sesiones y comprar
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
         </div>
       ) : (
         <article className="studio-card">

@@ -81,6 +81,15 @@
 - `SUPABASE_PRODUCT_IMAGES_BUCKET` configurado.
 - Bucket existente en Supabase Storage y políticas acordes.
 
+### Tarjetas de cursos muestran imagen rota
+**Síntoma:** en `/cursos` aparece el ícono de imagen rota cuando un curso no tiene `image_url` cargada.
+
+**Causa frecuente:** `image_url` vacío (`""`) termina construyendo una URL de render de Storage inválida en vez de usar fallback local.
+
+**Revisión rápida:**
+- Confirmar en `courses.image_url` si el valor viene vacío/null.
+- Verificar que el frontend use fallback local (`/images/logo.png`) cuando `image_url` no tenga contenido.
+
 ---
 
 ## Documentation Drift

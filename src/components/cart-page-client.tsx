@@ -59,7 +59,7 @@ export default function CartPageClient() {
           const imageSource =
             item.kind === "product"
               ? toRenderableProductImageUrl(item.image, "cart")
-              : item.image.startsWith("http")
+              : item.image.startsWith("http") || item.image.startsWith("/")
                 ? item.image
                 : toRenderableProductImageUrl(item.image, "cart");
 
