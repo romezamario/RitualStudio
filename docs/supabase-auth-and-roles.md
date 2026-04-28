@@ -30,6 +30,18 @@ Incluye:
 - función `public.is_admin()`;
 - policies de lectura/actualización propia y lectura/edición admin.
 
+
+## RLS Extension: Courses
+Migración de cursos/sesiones/compras de cursos:
+- `supabase/migrations/20260428101500_courses_schema.sql`
+
+Incluye:
+- tablas `public.courses`, `public.course_sessions`, `public.order_course_items`, `public.course_participants`;
+- RLS habilitado en las cuatro tablas;
+- lectura propia de compras/participantes basada en `orders.user_id = auth.uid()`;
+- escritura administrativa para gestión de cursos y sesiones mediante `public.is_admin()`;
+- trigger `set_updated_at` aplicado en tablas con columna `updated_at`.
+
 ## Promotion to Admin
 La promoción inicial de admin se hace desde SQL por operador autorizado.
 No debe existir elevación de rol desde frontend.

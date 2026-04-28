@@ -22,6 +22,14 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - El webhook vuelve a sincronizar/actualizar estado para consistencia operativa.
 - Estados normalizados para UI: `approved`, `pending`, `rejected`, `error`.
 
+
+## Courses & Sessions Rules
+- `courses.slug` es único y funciona como identificador estable para catálogo de cursos.
+- Cada sesión (`course_sessions`) pertenece a un curso y debe respetar `capacity > 0`.
+- Los cupos reservados (`reserved_spots`) nunca pueden ser negativos.
+- Las líneas de compra de cursos (`order_course_items`) requieren `quantity >= 1` y se vinculan a `orders`, `courses` y `course_sessions`.
+- Participantes (`course_participants`) se registran por ítem de compra y heredan acceso por propiedad de la orden (`orders.user_id`).
+
 ## Account & Role Rules
 - Roles vigentes: `user` y `admin`.
 - Rutas `/admin/*` requieren sesión válida y rol admin.
