@@ -189,6 +189,7 @@ async function upsertOrderFromMpOrder(order: MpOrderResponse) {
 
   if (payment?.id) {
     const paymentRow = {
+      order_id: existingOrder?.id ?? null,
       mercado_pago_payment_id: String(payment.id),
       mercado_pago_order_id: String(order.id ?? ""),
       status: payment.status ?? "unknown",
@@ -249,6 +250,7 @@ async function upsertOrderFromPayment(payment: MpPaymentResponse) {
   }
 
   const paymentRow = {
+    order_id: existingOrder?.id ?? null,
     mercado_pago_payment_id: String(payment.id ?? ""),
     mercado_pago_order_id: String(orderId),
     status: payment.status ?? "unknown",
