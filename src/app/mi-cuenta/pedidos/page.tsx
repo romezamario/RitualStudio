@@ -113,6 +113,22 @@ function formatPaymentMethod(rawValue: string | null | undefined) {
   return rawValue.replace(/[_-]+/g, " ").trim();
 }
 
+function formatOrderItemsSummary(order: OrderRow, courseItems: CourseItemRow[]) {
+  const productNames =
+    order.metadata?.mixed_items_summary?.products
+      ?.map((product) => product.name?.trim())
+      .filter((name): name is string => Boolean(name)) ?? [];
+
+  const courseNames = courseItems
+    .map((course) => course.courses?.title?.trim())
+    .filter((name): name is string => Boolean(name));
+
+  const merged = [...new Set([...productNames, ...courseNames])];
+  if (merged.length === 0) return "Sin ítems";
+  if (merged.length <= 2) return merged.join(", ");
+  return `${merged.slice(0, 2).join(", ")} +${merged.length - 2}`;
+}
+
 function getFallbackCourseBySession(order: OrderRow, sessionId: string) {
   const courses = order.metadata?.mixed_items_summary?.courses;
 
@@ -263,7 +279,7 @@ export default async function AccountOrdersPage({ searchParams }: OrdersPageProp
         </div>
       </form>
 
-      <div className="feature-grid" style={{ marginTop: "1.25rem" }}>
+      <div style={{ marginTop: "1.25rem" }}>
         {orders.length === 0 ? (
           <article className="studio-card">
             <p className="card-label">Sin resultados</p>
@@ -272,102 +288,112 @@ export default async function AccountOrdersPage({ searchParams }: OrdersPageProp
           </article>
         ) : null}
 
-        {orders.map((order) => {
-          const payment = paymentsByOrder.get(order.id);
-          const courseItems = courseItemsByOrder.get(order.id) ?? [];
-          const products = order.metadata?.mixed_items_summary?.products ?? [];
+        {orders.length > 0 ? (
+          <div className="orders-table-card">
+            <div className="orders-table-head" aria-hidden="true">
+              <span>Referencia</span>
+              <span>Fecha</span>
+              <span>Estado</span>
+              <span>Total</span>
+              <span>Ítems</span>
+            </div>
+            <div className="orders-table-body">
+              {orders.map((order) => {
+                const payment = paymentsByOrder.get(order.id);
+                const courseItems = courseItemsByOrder.get(order.id) ?? [];
+                const products = order.metadata?.mixed_items_summary?.products ?? [];
+                const itemsSummary = formatOrderItemsSummary(order, courseItems);
 
-          return (
-            <article className="studio-card" key={order.id}>
-              <p className="card-label">Orden</p>
-              <h2 className="order-reference">{order.external_reference}</h2>
+                return (
+                  <details className="orders-table-row" key={order.id}>
+                    <summary>
+                      <span className="order-reference">{order.external_reference}</span>
+                      <span>{formatDateTime(order.created_at)}</span>
+                      <span>{normalizeStatus(order.status)}</span>
+                      <span>{formatMoney(order.total_amount)}</span>
+                      <span>{itemsSummary}</span>
+                    </summary>
 
-              <ul className="checkout-success-summary" style={{ listStyle: "none", padding: 0 }}>
-                <li>
-                  <span>Fecha</span>
-                  <strong>{formatDateTime(order.created_at)}</strong>
-                </li>
-                <li>
-                  <span>Estado</span>
-                  <strong>{normalizeStatus(order.status)}</strong>
-                </li>
-                <li>
-                  <span>Total</span>
-                  <strong>{formatMoney(order.total_amount)}</strong>
-                </li>
-                <li>
-                  <span>Método de pago</span>
-                  <strong>{formatPaymentMethod(payment?.payment_method)}</strong>
-                </li>
-              </ul>
+                    <div className="orders-table-details">
+                      <ul className="checkout-success-summary" style={{ listStyle: "none", padding: 0 }}>
+                        <li>
+                          <span>Método de pago</span>
+                          <strong>{formatPaymentMethod(payment?.payment_method)}</strong>
+                        </li>
+                      </ul>
 
-              {products.length > 0 ? (
-                <div>
-                  <p className="card-label" style={{ marginTop: "1rem" }}>
-                    Productos
-                  </p>
-                  <div className="checkout-success-table-wrapper">
-                    <table className="checkout-success-table">
-                      <thead>
-                        <tr>
-                          <th>Producto</th>
-                          <th>Cantidad</th>
-                          <th>Precio unitario</th>
-                          <th>Subtotal</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {products.map((product, index) => (
-                          <tr key={`${order.id}-product-${product.slug ?? index}`}>
-                            <td>{product.name ?? product.slug ?? "Producto"}</td>
-                            <td>{product.quantity ?? 0}</td>
-                            <td>{formatMoney(product.unitPrice)}</td>
-                            <td>{formatMoney(product.subtotal)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ) : null}
+                      {products.length > 0 ? (
+                        <div>
+                          <p className="card-label" style={{ marginTop: "1rem" }}>
+                            Productos
+                          </p>
+                          <div className="checkout-success-table-wrapper">
+                            <table className="checkout-success-table">
+                              <thead>
+                                <tr>
+                                  <th>Producto</th>
+                                  <th>Cantidad</th>
+                                  <th>Precio unitario</th>
+                                  <th>Subtotal</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {products.map((product, index) => (
+                                  <tr key={`${order.id}-product-${product.slug ?? index}`}>
+                                    <td>{product.name ?? product.slug ?? "Producto"}</td>
+                                    <td>{product.quantity ?? 0}</td>
+                                    <td>{formatMoney(product.unitPrice)}</td>
+                                    <td>{formatMoney(product.subtotal)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ) : null}
 
-              {courseItems.length > 0 ? (
-                <div>
-                  <p className="card-label" style={{ marginTop: "1rem" }}>
-                    Cursos
-                  </p>
-                  {courseItems.map((courseItem) => {
-                    const fallback = getFallbackCourseBySession(order, courseItem.course_session_id);
-                    const participants = (courseItem.course_participants ?? [])
-                      .map((participant) => participant.full_name?.trim())
-                      .filter((name): name is string => Boolean(name));
+                      {courseItems.length > 0 ? (
+                        <div>
+                          <p className="card-label" style={{ marginTop: "1rem" }}>
+                            Cursos
+                          </p>
+                          {courseItems.map((courseItem) => {
+                            const fallback = getFallbackCourseBySession(order, courseItem.course_session_id);
+                            const participants = (courseItem.course_participants ?? [])
+                              .map((participant) => participant.full_name?.trim())
+                              .filter((name): name is string => Boolean(name));
 
-                    const title = courseItem.courses?.title ?? fallback?.name ?? "Curso";
-                    const sessionDate = courseItem.course_sessions?.starts_at ?? fallback?.session_starts_at ?? null;
+                            const title = courseItem.courses?.title ?? fallback?.name ?? "Curso";
+                            const sessionDate = courseItem.course_sessions?.starts_at ?? fallback?.session_starts_at ?? null;
 
-                    return (
-                      <div key={courseItem.id} className="studio-card" style={{ marginTop: "0.8rem" }}>
-                        <h3>{title}</h3>
-                        <p>
-                          <strong>Sesión:</strong> {formatDateTime(sessionDate)}
-                        </p>
-                        <p>
-                          <strong>Cantidad:</strong> {courseItem.quantity}
-                        </p>
-                        <p>
-                          <strong>Subtotal:</strong> {formatMoney(courseItem.subtotal)}
-                        </p>
-                        <p>
-                          <strong>Participantes registrados:</strong> {participants.length ? participants.join(", ") : "Sin participantes"}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </article>
-          );
-        })}
+                            return (
+                              <div key={courseItem.id} className="studio-card" style={{ marginTop: "0.8rem" }}>
+                                <h3>{title}</h3>
+                                <p>
+                                  <strong>Sesión:</strong> {formatDateTime(sessionDate)}
+                                </p>
+                                <p>
+                                  <strong>Cantidad:</strong> {courseItem.quantity}
+                                </p>
+                                <p>
+                                  <strong>Subtotal:</strong> {formatMoney(courseItem.subtotal)}
+                                </p>
+                                <p>
+                                  <strong>Participantes registrados:</strong>{" "}
+                                  {participants.length ? participants.join(", ") : "Sin participantes"}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  </details>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
     </SiteShell>
   );
