@@ -280,7 +280,7 @@ export default async function AccountOrdersPage({ searchParams }: OrdersPageProp
           return (
             <article className="studio-card" key={order.id}>
               <p className="card-label">Orden</p>
-              <h2>{order.external_reference}</h2>
+              <h2 className="order-reference">{order.external_reference}</h2>
 
               <ul className="checkout-success-summary" style={{ listStyle: "none", padding: 0 }}>
                 <li>
