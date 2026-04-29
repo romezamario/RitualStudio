@@ -58,10 +58,10 @@ export default function CartPageClient() {
           const lineKey = getCartItemLineKey(item);
           const imageSource =
             item.kind === "product"
-              ? toRenderableProductImageUrl(item.image, "cart")
+              ? toRenderableProductImageUrl(item.image, "cart-item")
               : item.image.startsWith("http") || item.image.startsWith("/")
                 ? item.image
-                : toRenderableProductImageUrl(item.image, "cart");
+                : toRenderableProductImageUrl(item.image, "cart-item");
 
           return (
             <article key={lineKey} className="studio-card cart-item">

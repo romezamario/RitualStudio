@@ -25,7 +25,7 @@ export default async function CoursesPage() {
         <div className="feature-grid">
           {courses.map((course) => {
             const courseImage = course.imageUrl
-              ? toRenderableProductImageUrl(course.imageUrl, "marketplace-card")
+              ? toRenderableProductImageUrl(course.imageUrl, "marketplace-list")
               : "/images/logo.png";
 
             return (
