@@ -3,22 +3,58 @@ import Link from "next/link";
 import Image from "next/image";
 import SiteShell from "@/components/site-shell";
 
-const GRID_IMAGE_SIZES = "(max-width: 900px) 100vw, (max-width: 1280px) 50vw, 33vw";
+const WALLPAPER_IMAGE_SIZES = "(max-width: 760px) 100vw, (max-width: 1280px) 50vw, 25vw";
 
-const referenciasVisuales = [
+type HomeOption = {
+  titulo: string;
+  descripcion: string;
+  href: string;
+  url: string;
+  span?: "compact" | "wide" | "tall";
+};
+
+const opcionesHome: HomeOption[] = [
   {
-    titulo: "Bouquet editorial en tonos blush",
-    url: "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=1200&q=80"
+    titulo: "Tienda",
+    descripcion: "Bouquets listos para entrega con curaduría floral de temporada.",
+    href: "/arreglos",
+    url: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1400&q=80",
+    span: "wide"
   },
   {
-    titulo: "Mesa floral para evento íntimo",
-    url: "https://images.unsplash.com/photo-1468327768560-75b778cbb551?auto=format&fit=crop&w=1200&q=80"
+    titulo: "Cursos",
+    descripcion: "Workshops presenciales para técnica, composición y narrativa botánica.",
+    href: "/cursos",
+    url: "https://images.unsplash.com/photo-1455659817273-f96807779a8a?auto=format&fit=crop&w=1200&q=80",
+    span: "tall"
   },
   {
-    titulo: "Texturas orgánicas y follaje suave",
-    url: "https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?auto=format&fit=crop&w=1200&q=80"
+    titulo: "Diseño a medida",
+    descripcion: "Propuestas personalizadas para regalos, espacios y activaciones de marca.",
+    href: "/custom",
+    url: "https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    titulo: "Eventos",
+    descripcion: "Ambientaciones florales para bodas íntimas, cenas y hospitality premium.",
+    href: "/eventos",
+    url: "https://images.unsplash.com/photo-1478144592103-25e218a04891?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    titulo: "Nosotros",
+    descripcion: "Conoce el estudio, nuestra dirección creativa y el enfoque editorial.",
+    href: "/nosotros",
+    url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    titulo: "Contacto",
+    descripcion: "Agenda una asesoría para transformar tu idea en una propuesta floral integral.",
+    href: "/contacto",
+    url: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+    span: "compact"
   }
 ];
+
 export const metadata: Metadata = {
   alternates: {
     canonical: "/"
@@ -29,47 +65,24 @@ export default function Home() {
   return (
     <SiteShell
       eyebrow="Estudio floral editorial"
-      title="Arreglos florales de autor para espacios, regalos y eventos con carácter"
-      subtitle="Inspirados en el lenguaje sobrio y artístico de estudios de diseño contemporáneo, creamos composiciones con intención: textura, escala y narrativa visual adaptada a cada cliente."
+      title="Explora Ritual Studio desde un wallpaper vivo de experiencias"
+      subtitle="Un acceso visual a nuestras principales líneas: tienda floral, cursos, diseño personalizado, eventos, nosotros y contacto."
     >
-      <div className="feature-grid">
-        <article className="studio-card">
-          <p className="card-label">01</p>
-          <h2>Arreglos signature</h2>
-          <p>Colección curada para entrega inmediata con estética Ritual: elegante, escultórica y atemporal.</p>
-        </article>
-        <article className="studio-card">
-          <p className="card-label">02</p>
-          <h2>Diseño a medida</h2>
-          <p>Traducimos tu idea en una propuesta botánica personalizada con dirección creativa y selección estacional.</p>
-        </article>
-        <article className="studio-card">
-          <p className="card-label">03</p>
-          <h2>Eventos y hospitality</h2>
-          <p>Producción floral para bodas íntimas, cenas de marca y ambientaciones de alto impacto visual.</p>
-        </article>
-      </div>
-
-      <div className="cta-row">
-        <Link href="/custom" className="btn btn-primary">
-          Solicitar propuesta
-        </Link>
-        <Link href="/arreglos" className="btn btn-ghost">
-          Ver colección
-        </Link>
-      </div>
-
-      <section className="reference-gallery" aria-label="Imágenes de referencia para diseño">
-        <p className="card-label">Moodboard inicial</p>
-        <h2>Imágenes de ejemplo para la dirección visual</h2>
-        <div className="reference-grid">
-          {referenciasVisuales.map((item) => (
-            <figure key={item.titulo} className="reference-item">
-              <Image src={item.url} alt={item.titulo} width={1200} height={900} sizes={GRID_IMAGE_SIZES} />
-              <figcaption>{item.titulo}</figcaption>
-            </figure>
-          ))}
-        </div>
+      <section className="home-wallpaper" aria-label="Navegación principal de Ritual Studio">
+        {opcionesHome.map((item) => (
+          <Link
+            key={item.titulo}
+            href={item.href}
+            className={`wallpaper-card${item.span ? ` wallpaper-card-${item.span}` : ""}`}
+          >
+            <Image src={item.url} alt={item.titulo} width={1200} height={1400} sizes={WALLPAPER_IMAGE_SIZES} />
+            <div className="wallpaper-overlay">
+              <p className="wallpaper-kicker">Ritual Studio</p>
+              <h2>{item.titulo}</h2>
+              <p>{item.descripcion}</p>
+            </div>
+          </Link>
+        ))}
       </section>
     </SiteShell>
   );
