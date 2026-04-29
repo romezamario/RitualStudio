@@ -18,7 +18,7 @@ type UploadImageResult = {
   renderUrl: string;
 };
 
-const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
+const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
 
 const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/webp", "image/avif", "image/png"]);
 const BLOCKED_IMAGE_TYPES = new Set([
@@ -155,18 +155,14 @@ export async function POST(request: Request) {
   }
 
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    return NextResponse.json({ error: "La imagen excede el límite de 4MB." }, { status: 400 });
+    return NextResponse.json({ error: "La imagen excede el límite de 8MB." }, { status: 400 });
   }
 
-  if (file.type === "image/png" && file.size > 2 * 1024 * 1024) {
-    return NextResponse.json(
-      {
-        error:
-          "PNG demasiado pesado para catálogo web. Convierte a WEBP/AVIF o comprime el archivo por debajo de 2MB.",
-      },
-      { status: 400 },
-    );
-  }
+
+  const optimizationHint =
+    file.size > 2 * 1024 * 1024
+      ? "Archivo pesado detectado: se optimizó automáticamente para catálogo (WEBP en variantes)."
+      : null;
 
   const rawSlug = typeof formData?.get("slug") === "string" ? String(formData.get("slug")) : "";
   const rawProductId = typeof formData?.get("productId") === "string" ? String(formData.get("productId")) : "";
@@ -278,6 +274,7 @@ export async function POST(request: Request) {
           image: variants.detail,
           imageVariants: variants,
         },
+        optimizationHint,
       },
     },
     { status: 201 },

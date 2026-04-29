@@ -51,6 +51,7 @@ const initialCourseForm: CourseFormState = {
 };
 
 const ADMIN_PREVIEW_IMAGE_SIZES = "(max-width: 900px) 100vw, 50vw";
+const MAX_UPLOAD_IMAGE_BYTES = 8 * 1024 * 1024;
 
 const initialSessionForm: SessionFormState = {
   startsAt: "",
@@ -210,6 +211,16 @@ export default function AdminCoursesManager() {
       return;
     }
 
+    if (!file.type.startsWith("image/")) {
+      setFeedback("Selecciona un archivo de imagen válido (JPG, PNG, WEBP o AVIF).");
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_IMAGE_BYTES) {
+      setFeedback("La imagen supera el límite de 8MB. Reduce el tamaño antes de subirla.");
+      return;
+    }
+
     setIsUploadingImage(true);
     setFeedback("Subiendo imagen del curso...");
 
@@ -223,7 +234,7 @@ export default function AdminCoursesManager() {
       });
 
       const body = (await response.json().catch(() => null)) as
-        | { data?: { image?: string; publicUrl?: string; renderUrl?: string }; error?: string }
+        | { data?: { image?: string; publicUrl?: string; renderUrl?: string; optimizationHint?: string }; error?: string }
         | null;
 
       if (!response.ok || !body?.data?.image) {
@@ -231,7 +242,7 @@ export default function AdminCoursesManager() {
       }
 
       setCourseForm((current) => ({ ...current, imageUrl: body.data?.image ?? "" }));
-      setFeedback("Imagen subida correctamente.");
+      setFeedback(body?.data?.optimizationHint ?? "Imagen subida correctamente.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "No fue posible subir la imagen del curso.");
     } finally {
