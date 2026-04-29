@@ -404,6 +404,85 @@ p {
   text-transform: uppercase;
 }
 
+
+.home-wallpaper {
+  display: grid;
+  gap: 1rem;
+  grid-auto-flow: dense;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 2.2rem;
+}
+
+.wallpaper-card {
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  box-shadow: 0 12px 28px rgba(74, 74, 74, 0.12);
+  min-height: 280px;
+  overflow: hidden;
+  position: relative;
+}
+
+.wallpaper-card img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+  width: 100%;
+}
+
+.wallpaper-card::after {
+  background: linear-gradient(180deg, rgba(24, 23, 23, 0.08) 18%, rgba(24, 23, 23, 0.72) 100%);
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.wallpaper-card:hover img {
+  transform: scale(1.03);
+}
+
+.wallpaper-overlay {
+  bottom: 0;
+  color: #f8f7f5;
+  display: grid;
+  gap: 0.45rem;
+  left: 0;
+  padding: 1.2rem;
+  position: absolute;
+  right: 0;
+  z-index: 2;
+}
+
+.wallpaper-kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  opacity: 0.85;
+  text-transform: uppercase;
+}
+
+.wallpaper-overlay h2 {
+  font-size: 1.7rem;
+}
+
+.wallpaper-overlay p {
+  color: color-mix(in srgb, #f8f7f5 88%, #bcc1c7);
+  line-height: 1.5;
+  max-width: 28ch;
+}
+
+.wallpaper-card-wide {
+  grid-column: span 2;
+}
+
+.wallpaper-card-tall {
+  grid-row: span 2;
+  min-height: 430px;
+}
+
+.wallpaper-card-compact {
+  min-height: 230px;
+}
+
 .hero-block h1 {
   font-size: clamp(2.3rem, 5vw, 4.4rem);
   line-height: 1.05;
@@ -960,6 +1039,7 @@ p {
   }
 
   .feature-grid,
+  .home-wallpaper,
   .split-panel,
   .contact-grid,
   .reference-grid,
@@ -1347,5 +1427,18 @@ p {
   .admin-product-item {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 1200px) {
+  .home-wallpaper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wallpaper-card-wide,
+  .wallpaper-card-tall {
+    grid-column: span 1;
+    grid-row: span 1;
+    min-height: 300px;
   }
 }
