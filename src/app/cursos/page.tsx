@@ -48,6 +48,9 @@ export default async function CoursesPage() {
                   <span>{course.sessionsCount} sesiones publicadas</span>
                 </div>
                 <div className="marketplace-card-actions">
+                  <Link href={`/cursos/${course.slug}`} className="btn btn-ghost">
+                    Ver detalle
+                  </Link>
                   <Link href={`/cursos/${course.slug}`} className="btn btn-primary">
                     Ver sesiones y comprar
                   </Link>
