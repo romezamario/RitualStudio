@@ -62,4 +62,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 ## Operational Rule
 Los cambios en lógica comercial deben reflejarse en este archivo.
 
-- En administración, la carga de imágenes acepta hasta 8MB por archivo y optimiza automáticamente variantes WEBP para catálogo (thumb/card/detail), incluso cuando el original es una foto pesada.
+- En administración, la carga de imágenes acepta hasta 8MB por archivo.
+- En administración, antes de subir al backend, el navegador valida tipo/peso y procesa la imagen (resize proporcional hasta 2000px de lado mayor, export WEBP con calidad configurable y fallback JPEG/PNG).
+- El backend conserva validaciones de seguridad de tipo/peso y rechaza mensajes con formato claro para UX.
+- Cada imagen subida registra metadatos (`width`, `height`, `size_bytes`, `mime_type`, `original_filename`, `storage_path`) en `public.product_image_uploads`.

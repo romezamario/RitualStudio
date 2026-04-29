@@ -57,6 +57,8 @@ Relación funcional:
 ## Storage
 - Imágenes de producto en bucket de Supabase configurado por variable de entorno.
 - Imágenes de cursos administradas con carga directa desde backend (sin exponer service role en frontend).
+- Antes del upload, el navegador procesa imágenes (resize proporcional con lado mayor máximo de 2000px + export preferente WEBP con fallback JPEG/PNG).
+- Cada upload exitoso persiste metadatos operativos en `public.product_image_uploads` (`width`, `height`, `size_bytes`, `mime_type`, `original_filename`, `storage_path`) para trazabilidad.
 - Operaciones de escritura al storage solo por backend autenticado.
 
 ## Deployment Model
