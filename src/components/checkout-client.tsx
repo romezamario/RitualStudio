@@ -252,6 +252,8 @@ export default function CheckoutClient() {
 
   const [courseParticipantsByLine, setCourseParticipantsByLine] = useState<CourseParticipantsByLine>({});
   const [courseErrorsByLine, setCourseErrorsByLine] = useState<CourseErrorsByLine>({});
+  const courseParticipantsByLineRef = useRef<CourseParticipantsByLine>({});
+  const courseLinesRef = useRef(courseLines);
 
   useEffect(() => {
     setCourseParticipantsByLine((current) => {
@@ -276,6 +278,14 @@ export default function CheckoutClient() {
 
       return nextState;
     });
+  }, [courseLines]);
+
+  useEffect(() => {
+    courseParticipantsByLineRef.current = courseParticipantsByLine;
+  }, [courseParticipantsByLine]);
+
+  useEffect(() => {
+    courseLinesRef.current = courseLines;
   }, [courseLines]);
 
   const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim();
@@ -350,7 +360,8 @@ export default function CheckoutClient() {
             setCheckoutStatus("loading");
 
             return new Promise<void>((resolve) => {
-              const frontendValidationErrors = validateCourseParticipants(courseParticipantsByLine);
+              const currentParticipantsByLine = courseParticipantsByLineRef.current;
+              const frontendValidationErrors = validateCourseParticipants(currentParticipantsByLine);
               setCourseErrorsByLine(frontendValidationErrors);
 
               if (Object.values(frontendValidationErrors).some((errorMessage) => errorMessage)) {
@@ -361,9 +372,9 @@ export default function CheckoutClient() {
               }
 
               const courseParticipantsBySession = Object.fromEntries(
-                courseLines.map((line) => [
+                courseLinesRef.current.map((line) => [
                   line.courseSessionId,
-                  (courseParticipantsByLine[line.lineKey] ?? []).map((fullName) => fullName.trim()),
+                  (currentParticipantsByLine[line.lineKey] ?? []).map((fullName) => fullName.trim()),
                 ]),
               );
 
@@ -452,8 +463,6 @@ export default function CheckoutClient() {
   }, [
     checkoutItems,
     clearCart,
-    courseLines,
-    courseParticipantsByLine,
     isBelowMercadoPagoMinAmount,
     isProductionKey,
     normalizedUserEmail,
