@@ -17,6 +17,17 @@ type UploadImageResult = {
   publicUrl: string;
   renderUrl: string;
 };
+type ImageMetadataInsert = {
+  product_slug: string | null;
+  product_id: string | null;
+  admin_user_id: string | null;
+  width: number | null;
+  height: number | null;
+  size_bytes: number;
+  mime_type: string;
+  original_filename: string;
+  storage_path: string;
+};
 
 const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
 
@@ -166,6 +177,10 @@ export async function POST(request: Request) {
 
   const rawSlug = typeof formData?.get("slug") === "string" ? String(formData.get("slug")) : "";
   const rawProductId = typeof formData?.get("productId") === "string" ? String(formData.get("productId")) : "";
+  const metadataWidth = Number(formData?.get("width"));
+  const metadataHeight = Number(formData?.get("height"));
+  const processedMimeType = typeof formData?.get("processed_mime_type") === "string" ? String(formData.get("processed_mime_type")) : "";
+  const originalFilename = typeof formData?.get("original_filename") === "string" ? String(formData.get("original_filename")) : file.name;
   const entityKey = sanitizeStorageSegment(rawSlug || rawProductId || `${Date.now()}-${randomUUID()}`);
   const safeName = sanitizeFileName(file.name || "producto");
   const bucket = getProductImagesBucket();
@@ -257,6 +272,30 @@ export async function POST(request: Request) {
     ProductImageVariant,
     string
   >;
+
+  const metadataPayload: ImageMetadataInsert = {
+    product_slug: rawSlug || null,
+    product_id: rawProductId || null,
+    admin_user_id: null,
+    width: Number.isFinite(metadataWidth) && metadataWidth > 0 ? Math.round(metadataWidth) : null,
+    height: Number.isFinite(metadataHeight) && metadataHeight > 0 ? Math.round(metadataHeight) : null,
+    size_bytes: file.size,
+    mime_type: processedMimeType || file.type || "application/octet-stream",
+    original_filename: sanitizeFileName(originalFilename || "imagen"),
+    storage_path: variants.detail,
+  };
+
+  await fetch(`${supabaseUrl}/rest/v1/product_image_uploads`, {
+    method: "POST",
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify(metadataPayload),
+    cache: "no-store",
+  });
 
   return NextResponse.json(
     {

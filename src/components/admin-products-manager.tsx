@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
+import { MAX_UPLOAD_IMAGE_BYTES, processImageBeforeUpload } from "@/lib/client-image-processing";
 import type { MarketplaceProduct } from "@/data/marketplace-products";
 import {
   buildMarketplaceProduct,
@@ -22,7 +23,7 @@ type FormState = {
 };
 
 const ADMIN_PREVIEW_IMAGE_SIZES = "(max-width: 900px) 100vw, 50vw";
-const MAX_UPLOAD_IMAGE_BYTES = 8 * 1024 * 1024;
+
 
 const initialForm: FormState = {
   slug: "",
@@ -116,12 +117,18 @@ export default function AdminProductsManager() {
     }
 
     setIsUploadingImage(true);
-    setFeedback("Subiendo imagen a storage...");
+    setFeedback("Procesando imagen...");
 
     try {
+      const processed = await processImageBeforeUpload(file);
       const payload = new FormData();
-      payload.set("file", file);
+      payload.set("file", processed.file);
+      payload.set("width", String(processed.width));
+      payload.set("height", String(processed.height));
+      payload.set("processed_mime_type", processed.outputMimeType);
+      payload.set("original_filename", processed.originalFilename);
 
+      setFeedback("Subiendo imagen a storage...");
       const response = await fetch("/api/admin/products/upload-image", {
         method: "POST",
         body: payload,
