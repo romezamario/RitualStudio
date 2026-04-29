@@ -445,6 +445,12 @@ p {
   font-size: 1.35rem;
 }
 
+.studio-card .order-reference {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
 .studio-card p {
   color: color-mix(in srgb, var(--ink) 82%, white);
 }
