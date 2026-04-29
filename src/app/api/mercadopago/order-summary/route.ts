@@ -64,7 +64,12 @@ function normalizeStatus(rawStatus?: string | null) {
     return "approved";
   }
 
-  if (status === "pending" || status === "in_process" || status === "in_mediation") {
+  if (
+    status === "pending" ||
+    status === "pending_payment" ||
+    status === "in_process" ||
+    status === "in_mediation"
+  ) {
     return "pending";
   }
 
@@ -174,6 +179,25 @@ export async function GET(request: Request) {
     }
 
     payment = paymentResult.payment;
+  }
+
+  if (!payment && paymentId) {
+    try {
+      const mpPayment = await mpApiFetch<MpPaymentLookup>(`/v1/payments/${encodeURIComponent(paymentId)}`);
+
+      payment = {
+        mercado_pago_payment_id: String(mpPayment.id ?? paymentId),
+        mercado_pago_order_id: null,
+        status: mpPayment.status ?? null,
+        status_detail: mpPayment.status_detail ?? null,
+        payment_method: mpPayment.payment_method_id ?? null,
+        amount: mpPayment.transaction_amount ?? null,
+        created_at: mpPayment.date_created ?? null,
+        updated_at: mpPayment.date_last_updated ?? null,
+      };
+    } catch {
+      // Si Mercado Pago no responde, continuamos con datos locales disponibles.
+    }
   }
 
   if (!payment && order?.mercado_pago_order_id) {
