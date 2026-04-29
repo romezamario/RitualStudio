@@ -61,3 +61,5 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 
 ## Operational Rule
 Los cambios en lógica comercial deben reflejarse en este archivo.
+
+- En administración, la carga de imágenes acepta hasta 8MB por archivo y optimiza automáticamente variantes WEBP para catálogo (thumb/card/detail), incluso cuando el original es una foto pesada.

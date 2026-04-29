@@ -91,6 +91,7 @@
 - Verificar que el frontend use fallback local (`/images/logo.png`) cuando `image_url` no tenga contenido.
 
 ### En admin de cursos no se guarda la imagen al seleccionar archivo
+**Nota de validación actual:** el backend acepta imágenes hasta 8MB y, si pesan más de 2MB, devuelve aviso de optimización automática para catálogo.
 **Síntoma:** en `/admin/cursos`, después de seleccionar imagen y guardar, el curso sigue sin `image_url`.
 
 **Causa frecuente:** el archivo no cumple las reglas del endpoint de carga (se reutiliza el mismo endpoint de productos).
