@@ -60,6 +60,8 @@ Relación funcional:
 - Antes del upload, el navegador procesa imágenes (resize proporcional con lado mayor máximo de 2000px + export preferente WEBP con fallback JPEG/PNG).
 - Cada upload exitoso persiste metadatos operativos en `public.product_image_uploads` (`width`, `height`, `size_bytes`, `mime_type`, `original_filename`, `storage_path`) para trazabilidad.
 - Operaciones de escritura al storage solo por backend autenticado.
+- Contrato de variantes de imagen activo: `thumb` (320x240), `card` (720x540), `detail` (1440x1080) y `original` (solo acciones explícitas fuera del flujo normal).
+- Mapeo por pantalla: listados usan `thumb`, cards/admin preview usan `card`, PDP usa `detail`; `original` no se solicita durante navegación estándar.
 
 ## Deployment Model
 - Rama principal para producción (`main`, salvo configuración contraria).

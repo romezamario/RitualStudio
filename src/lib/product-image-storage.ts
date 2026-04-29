@@ -1,18 +1,40 @@
 const DEFAULT_PRODUCT_IMAGES_BUCKET = "product-images";
 
-export type ProductImageRenderUsage = "marketplace-card" | "product-detail" | "cart" | "admin-preview";
+export type ProductImageVariant = "thumb" | "card" | "detail" | "original";
+
+export type ProductImageRenderUsage =
+  | "marketplace-list"
+  | "product-card"
+  | "product-detail"
+  | "cart-item"
+  | "admin-preview"
+  | "original-download";
+
+type ProductImageVariantContract = {
+  width: number;
+  height: number;
+  quality: number;
+  usage: string;
+};
 
 type ProductImageRenderPreset = {
-  width: number;
-  height?: number;
-  quality: number;
+  variant: ProductImageVariant;
+};
+
+export const PRODUCT_IMAGE_VARIANT_CONTRACT: Record<ProductImageVariant, ProductImageVariantContract> = {
+  thumb: { width: 320, height: 240, quality: 70, usage: "Miniaturas en listados densos y previews pequeñas." },
+  card: { width: 720, height: 540, quality: 78, usage: "Cards de catálogo (marketplace, cursos y tarjetas)." },
+  detail: { width: 1440, height: 1080, quality: 84, usage: "PDP y vistas de detalle con imagen protagonista." },
+  original: { width: 0, height: 0, quality: 100, usage: "Solo para acciones explícitas (descarga/revisión)." },
 };
 
 const PRODUCT_IMAGE_RENDER_PRESETS: Record<ProductImageRenderUsage, ProductImageRenderPreset> = {
-  "marketplace-card": { width: 960, height: 720, quality: 76 },
-  "product-detail": { width: 1440, height: 1080, quality: 84 },
-  cart: { width: 360, height: 252, quality: 72 },
-  "admin-preview": { width: 800, height: 600, quality: 74 },
+  "marketplace-list": { variant: "thumb" },
+  "product-card": { variant: "card" },
+  "product-detail": { variant: "detail" },
+  "cart-item": { variant: "thumb" },
+  "admin-preview": { variant: "card" },
+  "original-download": { variant: "original" },
 };
 
 export function getProductImagesBucket() {
@@ -53,14 +75,16 @@ export function buildSupabaseStorageRenderUrl(path: string, usage: ProductImageR
   const normalizedPath = path.replace(/^\/+/, "");
   const preset = PRODUCT_IMAGE_RENDER_PRESETS[usage];
 
-  const searchParams = new URLSearchParams({
-    width: String(preset.width),
-    quality: String(preset.quality),
-  });
-
-  if (preset.height) {
-    searchParams.set("height", String(preset.height));
+  if (preset.variant === "original") {
+    return buildSupabaseStoragePublicUrl(normalizedPath);
   }
+
+  const variant = PRODUCT_IMAGE_VARIANT_CONTRACT[preset.variant];
+  const searchParams = new URLSearchParams({
+    width: String(variant.width),
+    height: String(variant.height),
+    quality: String(variant.quality),
+  });
 
   return `${supabaseUrl}/storage/v1/render/image/public/${getProductImagesBucket()}/${normalizedPath}?${searchParams.toString()}`;
 }

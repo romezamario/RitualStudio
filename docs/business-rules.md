@@ -66,3 +66,5 @@ Los cambios en lógica comercial deben reflejarse en este archivo.
 - En administración, antes de subir al backend, el navegador valida tipo/peso y procesa la imagen (resize proporcional hasta 2000px de lado mayor, export WEBP con calidad configurable y fallback JPEG/PNG).
 - El backend conserva validaciones de seguridad de tipo/peso y rechaza mensajes con formato claro para UX.
 - Cada imagen subida registra metadatos (`width`, `height`, `size_bytes`, `mime_type`, `original_filename`, `storage_path`) en `public.product_image_uploads`.
+- En navegación normal del catálogo, las miniaturas/listados solicitan variantes ligeras (`thumb`) y la variante grande (`detail`) solo se pide al abrir la vista de detalle del producto/curso.
+- La variante `original` queda reservada para acciones explícitas de descarga/revisión interna y no participa en cards, listados, carrito o PDP estándar.
