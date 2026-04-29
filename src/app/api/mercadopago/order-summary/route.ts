@@ -192,8 +192,8 @@ export async function GET(request: Request) {
         status_detail: mpPayment.status_detail ?? null,
         payment_method: mpPayment.payment_method_id ?? null,
         amount: mpPayment.transaction_amount ?? null,
-        created_at: mpPayment.date_created ?? null,
-        updated_at: mpPayment.date_last_updated ?? null,
+        created_at: mpPayment.date_created ?? undefined,
+        updated_at: mpPayment.date_last_updated ?? undefined,
       };
     } catch {
       // Si Mercado Pago no responde, continuamos con datos locales disponibles.
