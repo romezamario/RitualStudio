@@ -1260,6 +1260,7 @@ p {
 }
 
 .orders-table-details {
+  background: color-mix(in srgb, var(--panel) 86%, var(--smoke));
   border-top: 1px solid color-mix(in srgb, var(--smoke) 18%, white);
   display: grid;
   gap: 0.75rem;
