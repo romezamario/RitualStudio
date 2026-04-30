@@ -65,7 +65,9 @@ Respuesta (resumen):
 - Para construir el `manifest` de validación (`id:{data.id};request-id:{x-request-id};ts:{ts};`), `data.id` se normaliza a lowercase cuando contiene caracteres alfanuméricos, alineando el cálculo HMAC con la validación esperada por Mercado Pago.
 - En auditoría (`payment_events.payload.signature`) se guardan ambos valores de `data.id`: original y normalizado, para trazabilidad y debugging.
 - Existe fallback de validación por hash de `rawBody` para robustez.
-- Si no valida firma, el evento se rechaza lógicamente (ver logs y troubleshooting).
+- Si no valida firma:
+  - Se registra auditoría mínima en `payment_events` (`signature`, `webhook_processing` y `audit.ignored_reason="invalid_signature"`).
+  - Se responde **HTTP 401** y se corta la ejecución antes de consultar APIs de MP o reconciliar pagos/cupos.
 
 ## Persistence Strategy
 - Tabla `orders`: referencia externa, estado, total, metadata y raw response.
@@ -115,8 +117,10 @@ Respuesta (resumen):
   - Ejemplos: timeout/intermitencia al consultar MP o al reconciliar entidades internas luego de persistir evento.
   - Estado: `payment_events.payload.webhook_processing.status = "pending_internal_retry"`.
   - Señales operativas: `retry_policy = "internal-retry-200"`, `retry_after_seconds`, y `operational_alert.required=true`.
-- **Criterio 3 — Falla no reintetable por MP**: se responde **HTTP 200** sin retry externo.
-  - Ejemplos: JSON inválido o firma inválida.
+- **Criterio 3 — Falla no reintetable por MP**: se responde sin retry externo.
+  - Ejemplos:
+    - JSON inválido → **HTTP 200** (`ignored: invalid-json`).
+    - Firma inválida → **HTTP 401** con auditoría mínima persistida.
   - Estado: `payment_events.payload.webhook_processing.status = "failed_non_retryable"`.
 
 Estados de `webhook_processing` usados por el sistema:

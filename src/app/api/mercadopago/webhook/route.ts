@@ -700,6 +700,29 @@ export async function handleWebhook(request: Request, environment: "prod" | "tes
     return NextResponse.json({ ok: false, retry: "mercadopago", reason: "payment_event_persist_failed" }, { status: 500 });
   }
 
+  if (signature.validated === false) {
+    const invalidSignaturePayload = {
+      ...initialPayload,
+      webhook_processing: {
+        ...(initialPayload.webhook_processing ?? {}),
+        processed: false,
+        status: "failed_non_retryable",
+        retry_policy: "none",
+        failed_at: new Date().toISOString(),
+        error: `Firma inválida: ${signature.reason}`,
+      },
+      audit: {
+        topic: payload.type ?? payload.action ?? "",
+        data_id: payload.data?.id ?? null,
+        finalized_at: new Date().toISOString(),
+        ignored_reason: "invalid_signature",
+      },
+    };
+
+    await updatePaymentEventPayload(eventKey, invalidSignaturePayload);
+    return NextResponse.json({ ok: false, ignored: "invalid-signature" }, { status: 401 });
+  }
+
   let audit: Record<string, unknown> = {
     topic: payload.type ?? payload.action ?? "",
     data_id: payload.data?.id ?? null,
