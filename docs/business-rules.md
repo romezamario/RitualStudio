@@ -11,6 +11,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 ## Catalog & Product Rules
 - El catálogo expone productos por `slug` como identificador funcional.
 - El checkout no confía en precios enviados por frontend: recalcula usando catálogo backend.
+- En PDP de productos y detalle de cursos, la acción **Comprar ahora** agrega la línea seleccionada al carrito y redirige directo a `/checkout` (sin pasar por WhatsApp).
 - Cada línea de compra debe incluir `slug` válido y `quantity` entera.
 
 ## Cart & Checkout Rules
