@@ -38,7 +38,9 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - `SUPABASE_SERVICE_ROLE_KEY`: acceso privilegiado a Supabase desde backend.
 - `SUPABASE_PRODUCT_IMAGES_BUCKET`: bucket de imágenes de producto.
 - `MP_ACCESS_TOKEN`: credencial privada para API de Mercado Pago.
+- `MP_ACCESS_TOKEN_TEST`: credencial privada de pruebas para reconciliación webhook en endpoint `/api/mercadopago/webhook/test`.
 - `MP_WEBHOOK_SECRET`: secreto para validar firma del webhook.
+- `MP_WEBHOOK_SECRET_TEST`: secreto de pruebas para validar firma del endpoint `/api/mercadopago/webhook/test`.
 - `EMAIL_PROVIDER`: proveedor de correo (`resend`, `disabled`, etc.).
 - `EMAIL_FROM`: remitente para correos transaccionales.
 - `EMAIL_SUPPORT_CHANNEL`: canal mostrado en comprobantes.

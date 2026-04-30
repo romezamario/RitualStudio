@@ -6,6 +6,8 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 ## Endpoints in Use
 - `POST /api/mercadopago/create-order`
 - `POST /api/mercadopago/webhook`
+- `POST /api/mercadopago/webhook/prod`
+- `POST /api/mercadopago/webhook/test`
 - `GET /api/mercadopago/order-summary` (lectura de resumen)
 - Endpoint complementario de autenticación: `POST /api/auth/claim-orders` para asociar compras de invitado al usuario autenticado con correo confirmado y auditoría de claim.
 
@@ -55,7 +57,9 @@ Respuesta (resumen):
 - El payload del checkout envía `course_participants` por `course_session_id` (también embebido por línea) para reforzar trazabilidad de validación.
 
 ## Webhook Validation Flow
-- Se valida firma usando `MP_WEBHOOK_SECRET`.
+- Se valida firma por entorno:
+  - `/api/mercadopago/webhook/prod` y `/api/mercadopago/webhook` usan `MP_WEBHOOK_SECRET`.
+  - `/api/mercadopago/webhook/test` usa `MP_WEBHOOK_SECRET_TEST`.
 - Se consideran headers de firma + `request-id` + `data.id`.
 - Existe fallback de validación por hash de `rawBody` para robustez.
 - Si no valida firma, el evento se rechaza lógicamente (ver logs y troubleshooting).
@@ -89,6 +93,7 @@ Respuesta (resumen):
 
 ## Critical Security Rules
 - `MP_ACCESS_TOKEN` solo backend.
+- `MP_ACCESS_TOKEN_TEST` solo backend (exclusivo para endpoint de pruebas del webhook).
 - `NEXT_PUBLIC_MP_PUBLIC_KEY` solo para inicialización del checkout client-side.
 - Estado final de pago lo determina backend/webhook, nunca solo frontend.
 - No aceptar monto final calculado en cliente.

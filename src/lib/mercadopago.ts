@@ -86,6 +86,10 @@ export function getMercadoPagoPublicKey() {
 
 export function getMercadoPagoAccessToken() {
   const rawToken = process.env.MP_ACCESS_TOKEN?.trim() ?? "";
+  return sanitizeMercadoPagoToken(rawToken);
+}
+
+function sanitizeMercadoPagoToken(rawToken: string) {
 
   if (!rawToken) {
     return "";
@@ -99,6 +103,16 @@ export function getMercadoPagoAccessToken() {
 
 export function getMercadoPagoWebhookSecret() {
   return process.env.MP_WEBHOOK_SECRET?.trim() ?? "";
+}
+
+export function getMercadoPagoAccessTokenByEnvironment(environment: "prod" | "test") {
+  const envVarName = environment === "test" ? "MP_ACCESS_TOKEN_TEST" : "MP_ACCESS_TOKEN";
+  return sanitizeMercadoPagoToken(process.env[envVarName]?.trim() ?? "");
+}
+
+export function getMercadoPagoWebhookSecretByEnvironment(environment: "prod" | "test") {
+  const envVarName = environment === "test" ? "MP_WEBHOOK_SECRET_TEST" : "MP_WEBHOOK_SECRET";
+  return process.env[envVarName]?.trim() ?? "";
 }
 
 export function parseMxPrice(priceLabel: string): number {
