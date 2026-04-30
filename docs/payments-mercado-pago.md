@@ -66,7 +66,7 @@ Respuesta (resumen):
 
 ## Persistence Strategy
 - Tabla `orders`: referencia externa, estado, total, metadata y raw response.
-- Tabla `payments`: id de pago MP, método, estado, monto y raw response.
+- Tabla `payments`: id de pago MP, método (`payment_method`), tipo de método (`payment_method_type`), estado, monto y raw response.
 - En webhook, al hacer upsert de `payments`, se debe mantener `order_id` (UUID interno) resolviendo primero la orden por `mercado_pago_order_id`; esto asegura que vistas de cuenta (que consultan `payments` por `order_id`) puedan mostrar el método de pago incluso cuando la actualización proviene solo del webhook.
 - Tabla `payment_events`: auditoría operativa del webhook en `payload` (firma validada, snapshots MP, reconciliación de cupos y resultado de procesamiento).
 - Tabla `order_claim_events`: auditoría de vinculación de órdenes de invitado a cuenta autenticada (quién, cómo y cuándo).
