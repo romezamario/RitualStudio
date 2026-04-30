@@ -585,9 +585,43 @@ async function trySendPurchaseEmail({
   await persistEmailConfirmationMetadata(order.id, nextMetadata);
 }
 
+type WebhookFailurePolicy = "mp-retry-5xx" | "internal-retry-200" | "non-retryable-200";
+
+function classifyWebhookFailure(error: unknown): {
+  policy: WebhookFailurePolicy;
+  reason: string;
+} {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+
+  if (message.includes("no se pudo registrar evento en payment_events") || message.includes("payment_events")) {
+    return {
+      policy: "mp-retry-5xx",
+      reason: "No se pudo persistir auditoría mínima del webhook en payment_events.",
+    };
+  }
+
+  if (message.includes("json") || message.includes("signature")) {
+    return {
+      policy: "non-retryable-200",
+      reason: "Payload o firma inválida; un reintento de MP no corrige este tipo de error.",
+    };
+  }
+
+  return {
+    policy: "internal-retry-200",
+    reason: "Falla transitoria de sincronización/reconciliación backend; se programa reproceso interno.",
+  };
+}
+
 export async function handleWebhook(request: Request, environment: "prod" | "test" = "prod") {
   const rawBody = await request.text();
-  const payload = (JSON.parse(rawBody || "{}") ?? {}) as WebhookPayload;
+  let payload: WebhookPayload = {};
+
+  try {
+    payload = (JSON.parse(rawBody || "{}") ?? {}) as WebhookPayload;
+  } catch {
+    return NextResponse.json({ ok: true, ignored: "invalid-json" });
+  }
 
   const signatureHeader = request.headers.get("x-signature");
   const requestId = request.headers.get("x-request-id");
@@ -651,6 +685,7 @@ export async function handleWebhook(request: Request, environment: "prod" | "tes
 
   if (eventError) {
     console.error("[MP webhook] No se pudo registrar evento en payment_events:", eventError);
+    return NextResponse.json({ ok: false, retry: "mercadopago", reason: "payment_event_persist_failed" }, { status: 500 });
   }
 
   let audit: Record<string, unknown> = {
@@ -730,19 +765,40 @@ export async function handleWebhook(request: Request, environment: "prod" | "tes
   } catch (error) {
     console.error("[MP webhook] Error al reconciliar datos con Mercado Pago:", error);
 
+    const classification = classifyWebhookFailure(error);
+    const failedAt = new Date().toISOString();
     const failedPayload = {
       ...initialPayload,
       webhook_processing: {
         ...(initialPayload.webhook_processing ?? {}),
         processed: false,
-        failed_at: new Date().toISOString(),
+        status:
+          classification.policy === "internal-retry-200"
+            ? "pending_internal_retry"
+            : classification.policy === "mp-retry-5xx"
+              ? "waiting_mp_retry"
+              : "failed_non_retryable",
+        retry_policy: classification.policy,
+        failed_at: failedAt,
         error: error instanceof Error ? error.message : "Error desconocido en webhook.",
+        retry_after_seconds: classification.policy === "internal-retry-200" ? 60 : null,
+      },
+      operational_alert: {
+        required: classification.policy !== "non-retryable-200",
+        severity: classification.policy === "mp-retry-5xx" ? "critical" : "high",
+        reason: classification.reason,
+        created_at: failedAt,
       },
       audit,
     };
 
     await updatePaymentEventPayload(eventKey, failedPayload);
-    return NextResponse.json({ ok: true });
+
+    if (classification.policy === "mp-retry-5xx") {
+      return NextResponse.json({ ok: false, retry: "mercadopago" }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, retry: classification.policy === "internal-retry-200" ? "internal" : "none" });
   }
 
   const finalizedPayload = {
@@ -750,6 +806,8 @@ export async function handleWebhook(request: Request, environment: "prod" | "tes
     webhook_processing: {
       ...(initialPayload.webhook_processing ?? {}),
       processed: true,
+      status: "completed",
+      retry_policy: "none",
       finished_at: new Date().toISOString(),
     },
     audit: {

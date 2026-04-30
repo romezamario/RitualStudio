@@ -102,6 +102,25 @@ Respuesta (resumen):
 - Estado final de pago lo determina backend/webhook, nunca solo frontend.
 - No aceptar monto final calculado en cliente.
 
+
+## Política de reintentos del webhook (operativa actual)
+- **Objetivo**: combinar idempotencia (`event_key`) con recuperación confiable según criticidad.
+- **Criterio 1 — Falla crítica de infraestructura/auditoría mínima**: se responde **HTTP 5xx** para que Mercado Pago reintente.
+  - Ejemplo: no se puede crear/actualizar `payment_events` al inicio (sin rastro auditable del evento).
+  - `payment_events.payload.webhook_processing.status = "waiting_mp_retry"` cuando exista registro previo; si ni siquiera se pudo persistir el evento inicial, el 5xx igualmente fuerza retry de MP.
+- **Criterio 2 — Falla transitoria de procesamiento interno**: se responde **HTTP 200** y se activa reproceso interno asíncrono.
+  - Ejemplos: timeout/intermitencia al consultar MP o al reconciliar entidades internas luego de persistir evento.
+  - Estado: `payment_events.payload.webhook_processing.status = "pending_internal_retry"`.
+  - Señales operativas: `retry_policy = "internal-retry-200"`, `retry_after_seconds`, y `operational_alert.required=true`.
+- **Criterio 3 — Falla no reintetable por MP**: se responde **HTTP 200** sin retry externo.
+  - Ejemplos: JSON inválido o firma inválida.
+  - Estado: `payment_events.payload.webhook_processing.status = "failed_non_retryable"`.
+
+Estados de `webhook_processing` usados por el sistema:
+- `completed`: procesamiento finalizado correctamente.
+- `pending_internal_retry`: requiere reproceso interno garantizado (cola/job async).
+- `waiting_mp_retry`: se devolvió 5xx para que MP reintente.
+- `failed_non_retryable`: falla definitiva que no mejora con retry de MP.
+
 ## Pending / TODO
 - Documentar job automático de reconciliación para órdenes pendientes sin confirmación webhook en ventana esperada.
-- Definir política de reintentos y alertamiento de fallas webhook.

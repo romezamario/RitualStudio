@@ -44,6 +44,26 @@
 - Endpoint público accesible.
 - Revisar logs del route handler y respuestas HTTP.
 
+
+### Política de retry webhook (qué debe reintentarse y qué no)
+**Criticidad alta (debe provocar retry de Mercado Pago con 5xx):**
+- Fallas para persistir auditoría mínima del evento (`payment_events` al inicio del webhook).
+
+**Criticidad media (200 + retry interno asíncrono):**
+- Fallas transitorias tras registrar el evento: consulta a MP, upserts internos, reconciliación operativa.
+- Verificar en `payment_events.payload.webhook_processing` estado `pending_internal_retry` y campos `retry_policy`, `retry_after_seconds`, `operational_alert`.
+
+**No reintetable por MP (200 sin retry externo):**
+- JSON malformado, firma inválida o payload inconsistente de origen.
+- Revisar `signature.valid=false` y `webhook_processing.status=failed_non_retryable` cuando exista `payment_events`.
+
+**Playbook operativo rápido:**
+1. Buscar por `event_key` en `payment_events`.
+2. Leer `payload.webhook_processing.status`.
+3. Si `pending_internal_retry`, verificar que el worker de reproceso haya tomado el evento y escalar si excede SLA.
+4. Si `waiting_mp_retry`, confirmar nuevos intentos de MP (dash/logs) y vigilar transición a `completed`.
+5. Si `failed_non_retryable`, cerrar como incidente de entrada inválida y no forzar retries manuales de MP.
+
 ### Inconsistencia de cupo (course_sessions.reserved_spots) vs estado de pago
 **Síntoma:** la orden quedó `rejected/cancelled/expired` pero cupo sigue reservado, o pago `approved` y no hay trazabilidad de confirmación.
 
