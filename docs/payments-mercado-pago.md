@@ -62,6 +62,8 @@ Respuesta (resumen):
   - `/api/mercadopago/webhook/prod` y `/api/mercadopago/webhook` usan `MP_WEBHOOK_SECRET_PROD`.
   - `/api/mercadopago/webhook/test` usa `MP_WEBHOOK_SECRET_TEST`.
 - Se consideran headers de firma + `request-id` + `data.id`.
+- Para construir el `manifest` de validación (`id:{data.id};request-id:{x-request-id};ts:{ts};`), `data.id` se normaliza a lowercase cuando contiene caracteres alfanuméricos, alineando el cálculo HMAC con la validación esperada por Mercado Pago.
+- En auditoría (`payment_events.payload.signature`) se guardan ambos valores de `data.id`: original y normalizado, para trazabilidad y debugging.
 - Existe fallback de validación por hash de `rawBody` para robustez.
 - Si no valida firma, el evento se rechaza lógicamente (ver logs y troubleshooting).
 
@@ -81,6 +83,7 @@ Respuesta (resumen):
   - la liberación marca metadata (`capacity_released`) para evitar doble decremento.
 - Dedupe de notificaciones webhook:
   - se usa `event_key` como llave de idempotencia;
+  - `event_key` normaliza `data.id` en lowercase (si contiene caracteres alfanuméricos) para evitar duplicados por diferencias de mayúsculas/minúsculas;
   - si llega la misma notificación repetida y ya está `processed=true`, se evita reprocesar y solo se incrementa contador de duplicados en `payment_events.payload`.
 
 ## Payment State Model & Reconciliation
