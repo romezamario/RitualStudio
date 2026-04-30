@@ -1,7 +1,11 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { sendPurchaseConfirmationEmail } from "@/lib/email";
-import { mpApiFetch, getMercadoPagoWebhookSecret } from "@/lib/mercadopago";
+import {
+  getMercadoPagoAccessTokenByEnvironment,
+  getMercadoPagoWebhookSecretByEnvironment,
+  mpApiFetch,
+} from "@/lib/mercadopago";
 import { supabaseAdminRequest } from "@/lib/supabase-admin";
 
 type WebhookPayload = {
@@ -111,13 +115,15 @@ function validateMercadoPagoSignature({
   signatureHeader,
   requestId,
   dataId,
+  environment,
 }: {
   rawBody: string;
   signatureHeader: string | null;
   requestId: string | null;
   dataId: string | undefined;
+  environment: "prod" | "test";
 }) {
-  const secret = getMercadoPagoWebhookSecret();
+  const secret = getMercadoPagoWebhookSecretByEnvironment(environment);
 
   if (!secret) {
     return { validated: false, reason: "missing-secret" };
@@ -579,7 +585,7 @@ async function trySendPurchaseEmail({
   await persistEmailConfirmationMetadata(order.id, nextMetadata);
 }
 
-export async function POST(request: Request) {
+export async function handleWebhook(request: Request, environment: "prod" | "test" = "prod") {
   const rawBody = await request.text();
   const payload = (JSON.parse(rawBody || "{}") ?? {}) as WebhookPayload;
 
@@ -591,7 +597,9 @@ export async function POST(request: Request) {
     signatureHeader,
     requestId,
     dataId: payload.data?.id,
+    environment,
   });
+  const accessToken = getMercadoPagoAccessTokenByEnvironment(environment);
 
   const eventKey = `${payload.type ?? "unknown"}:${payload.data?.id ?? "na"}:${payload.action ?? "na"}`;
   const existingEvent = await findPaymentEventByEventKey(eventKey);
@@ -659,6 +667,7 @@ export async function POST(request: Request) {
     if (dataId && topic.includes("payment")) {
       const payment = await mpApiFetch<MpPaymentResponse>(`/v1/payments/${dataId}`, {
         method: "GET",
+        accessToken,
       });
 
       await upsertOrderFromPayment(payment);
@@ -691,6 +700,7 @@ export async function POST(request: Request) {
     if (dataId && topic.includes("order")) {
       const order = await mpApiFetch<MpOrderResponse>(`/v1/orders/${dataId}`, {
         method: "GET",
+        accessToken,
       });
 
       await upsertOrderFromMpOrder(order);
@@ -754,5 +764,13 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({ ok: true, message: "Webhook Mercado Pago activo." });
+  return NextResponse.json({
+    ok: true,
+    message: "Webhook Mercado Pago activo.",
+    endpoints: ["/api/mercadopago/webhook/prod", "/api/mercadopago/webhook/test"],
+  });
+}
+
+export async function POST(request: Request) {
+  return handleWebhook(request, "prod");
 }
