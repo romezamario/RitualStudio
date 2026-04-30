@@ -10,6 +10,8 @@ export type UserProfile = {
   id: string;
   email: string | null;
   role: "user" | "admin";
+  full_name: string | null;
+  phone: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -65,7 +67,7 @@ export async function getUserProfileById(userId: string, accessToken: string): P
   const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
 
   const url = new URL(`${supabaseUrl}/rest/v1/profiles`);
-  url.searchParams.set("select", "id,email,role,created_at,updated_at");
+  url.searchParams.set("select", "id,email,role,full_name,phone,created_at,updated_at");
   url.searchParams.set("id", `eq.${userId}`);
   url.searchParams.set("limit", "1");
 
