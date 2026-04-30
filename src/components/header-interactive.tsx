@@ -30,7 +30,7 @@ export function HeaderInteractive({ links }: HeaderInteractiveProps) {
   const userMenuLinks =
     user?.role === "admin"
       ? [
-          { href: "/mi-cuenta", label: "Dashboard" },
+          { href: "/mi-cuenta", label: "Mi perfil" },
           { href: "/mi-cuenta/pedidos", label: "Mis pedidos" },
           { href: "/mi-cuenta/direcciones", label: "Mis direcciones" },
           { href: "/admin/pedidos", label: "Gestión de pedidos" },
@@ -39,7 +39,7 @@ export function HeaderInteractive({ links }: HeaderInteractiveProps) {
           { href: "/admin/cursos", label: "Gestión de cursos" },
         ]
       : [
-          { href: "/mi-cuenta", label: "Dashboard" },
+          { href: "/mi-cuenta", label: "Mi perfil" },
           { href: "/mi-cuenta/pedidos", label: "Mis pedidos" },
           { href: "/mi-cuenta/direcciones", label: "Mis direcciones" },
         ];

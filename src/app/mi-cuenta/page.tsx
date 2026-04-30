@@ -5,8 +5,8 @@ export default function AccountDashboardPage() {
   return (
     <SiteShell
       eyebrow="Mi cuenta"
-      title="Dashboard del usuario"
-      subtitle="Desde aquí puedes revisar tu información general, pedidos y direcciones guardadas en un solo lugar."
+      title="Mi perfil"
+      subtitle="Gestiona tus datos personales, consulta tus pedidos y administra tus direcciones guardadas desde un solo lugar."
     >
       <AccountDashboardClient />
     </SiteShell>
