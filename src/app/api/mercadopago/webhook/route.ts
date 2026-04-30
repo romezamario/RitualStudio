@@ -133,6 +133,8 @@ function validateMercadoPagoSignature({
     return { validated: false, reason: "missing-headers" };
   }
 
+  const normalizedDataId = /[a-z0-9]/i.test(dataId) ? dataId.toLowerCase() : dataId;
+
   const parts = signatureHeader.split(",").reduce<Record<string, string>>((acc, part) => {
     const [key, value] = part.split("=");
 
@@ -150,7 +152,7 @@ function validateMercadoPagoSignature({
     return { validated: false, reason: "invalid-signature-format" };
   }
 
-  const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
+  const manifest = `id:${normalizedDataId};request-id:${requestId};ts:${ts};`;
   const expected = crypto.createHmac("sha256", secret).update(manifest).digest("hex");
 
   if (!secureCompare(expected, v1)) {
@@ -161,7 +163,12 @@ function validateMercadoPagoSignature({
     }
   }
 
-  return { validated: true, reason: "ok" };
+  return {
+    validated: true,
+    reason: "ok",
+    dataIdOriginal: dataId,
+    dataIdNormalized: normalizedDataId,
+  };
 }
 
 async function upsertOrderFromMpOrder(order: MpOrderResponse) {
@@ -635,7 +642,9 @@ export async function handleWebhook(request: Request, environment: "prod" | "tes
   });
   const accessToken = getMercadoPagoAccessTokenByEnvironment(environment);
 
-  const eventKey = `${payload.type ?? "unknown"}:${payload.data?.id ?? "na"}:${payload.action ?? "na"}`;
+  const normalizedEventDataId =
+    payload.data?.id && /[a-z0-9]/i.test(payload.data.id) ? payload.data.id.toLowerCase() : payload.data?.id;
+  const eventKey = `${payload.type ?? "unknown"}:${normalizedEventDataId ?? "na"}:${payload.action ?? "na"}`;
   const existingEvent = await findPaymentEventByEventKey(eventKey);
   const alreadyProcessed = existingEvent?.payload?.webhook_processing
     ? (existingEvent.payload.webhook_processing as Record<string, unknown>).processed === true
@@ -658,6 +667,9 @@ export async function handleWebhook(request: Request, environment: "prod" | "tes
       valid: signature.validated,
       reason: signature.reason,
       request_id: requestId,
+      data_id_original: payload.data?.id ?? null,
+      data_id_normalized:
+        "dataIdNormalized" in signature ? (signature.dataIdNormalized ?? null) : (normalizedEventDataId ?? null),
     },
     webhook_processing: {
       processed: false,
