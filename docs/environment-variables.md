@@ -41,6 +41,9 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - `MP_ACCESS_TOKEN_TEST`: credencial privada de pruebas para reconciliación webhook en endpoint `/api/mercadopago/webhook/test`.
 - `MP_WEBHOOK_SECRET_PROD`: secreto para validar firma del webhook.
 - `MP_WEBHOOK_SECRET_TEST`: secreto de pruebas para validar firma del endpoint `/api/mercadopago/webhook/test`.
+- `MP_NOTIFICATION_URL_PROD`: URL absoluta (https) para enviar como `notification_url` en pagos de producción (recomendado `/api/mercadopago/webhook/prod`).
+- `MP_NOTIFICATION_URL_TEST`: URL absoluta (https) para enviar como `notification_url` en pagos de pruebas (recomendado `/api/mercadopago/webhook/test`).
+- `MP_NOTIFICATION_URL` (legacy opcional): fallback retrocompatible si aún no se migraron variables por ambiente.
 - `EMAIL_PROVIDER`: proveedor de correo (`resend`, `disabled`, etc.).
 - `EMAIL_FROM`: remitente para correos transaccionales.
 - `EMAIL_SUPPORT_CHANNEL`: canal mostrado en comprobantes.

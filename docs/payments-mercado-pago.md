@@ -46,6 +46,7 @@ Respuesta (resumen):
    - incrementar `course_sessions.reserved_spots`;
    - persistir `order_course_items` y `course_participants`.
 5. Backend llama `POST /v1/payments` de Mercado Pago con `X-Idempotency-Key`.
+   - En esa llamada se envía `notification_url` para que Mercado Pago publique eventos de pago al webhook del proyecto.
 6. Backend actualiza orden/pago en Supabase con respuesta de Mercado Pago.
 
 ## Checkout Embebido (Card Payment Brick)
@@ -95,6 +96,8 @@ Respuesta (resumen):
 ## Critical Security Rules
 - `MP_ACCESS_TOKEN_PROD` solo backend.
 - `MP_ACCESS_TOKEN_TEST` solo backend (exclusivo para endpoint de pruebas del webhook).
+- `MP_NOTIFICATION_URL_PROD` y `MP_NOTIFICATION_URL_TEST` solo backend; definen el endpoint absoluto que se envía como `notification_url` según entorno.
+- `MP_NOTIFICATION_URL` se mantiene como fallback legacy opcional para retrocompatibilidad.
 - `MP_PUBLIC_KEY_PROD` solo para inicialización del checkout client-side.
 - Estado final de pago lo determina backend/webhook, nunca solo frontend.
 - No aceptar monto final calculado en cliente.
