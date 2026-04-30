@@ -61,6 +61,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - Si hay sesión sin privilegios admin: redirección a `/unauthorized`.
 - La vista `/mi-cuenta/pedidos` solo debe exponer órdenes del usuario autenticado: se consulta server-side con token de sesión, RLS y filtro explícito por `orders.user_id`.
 - `/mi-cuenta/pedidos` permite filtrar por estado y buscar por `external_reference`.
+- El estado mostrado en `/mi-cuenta/pedidos` se consolida priorizando `payments.status` (último intento) y usando `orders.status` como respaldo para evitar desfases visuales temporales.
 - Cada orden en `/mi-cuenta/pedidos` muestra resumen (referencia, fecha, estado, total, método de pago) y detalle de líneas:
   - productos desde `orders.metadata.mixed_items_summary.products`,
   - cursos/sesiones desde `order_course_items`,

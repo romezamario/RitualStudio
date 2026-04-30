@@ -85,6 +85,7 @@ Respuesta (resumen):
 ## Payment State Model & Reconciliation
 - Estado de UI y negocio convergen a 4 estados: `approved`, `pending`, `rejected`, `error`.
 - Fuente de verdad final: webhook + consulta backend a Mercado Pago (no frontend).
+- En `mi-cuenta/pedidos`, el estado visible al usuario se consolida con prioridad de `payments.status` y fallback a `orders.status` para reflejar antes las acreditaciones cuando el webhook actualiza pagos primero.
 - Reconciliación de órdenes:
   - órdenes `pending` sin confirmación en ventana esperada se re-evalúan por proceso de reconciliación;
   - si el estado final converge a rechazo/cancelación/expiración, se asegura liberación de cupo idempotente;
