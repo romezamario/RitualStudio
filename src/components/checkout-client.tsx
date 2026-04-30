@@ -28,6 +28,10 @@ type MpBrickError = {
 type CourseParticipantsByLine = Record<string, string[]>;
 type CourseErrorsByLine = Record<string, string | null>;
 
+type CheckoutClientProps = {
+  mercadoPagoPublicKey: string;
+};
+
 const MIN_PARTICIPANT_NAME_LENGTH = 2;
 
 function normalizeStatusDetailCode(statusDetail?: string | null) {
@@ -191,7 +195,7 @@ declare global {
   }
 }
 
-export default function CheckoutClient() {
+export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientProps) {
   const { items, clearCart } = useCart();
   const { user } = useAuth();
   const router = useRouter();
@@ -288,7 +292,7 @@ export default function CheckoutClient() {
     courseLinesRef.current = courseLines;
   }, [courseLines]);
 
-  const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim();
+  const publicKey = mercadoPagoPublicKey.trim();
   const isProductionKey = /^APP_USR-/i.test(publicKey ?? "");
   const isBelowMercadoPagoMinAmount = total < MIN_MX_CARD_PAYMENT_AMOUNT;
   const normalizedUserEmail = user?.email.trim().toLowerCase() ?? "";
@@ -503,7 +507,7 @@ export default function CheckoutClient() {
       <section className="studio-card checkout-state checkout-state-error">
         <h2>Checkout no disponible</h2>
         <p>
-          Falta configurar <code>NEXT_PUBLIC_MP_PUBLIC_KEY</code>. Agrega la variable en Vercel para habilitar pagos
+          Falta configurar <code>MP_PUBLIC_KEY_PROD</code>. Agrega la variable en Vercel para habilitar pagos
           embebidos.
         </p>
       </section>

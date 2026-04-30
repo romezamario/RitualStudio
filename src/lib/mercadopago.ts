@@ -81,11 +81,11 @@ const MAX_PRODUCT_QUANTITY_PER_LINE = 10;
 const MAX_COURSE_PARTICIPANTS_PER_LINE = 6;
 
 export function getMercadoPagoPublicKey() {
-  return process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim() ?? "";
+  return process.env.MP_PUBLIC_KEY_PROD?.trim() ?? "";
 }
 
 export function getMercadoPagoAccessToken() {
-  const rawToken = process.env.MP_ACCESS_TOKEN?.trim() ?? "";
+  const rawToken = process.env.MP_ACCESS_TOKEN_PROD?.trim() ?? "";
   return sanitizeMercadoPagoToken(rawToken);
 }
 
@@ -102,20 +102,21 @@ function sanitizeMercadoPagoToken(rawToken: string) {
 }
 
 export function getMercadoPagoWebhookSecret() {
-  return process.env.MP_WEBHOOK_SECRET?.trim() ?? "";
+  return process.env.MP_WEBHOOK_SECRET_PROD?.trim() ?? "";
 }
 
 export function getMercadoPagoAccessTokenByEnvironment(environment: "prod" | "test") {
-  const envVarName = environment === "test" ? "MP_ACCESS_TOKEN_TEST" : "MP_ACCESS_TOKEN";
-  return sanitizeMercadoPagoToken(process.env[envVarName]?.trim() ?? "");
+  const envVarName = environment === "test" ? "MP_ACCESS_TOKEN_TEST" : "MP_ACCESS_TOKEN_PROD";
+    return sanitizeMercadoPagoToken(process.env[envVarName]?.trim() ?? "");
 }
 
 export function getMercadoPagoWebhookSecretByEnvironment(environment: "prod" | "test") {
-  const envVarName = environment === "test" ? "MP_WEBHOOK_SECRET_TEST" : "MP_WEBHOOK_SECRET";
-  return process.env[envVarName]?.trim() ?? "";
+  const envVarName = environment === "test" ? "MP_WEBHOOK_SECRET_TEST" : "MP_WEBHOOK_SECRET_PROD";
+    return process.env[envVarName]?.trim() ?? "";
 }
 
 export function parseMxPrice(priceLabel: string): number {
+  
   const clean = priceLabel.replace(/\s/g, "");
   const match = clean.match(/(\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2})?/);
 
@@ -266,7 +267,7 @@ export async function mpApiFetch<T>(
   const publicKey = getMercadoPagoPublicKey();
 
   if (!accessToken) {
-    throw new Error("MP_ACCESS_TOKEN no está configurado.");
+    throw new Error("MP_ACCESS_TOKEN_PROD no está configurado.");
   }
 
   const tokenIsTest = /^TEST-/i.test(accessToken);
@@ -276,7 +277,7 @@ export async function mpApiFetch<T>(
 
   if ((tokenIsTest && publicKeyIsProd) || (tokenIsProd && publicKeyIsTest)) {
     throw new Error(
-      "Detectamos llaves de Mercado Pago mezcladas: NEXT_PUBLIC_MP_PUBLIC_KEY y MP_ACCESS_TOKEN deben pertenecer al mismo entorno (TEST o APP_USR).",
+      "Detectamos llaves de Mercado Pago mezcladas: MP_PUBLIC_KEY_PROD y MP_ACCESS_TOKEN_PROD deben pertenecer al mismo entorno (TEST o APP_USR).",
     );
   }
 
@@ -302,7 +303,7 @@ export async function mpApiFetch<T>(
   if (!response.ok) {
     if (response.status === 401) {
       throw new Error(
-        "Mercado Pago respondió con 401 (Unauthorized). Revisa MP_ACCESS_TOKEN en Vercel: debe ser Access Token válido, sin prefijo 'Bearer', y del mismo entorno que NEXT_PUBLIC_MP_PUBLIC_KEY.",
+        "Mercado Pago respondió con 401 (Unauthorized). Revisa MP_ACCESS_TOKEN_PROD en Vercel: debe ser Access Token válido, sin prefijo 'Bearer', y del mismo entorno que MP_PUBLIC_KEY_PROD.",
       );
     }
 
