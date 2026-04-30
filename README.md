@@ -113,10 +113,10 @@ SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_PRODUCT_IMAGES_BUCKET=
 
 # Mercado Pago
-NEXT_PUBLIC_MP_PUBLIC_KEY=
-MP_ACCESS_TOKEN=
+MP_PUBLIC_KEY_PROD=
+MP_ACCESS_TOKEN_PROD=
 MP_ACCESS_TOKEN_TEST=
-MP_WEBHOOK_SECRET=
+MP_WEBHOOK_SECRET_PROD=
 MP_WEBHOOK_SECRET_TEST=
 
 # Correo transaccional (opcional)
@@ -219,7 +219,7 @@ Resumen rápido de alcance comercial actual:
 
 - Nunca exponer secretos en frontend ni en repositorio.
 - `SUPABASE_SERVICE_ROLE_KEY` debe quedar en backend seguro.
-- `MP_ACCESS_TOKEN` solo backend.
+- `MP_ACCESS_TOKEN_PROD` solo backend.
 - Validar pagos por backend/webhook; no confiar en estado del cliente.
 - No usar documentación para almacenar credenciales reales.
 

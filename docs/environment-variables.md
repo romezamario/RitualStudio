@@ -19,7 +19,7 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: fallback retrocompatible.
 
 ### Mercado Pago
-- `NEXT_PUBLIC_MP_PUBLIC_KEY`: llave pública para bricks/tokenización en frontend.
+- `MP_PUBLIC_KEY_PROD`: llave pública para bricks/tokenización en frontend.
 
 ### Integración metadata (operativa)
 - `NEXT_PUBLIC_GITHUB_REPOSITORY`
@@ -37,9 +37,9 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 ## Server-Only Variables
 - `SUPABASE_SERVICE_ROLE_KEY`: acceso privilegiado a Supabase desde backend.
 - `SUPABASE_PRODUCT_IMAGES_BUCKET`: bucket de imágenes de producto.
-- `MP_ACCESS_TOKEN`: credencial privada para API de Mercado Pago.
+- `MP_ACCESS_TOKEN_PROD`: credencial privada para API de Mercado Pago.
 - `MP_ACCESS_TOKEN_TEST`: credencial privada de pruebas para reconciliación webhook en endpoint `/api/mercadopago/webhook/test`.
-- `MP_WEBHOOK_SECRET`: secreto para validar firma del webhook.
+- `MP_WEBHOOK_SECRET_PROD`: secreto para validar firma del webhook.
 - `MP_WEBHOOK_SECRET_TEST`: secreto de pruebas para validar firma del endpoint `/api/mercadopago/webhook/test`.
 - `EMAIL_PROVIDER`: proveedor de correo (`resend`, `disabled`, etc.).
 - `EMAIL_FROM`: remitente para correos transaccionales.

@@ -32,15 +32,15 @@
 
 ### `401 Unauthorized` al crear pago
 **Revisión rápida:**
-- `MP_ACCESS_TOKEN` válido y sin prefijo `Bearer`.
-- Coincidencia de entorno entre `MP_ACCESS_TOKEN` y `NEXT_PUBLIC_MP_PUBLIC_KEY`.
+- `MP_ACCESS_TOKEN_PROD` válido y sin prefijo `Bearer`.
+- Coincidencia de entorno entre `MP_ACCESS_TOKEN_PROD` y `MP_PUBLIC_KEY_PROD`.
 
 ### El frontend muestra estado distinto al real
 **Regla:** tomar como fuente final el estado consolidado por backend/webhook.
 
 ### Webhook sin efecto en órdenes
 **Revisión rápida:**
-- `MP_WEBHOOK_SECRET` configurado.
+- `MP_WEBHOOK_SECRET_PROD` configurado.
 - Endpoint público accesible.
 - Revisar logs del route handler y respuestas HTTP.
 
