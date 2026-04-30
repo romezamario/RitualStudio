@@ -71,10 +71,28 @@ No debe existir elevación de rol desde frontend.
 
 
 ## Perfil de usuario (self-service)
-- `public.profiles` incluye los campos opcionales `full_name` y `phone` para autogestión de datos de contacto.
-- Endpoint autenticado `PATCH /api/auth/profile` permite actualizar `email`, `full_name` y `phone` del usuario en sesión.
-- El endpoint rechaza explícitamente cualquier intento de enviar `role` desde cliente.
-- Tras persistir cambios, frontend refresca estado con `refreshAuth` para reflejar datos en UI.
+### Campos de perfil soportados
+- `public.profiles` incluye `full_name` y `phone` como campos editables por el titular de la cuenta.
+- `email` se expone en UI de “Mi perfil” y puede editarse **solo** por usuario autenticado sobre su propia cuenta.
+- `role` permanece fuera del alcance del formulario self-service y no puede ser escalado desde frontend.
+
+### Endpoint `PATCH /api/auth/profile`
+Contrato funcional del endpoint autenticado para autogestión de perfil:
+- Ruta: `PATCH /api/auth/profile`.
+- Requiere sesión válida (cookie/token de Supabase).
+- Campos permitidos: `full_name`, `phone` y `email` (cuando aplique cambio).
+- Rechaza payload con claves no permitidas (incluyendo `role`).
+
+Restricciones de seguridad aplicadas:
+1. **Autorización por sesión**: solo opera para `auth.uid()` en contexto; no acepta `user_id` del cliente.
+2. **Actualización de email controlada**: el cambio se ejecuta vía backend usando APIs seguras de Auth; nunca con credenciales privilegiadas en cliente.
+3. **No elevación de privilegios**: cualquier intento de mutar `role` se bloquea con error de validación/autorización.
+4. **Defensa en profundidad**: además de validación en endpoint, RLS en `profiles` restringe edición de fila propia.
+
+### Comportamiento de `email` editable
+- Si el usuario envía un `email` distinto al actual, el backend procesa el update sobre Auth y devuelve estado consistente para refrescar UI.
+- Si `email` no cambia, el endpoint actualiza únicamente campos de `profiles` (`full_name`, `phone`).
+- El frontend debe refrescar estado de autenticación (`refreshAuth`) tras respuesta exitosa para sincronizar header, dashboard y vista `/mi-cuenta/perfil`.
 
 ## Ajuste RLS para update de perfil propio
 Migración aplicada:
