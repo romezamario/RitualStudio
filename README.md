@@ -40,7 +40,7 @@ Ritual Studio es una aplicación Next.js (App Router) que actualmente incluye:
 - Dashboard de cuenta y administración (`/mi-cuenta`, `/mi-cuenta/perfil`, `/admin/*`), incluyendo capability “Mi perfil” para actualizar nombre, teléfono y correo desde una ruta dedicada (vía endpoint seguro `PATCH /api/auth/profile`), además de admin de cursos/sesiones con cupos por sesión y carga directa de imagen de curso (sin URL manual) usando el mismo pipeline/validaciones de imágenes del módulo de productos.
 - Contrato de imágenes por variantes: `thumb` (listados), `card` (cards/previews), `detail` (PDP) y `original` solo para acciones explícitas fuera del flujo normal.
 - Upload admin de imágenes con preprocesamiento en navegador (resize máx. 2000px, export preferente WEBP con fallback JPEG/PNG) y registro de metadatos técnicos en Supabase para trazabilidad.
-- Módulo "Mis pedidos" conectado a Supabase con consulta server-side por usuario autenticado, filtros por estado/referencia y detalle de líneas para productos/cursos con participantes registrados.
+- Módulo "Mis pedidos" conectado a Supabase con consulta server-side por usuario autenticado, filtros por estado/referencia y detalle de líneas para productos/cursos con participantes registrados, consolidando estado con prioridad de `payments.status` y fallback de `orders.status`.
 - Base de datos preparada para cursos, sesiones y participantes con RLS en Supabase.
 - Aviso de privacidad (`/aviso-de-privacidad`).
 

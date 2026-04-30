@@ -42,9 +42,43 @@ type OrderRow = {
 
 type PaymentRow = {
   order_id: string;
+  status: string | null;
   payment_method: string | null;
   created_at: string;
 };
+
+function normalizeComparableStatus(rawStatus: string | null | undefined) {
+  const normalized = rawStatus?.trim().toLowerCase() ?? "unknown";
+
+  if (normalized === "approved") return "approved";
+  if (normalized === "pending" || normalized === "pending_payment" || normalized === "in_process" || normalized === "in_mediation") {
+    return "pending";
+  }
+  if (normalized === "rejected" || normalized === "cancelled" || normalized === "refunded" || normalized === "charged_back") {
+    return "rejected";
+  }
+
+  return normalized;
+}
+
+function consolidateOrderStatus(orderStatus?: string | null, paymentStatus?: string | null) {
+  const normalizedPayment = normalizeComparableStatus(paymentStatus);
+  const normalizedOrder = normalizeComparableStatus(orderStatus);
+
+  if (normalizedPayment === "rejected" || normalizedOrder === "rejected") {
+    return "rejected";
+  }
+
+  if (normalizedPayment === "approved" || normalizedOrder === "approved") {
+    return "approved";
+  }
+
+  if (normalizedPayment === "pending" || normalizedOrder === "pending") {
+    return "pending";
+  }
+
+  return normalizedPayment !== "unknown" ? normalizedPayment : normalizedOrder;
+}
 
 type CourseItemRow = {
   id: string;
@@ -219,7 +253,7 @@ export default async function AccountOrdersPage({ searchParams }: OrdersPageProp
 
     const [paymentsResult, courseItemsResult] = await Promise.all([
       supabaseUserRead<PaymentRow[]>(
-        `/rest/v1/payments?select=order_id,payment_method,created_at&order_id=in.(${encodeURIComponent(idsFilter)})&order=created_at.desc`,
+        `/rest/v1/payments?select=order_id,status,payment_method,created_at&order_id=in.(${encodeURIComponent(idsFilter)})&order=created_at.desc`,
         accessToken,
       ),
       supabaseUserRead<CourseItemRow[]>(
@@ -309,7 +343,7 @@ export default async function AccountOrdersPage({ searchParams }: OrdersPageProp
                     <summary>
                       <span className="order-reference">{order.external_reference}</span>
                       <span>{formatDateTime(order.created_at)}</span>
-                      <span>{normalizeStatus(order.status)}</span>
+                      <span>{normalizeStatus(consolidateOrderStatus(order.status, payment?.status))}</span>
                       <span>{formatMoney(order.total_amount)}</span>
                       <span>{itemsSummary}</span>
                     </summary>
