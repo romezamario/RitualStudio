@@ -47,6 +47,27 @@ function getValidationErrorStatus(message: string) {
   return knownValidationMessages.some((knownMessage) => message.includes(knownMessage)) ? 400 : 500;
 }
 
+function resolveMercadoPagoNotificationUrl(request: Request) {
+  const isTestEnvironment =
+    process.env.NODE_ENV !== "production" || (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production");
+  const configuredUrl = (isTestEnvironment
+    ? process.env.MP_NOTIFICATION_URL_TEST?.trim()
+    : process.env.MP_NOTIFICATION_URL_PROD?.trim()) ?? "";
+
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+
+  const legacyConfiguredUrl = process.env.MP_NOTIFICATION_URL?.trim();
+
+  if (legacyConfiguredUrl) {
+    return legacyConfiguredUrl;
+  }
+
+  const requestUrl = new URL(request.url);
+  return `${requestUrl.origin}/api/mercadopago/webhook/${isTestEnvironment ? "test" : "prod"}`;
+}
+
 function validateCourseParticipantsBySession(input: MpCreateOrderInput, lineItems: ValidatedLineItem[]) {
   const participantsBySession = input.course_participants ?? {};
 
@@ -266,6 +287,7 @@ export async function POST(request: Request) {
       },
       external_reference: externalReference,
       description: lineItems.map((item) => `${item.quantity}x ${item.name}`).join(" | ").slice(0, 240),
+      notification_url: resolveMercadoPagoNotificationUrl(request),
     };
 
     const payment = await mpApiFetch<MpPaymentResponse>("/v1/payments", {
