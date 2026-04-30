@@ -14,7 +14,16 @@ export default function AccountDashboardClient() {
         <p>
           Correo registrado: <strong>{user?.email ?? "Sin correo disponible"}</strong>
         </p>
+        <p>
+          Nombre: <strong>{user?.fullName?.trim() || "Aún no registraste tu nombre"}</strong>
+        </p>
+        <p>
+          Teléfono: <strong>{user?.phone?.trim() || "Aún no registraste un teléfono"}</strong>
+        </p>
         <p>Rol actual: {user?.role === "admin" ? "Administrador" : "Usuario"}.</p>
+        <Link href="/mi-cuenta/perfil" className="text-link">
+          Actualizar mis datos
+        </Link>
       </article>
 
       <article className="studio-card">
