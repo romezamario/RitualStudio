@@ -4,7 +4,7 @@
 Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 
 ## Home & Navigation Rules
-- La home (`/`) funciona como wallpaper navegable con mosaico editorial y accesos directos a: tienda (`/arreglos`), cursos (`/cursos`), diseño a medida (`/custom`), eventos (`/eventos`), nosotros (`/nosotros`) y contacto (`/contacto`).
+- La home (`/`) funciona como wallpaper navegable con mosaico editorial y accesos directos a: tienda (`/marketplace`), cursos (`/cursos`), diseño a medida (`/custom`), eventos (`/eventos`), nosotros (`/nosotros`) y contacto (`/contacto`).
 - Cada tarjeta de la home debe mantener estética premium/elegante y legibilidad de texto sobre imagen mediante overlay.
 - Los accesos visuales de la home no reemplazan la navegación global; la complementan como entrada rápida a áreas clave del sitio.
 
