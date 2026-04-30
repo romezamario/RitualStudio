@@ -8,6 +8,8 @@ export type AuthUser = {
   id: string;
   email: string;
   role: UserRole;
+  fullName?: string | null;
+  phone?: string | null;
 };
 
 type AuthContextValue = {
@@ -24,6 +26,8 @@ type AuthMePayload = {
   } | null;
   profile: {
     role: UserRole;
+    full_name?: string | null;
+    phone?: string | null;
   } | null;
 };
 
@@ -54,6 +58,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: payload.user.id,
       email: payload.user.email,
       role: payload.profile?.role ?? "user",
+      fullName: payload.profile?.full_name ?? null,
+      phone: payload.profile?.phone ?? null,
     });
   }, []);
 

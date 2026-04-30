@@ -39,6 +39,7 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 - Rutas administrativas protegidas por validación server-side (`/admin/*`).
 - Módulo administrativo de cursos (`/admin/cursos`) con endpoints backend para CRUD de cursos y sesiones (`/api/admin/courses/*`).
 - Módulo de cuenta `/mi-cuenta/pedidos` renderizado server-side: usa token de sesión (`sb-access-token`) para consultas REST con RLS y aplica validación defensiva adicional filtrando por `orders.user_id = auth user`.
+- El dashboard `/mi-cuenta` incluye tarjeta de perfil con CTA a `/mi-cuenta/perfil` para centralizar la edición de datos personales (nombre/teléfono) en una ruta dedicada.
 - El historial de pedidos consolida `orders` + `payments` + `order_course_items`/`course_participants` para mostrar resumen por orden y detalle de líneas compradas.
 
 ## Course Commerce Components
