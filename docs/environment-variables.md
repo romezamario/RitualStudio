@@ -57,3 +57,8 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 ## Operational Notes
 - Verificar que llaves públicas/privadas de Mercado Pago pertenezcan al mismo entorno (test/prod).
 - Mantener coherencia de variables entre ambientes Vercel (preview/production).
+
+## Perfil de usuario (Mi perfil)
+- El endpoint `PATCH /api/auth/profile` **no requiere variables nuevas** en esta iteración.
+- Reutiliza configuración actual de Supabase (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`/`NEXT_PUBLIC_SUPABASE_ANON_KEY`) para sesión de usuario y APIs backend ya existentes.
+- Mantener `SUPABASE_SERVICE_ROLE_KEY` restringida a backend seguro; nunca necesaria en frontend para edición de perfil.
