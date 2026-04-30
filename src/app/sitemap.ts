@@ -5,7 +5,6 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://ritualstudi
 
 const staticRoutes = [
   "",
-  "/arreglos",
   "/marketplace",
   "/cursos",
   "/custom",
