@@ -84,14 +84,22 @@ p {
 
 .container {
   margin: 0 auto;
+  max-width: 1600px;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
   position: relative;
-  width: min(1100px, calc(100% - 3rem));
+  width: 100%;
   z-index: 1;
+}
+
+.text-container {
+  max-width: 70ch;
 }
 
 .site-header {
   padding: 1.25rem 0;
   position: relative;
+  width: 100%;
   z-index: 90;
 }
 
@@ -374,12 +382,14 @@ p {
 
 .hero-block {
   padding: 3.5rem 0 5rem;
+  width: 100%;
 }
 
 .site-footer {
   border-top: 1px solid var(--line);
   margin-top: 2rem;
   padding: 1.3rem 0 2rem;
+  width: 100%;
 }
 
 .site-footer-inner {
@@ -493,7 +503,6 @@ p {
   color: color-mix(in srgb, var(--ink) 75%, white);
   font-size: 1.07rem;
   margin-top: 1.3rem;
-  max-width: 67ch;
 }
 
 .feature-grid {
@@ -995,6 +1004,20 @@ p {
   gap: 0.5rem;
 }
 
+
+@media (min-width: 768px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
 @media (max-width: 900px) {
   .nav-wrap {
     border-radius: 0.9rem;

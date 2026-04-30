@@ -34,9 +34,11 @@ export default function SiteShell({ title, subtitle, eyebrow, children }: SiteSh
       </header>
 
       <section className="container hero-block">
-        {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-        <h1>{title}</h1>
-        {subtitle ? <p className="lead">{subtitle}</p> : null}
+        <div className="text-container">
+          {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+          <h1>{title}</h1>
+          {subtitle ? <p className="lead">{subtitle}</p> : null}
+        </div>
         {children}
       </section>
 
