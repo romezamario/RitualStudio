@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/components/cart-context";
 import type { CourseCatalogCourse, CourseCatalogSession } from "@/lib/courses-catalog";
 
@@ -29,6 +30,7 @@ function formatSessionLabel(session: CourseCatalogSession) {
 }
 
 export default function CoursePurchaseActions({ course, initialSessions }: CoursePurchaseActionsProps) {
+  const router = useRouter();
   const { addCourseToCart } = useCart();
   const [sessions, setSessions] = useState(initialSessions);
   const [selectedSessionId, setSelectedSessionId] = useState(initialSessions[0]?.id ?? "");
@@ -65,7 +67,7 @@ export default function CoursePurchaseActions({ course, initialSessions }: Cours
     }
   };
 
-  const handleAddCourseToCart = async () => {
+  const addSelectedCourseToCart = async () => {
     const latestSessions = await refreshSessions();
     const sourceSessions = latestSessions ?? sessions;
 
@@ -96,6 +98,18 @@ export default function CoursePurchaseActions({ course, initialSessions }: Cours
 
     setFeedback("Curso agregado al carrito");
     window.setTimeout(() => setFeedback(""), 1800);
+    return true;
+  };
+
+  const handleAddCourseToCart = async () => {
+    await addSelectedCourseToCart();
+  };
+
+  const handleBuyNow = async () => {
+    const wasAdded = await addSelectedCourseToCart();
+    if (wasAdded) {
+      router.push("/checkout");
+    }
   };
 
   return (
@@ -143,6 +157,9 @@ export default function CoursePurchaseActions({ course, initialSessions }: Cours
           </button>
           <button type="button" className="btn btn-primary" onClick={() => void handleAddCourseToCart()} disabled={!selectedSession}>
             Agregar curso al carrito
+          </button>
+          <button type="button" className="btn btn-primary" onClick={() => void handleBuyNow()} disabled={!selectedSession}>
+            Comprar ahora
           </button>
         </div>
 

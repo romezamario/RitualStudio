@@ -1,22 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { MarketplaceProduct } from "@/data/marketplace-products";
 import { useCart } from "@/components/cart-context";
-import { getWhatsAppHref } from "@/lib/whatsapp";
 
 type ProductPurchaseActionsProps = {
   product: MarketplaceProduct;
 };
 
 export default function ProductPurchaseActions({ product }: ProductPurchaseActionsProps) {
+  const router = useRouter();
   const { addProductToCart } = useCart();
   const [feedback, setFeedback] = useState("");
-
-  const buyNowHref = useMemo(() => {
-    const message = `Hola Ritual Studio, quiero comprar \"${product.name}\" (${product.price}).`;
-    return getWhatsAppHref(message);
-  }, [product.name, product.price]);
 
   const handleAddToCart = () => {
     addProductToCart(product);
@@ -27,14 +23,19 @@ export default function ProductPurchaseActions({ product }: ProductPurchaseActio
     }, 1800);
   };
 
+  const handleBuyNow = () => {
+    addProductToCart(product);
+    router.push("/checkout");
+  };
+
   return (
     <div className="purchase-actions">
       <button type="button" className="btn btn-ghost" onClick={handleAddToCart}>
         Agregar al carrito
       </button>
-      <a className="btn btn-primary" href={buyNowHref} target="_blank" rel="noopener noreferrer">
+      <button type="button" className="btn btn-primary" onClick={handleBuyNow}>
         Comprar ahora
-      </a>
+      </button>
       {feedback ? <p className="cart-feedback">{feedback}</p> : null}
     </div>
   );
