@@ -68,3 +68,19 @@ No debe existir elevación de rol desde frontend.
 ## Pending / TODO
 - Documentar matriz de permisos por pantalla/endpoint.
 - Definir reglas de auditoría para cambios de rol.
+
+
+## Perfil de usuario (self-service)
+- `public.profiles` incluye los campos opcionales `full_name` y `phone` para autogestión de datos de contacto.
+- Endpoint autenticado `PATCH /api/auth/profile` permite actualizar `email`, `full_name` y `phone` del usuario en sesión.
+- El endpoint rechaza explícitamente cualquier intento de enviar `role` desde cliente.
+- Tras persistir cambios, frontend refresca estado con `refreshAuth` para reflejar datos en UI.
+
+## Ajuste RLS para update de perfil propio
+Migración aplicada:
+- `supabase/migrations/20260430110000_profiles_contact_fields_and_rls_update.sql`
+
+Garantías:
+- solo `auth.uid() = profiles.id` puede editar su fila;
+- se mantiene bloqueo de escalación de `role` para usuarios no admin;
+- `updated_at` continúa gestionado por trigger existente `profiles_set_updated_at`.
