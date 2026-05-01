@@ -45,6 +45,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - `courses.slug` es único y funciona como identificador estable para catálogo de cursos.
 - En `/cursos`, cada card expone CTA de **Ver detalle** hacia `/cursos/[slug]` para revisar la información del curso antes de comprar.
 - En administración, la imagen del curso se carga como archivo (upload directo) y no como URL manual.
+- En administración, la gestión de sesiones se realiza en una pantalla dedicada por curso (`/admin/cursos/[courseId]/sesiones`) para evitar mezclar formularios de cursos y sesiones en la misma vista.
 - Cada sesión (`course_sessions`) pertenece a un curso y debe respetar `capacity > 0`.
 - Los cupos reservados (`reserved_spots`) nunca pueden ser negativos.
 - Cupo disponible de sesión: `available_spots = capacity - reserved_spots` y no puede resultar negativo en ninguna transición.
