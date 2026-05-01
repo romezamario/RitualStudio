@@ -116,9 +116,13 @@ export default function CoursePurchaseActions({ course, initialSessions }: Cours
     <section className="studio-card">
       <p className="card-label">Reserva tu lugar</p>
       <div className="stack-sm">
-        <label>
-          Sesión disponible
-          <select value={selectedSessionId} onChange={(event) => setSelectedSessionId(event.target.value)}>
+        <label className="course-session-selector">
+          Fecha y hora
+          <select
+            value={selectedSessionId}
+            onChange={(event) => setSelectedSessionId(event.target.value)}
+            className="course-session-select"
+          >
             {sessions.map((session) => {
               const remainingSpots = remainingSpotsBySession.get(session.id) ?? 0;
               return (
@@ -130,16 +134,33 @@ export default function CoursePurchaseActions({ course, initialSessions }: Cours
           </select>
         </label>
 
-        <label>
-          Participantes
-          <input
-            type="number"
-            min={1}
-            max={MAX_PARTICIPANTS}
-            value={participants}
-            onChange={(event) => setParticipants(Math.min(Math.max(Number(event.target.value) || 1, 1), MAX_PARTICIPANTS))}
-          />
-        </label>
+        <div className="course-participants-stepper" aria-label="Selector de participantes">
+          <p className="course-participants-title">Participantes</p>
+          <div className="course-stepper-control">
+            <button
+              type="button"
+              className="course-stepper-button"
+              onClick={() => setParticipants((current) => Math.max(current - 1, 1))}
+              disabled={participants <= 1}
+              aria-label="Disminuir participantes"
+            >
+              −
+            </button>
+            <span className="course-stepper-value" aria-live="polite">
+              {participants}
+            </span>
+            <button
+              type="button"
+              className="course-stepper-button"
+              onClick={() => setParticipants((current) => Math.min(current + 1, MAX_PARTICIPANTS))}
+              disabled={participants >= MAX_PARTICIPANTS}
+              aria-label="Aumentar participantes"
+            >
+              +
+            </button>
+          </div>
+          <p className="small-muted">Máximo {MAX_PARTICIPANTS} participantes por reserva.</p>
+        </div>
 
         {selectedSession ? (
           <p>
