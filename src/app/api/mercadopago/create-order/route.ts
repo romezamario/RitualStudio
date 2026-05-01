@@ -234,7 +234,10 @@ export async function POST(request: Request) {
 
     validateMercadoPagoAmount(totalAmount);
 
-    const externalReference = `ritual-${Date.now()}-${randomUUID().slice(0, 8)}`;
+    const isTestModePayment = paymentMode === "test";
+    const externalReference = isTestModePayment
+      ? `ritual-test-${Date.now()}-${randomUUID().slice(0, 8)}`
+      : `ritual-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const idempotencyKey = randomUUID();
 
     const orderInsert = {
@@ -302,7 +305,10 @@ export async function POST(request: Request) {
         email: payer.email,
       },
       external_reference: externalReference,
-      description: lineItems.map((item) => `${item.quantity}x ${item.name}`).join(" | ").slice(0, 240),
+      description: `${isTestModePayment ? "[TEST] " : ""}${lineItems
+        .map((item) => `${item.quantity}x ${item.name}`)
+        .join(" | ")
+        .slice(0, isTestModePayment ? 232 : 240)}`,
       notification_url: resolveMercadoPagoNotificationUrl(request, paymentMode),
     };
 
