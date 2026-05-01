@@ -10,6 +10,8 @@ import {
   validateMercadoPagoAmount,
 } from "@/lib/mercadopago";
 import { supabaseAdminRequest } from "@/lib/supabase-admin";
+import { getPaymentMode } from "@/lib/payment-mode";
+import { getMercadoPagoAccessTokenByEnvironment } from "@/lib/mercadopago";
 import { getServerSessionTokens, getUserFromAccessToken } from "@/lib/supabase/server";
 
 function isValidEmail(email: string) {
@@ -47,12 +49,8 @@ function getValidationErrorStatus(message: string) {
   return knownValidationMessages.some((knownMessage) => message.includes(knownMessage)) ? 400 : 500;
 }
 
-function resolveMercadoPagoNotificationUrl(request: Request) {
-  const isTestEnvironment =
-    process.env.NODE_ENV !== "production" || (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production");
-  const configuredUrl = (isTestEnvironment
-    ? process.env.MP_NOTIFICATION_URL_TEST?.trim()
-    : process.env.MP_NOTIFICATION_URL_PROD?.trim()) ?? "";
+function resolveMercadoPagoNotificationUrl(request: Request, mode: "prod" | "test") {
+  const configuredUrl = (mode === "test" ? process.env.MP_NOTIFICATION_URL_TEST?.trim() : process.env.MP_NOTIFICATION_URL_PROD?.trim()) ?? "";
 
   if (configuredUrl) {
     return configuredUrl;
@@ -65,7 +63,7 @@ function resolveMercadoPagoNotificationUrl(request: Request) {
   }
 
   const requestUrl = new URL(request.url);
-  return `${requestUrl.origin}/api/mercadopago/webhook/${isTestEnvironment ? "test" : "prod"}`;
+  return `${requestUrl.origin}/api/mercadopago/webhook/${mode}`;
 }
 
 function validateCourseParticipantsBySession(input: MpCreateOrderInput, lineItems: ValidatedLineItem[]) {
@@ -212,6 +210,13 @@ export async function POST(request: Request) {
   }
 
   try {
+    const paymentMode = await getPaymentMode();
+    const mpAccessToken = getMercadoPagoAccessTokenByEnvironment(paymentMode);
+
+    if (!mpAccessToken) {
+      return NextResponse.json({ error: `No está configurado MP_ACCESS_TOKEN_${paymentMode.toUpperCase()}.` }, { status: 500 });
+    }
+
     const { accessToken } = await getServerSessionTokens();
     const sessionUser = await getUserFromAccessToken(accessToken);
     const { lineItems, totalAmount } = await validateAndPriceLineItems(items);
@@ -257,6 +262,7 @@ export async function POST(request: Request) {
         payer_email: payer.email,
         receipt_email: normalizedReceiptEmail ?? payer.email,
         idempotency_key: idempotencyKey,
+        payment_mode: paymentMode,
         course_participants: Object.fromEntries(validatedCourseParticipants),
       },
     };
@@ -287,10 +293,11 @@ export async function POST(request: Request) {
       },
       external_reference: externalReference,
       description: lineItems.map((item) => `${item.quantity}x ${item.name}`).join(" | ").slice(0, 240),
-      notification_url: resolveMercadoPagoNotificationUrl(request),
+      notification_url: resolveMercadoPagoNotificationUrl(request, paymentMode),
     };
 
     const payment = await mpApiFetch<MpPaymentResponse>("/v1/payments", {
+      accessToken: mpAccessToken,
       method: "POST",
       headers: {
         "X-Idempotency-Key": idempotencyKey,

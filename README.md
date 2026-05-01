@@ -119,6 +119,7 @@ MP_ACCESS_TOKEN_PROD=
 MP_ACCESS_TOKEN_TEST=
 MP_WEBHOOK_SECRET_PROD=
 MP_WEBHOOK_SECRET_TEST=
+SUPERUSER_EMAILS= # correos separados por comas con permiso para cambiar modo de pagos
 
 # Correo transaccional (opcional)
 EMAIL_PROVIDER=

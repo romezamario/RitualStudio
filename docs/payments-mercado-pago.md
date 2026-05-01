@@ -131,3 +131,10 @@ Estados de `webhook_processing` usados por el sistema:
 
 ## Pending / TODO
 - Documentar job automático de reconciliación para órdenes pendientes sin confirmación webhook en ventana esperada.
+
+
+## Modo de pagos conmutable (superusuario)
+- El checkout resuelve modo activo desde `public.app_settings` (`payments_mode`).
+- `payments_mode=test` usa `MP_ACCESS_TOKEN_TEST`, `MP_NOTIFICATION_URL_TEST`, `MP_WEBHOOK_SECRET_TEST` y `MP_PUBLIC_KEY_TEST`.
+- `payments_mode=prod` usa `MP_ACCESS_TOKEN_PROD`, `MP_NOTIFICATION_URL_PROD`, `MP_WEBHOOK_SECRET_PROD` y `MP_PUBLIC_KEY_PROD`.
+- Solo superusuario (correo incluido en `SUPERUSER_EMAILS`) puede cambiar modo desde `/admin/pagos`.

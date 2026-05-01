@@ -80,12 +80,14 @@ export const MIN_MX_CARD_PAYMENT_AMOUNT = 10;
 const MAX_PRODUCT_QUANTITY_PER_LINE = 10;
 const MAX_COURSE_PARTICIPANTS_PER_LINE = 6;
 
-export function getMercadoPagoPublicKey() {
-  return process.env.MP_PUBLIC_KEY_PROD?.trim() ?? "";
+export function getMercadoPagoPublicKey(environment: "prod" | "test" = "prod") {
+  const envVarName = environment === "test" ? "MP_PUBLIC_KEY_TEST" : "MP_PUBLIC_KEY_PROD";
+  return process.env[envVarName]?.trim() ?? "";
 }
 
-export function getMercadoPagoAccessToken() {
-  const rawToken = process.env.MP_ACCESS_TOKEN_PROD?.trim() ?? "";
+export function getMercadoPagoAccessToken(environment: "prod" | "test" = "prod") {
+  const envVarName = environment === "test" ? "MP_ACCESS_TOKEN_TEST" : "MP_ACCESS_TOKEN_PROD";
+  const rawToken = process.env[envVarName]?.trim() ?? "";
   return sanitizeMercadoPagoToken(rawToken);
 }
 
@@ -101,8 +103,9 @@ function sanitizeMercadoPagoToken(rawToken: string) {
   return withoutBearer;
 }
 
-export function getMercadoPagoWebhookSecret() {
-  return process.env.MP_WEBHOOK_SECRET_PROD?.trim() ?? "";
+export function getMercadoPagoWebhookSecret(environment: "prod" | "test" = "prod") {
+  const envVarName = environment === "test" ? "MP_WEBHOOK_SECRET_TEST" : "MP_WEBHOOK_SECRET_PROD";
+  return process.env[envVarName]?.trim() ?? "";
 }
 
 export function getMercadoPagoAccessTokenByEnvironment(environment: "prod" | "test") {

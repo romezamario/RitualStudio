@@ -90,6 +90,27 @@ export async function getUserProfileById(userId: string, accessToken: string): P
   return data?.[0] ?? null;
 }
 
+
+function getSuperuserEmails() {
+  const raw = process.env.SUPERUSER_EMAILS ?? "";
+  return new Set(
+    raw
+      .split(",")
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean),
+  );
+}
+
+export function isSuperuserProfile(profile: UserProfile | null) {
+  const email = profile?.email?.trim().toLowerCase();
+
+  if (!email) {
+    return false;
+  }
+
+  return getSuperuserEmails().has(email);
+}
+
 export async function getCurrentUserProfile() {
   const { accessToken } = await getServerSessionTokens();
   const user = await getUserFromAccessToken(accessToken);
@@ -108,6 +129,7 @@ export async function getCurrentUserProfile() {
     user,
     profile,
     isAdmin: profile?.role === "admin",
+    isSuperuser: isSuperuserProfile(profile),
   };
 }
 

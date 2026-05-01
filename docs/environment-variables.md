@@ -68,3 +68,8 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - El endpoint `PATCH /api/auth/profile` **no requiere variables nuevas** en esta iteración.
 - Reutiliza configuración actual de Supabase (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`/`NEXT_PUBLIC_SUPABASE_ANON_KEY`) para sesión de usuario y APIs backend ya existentes.
 - Mantener `SUPABASE_SERVICE_ROLE_KEY` restringida a backend seguro; nunca necesaria en frontend para edición de perfil.
+
+
+## Payment Mode Toggle (Superusuario)
+- `SUPERUSER_EMAILS`: lista separada por comas de correos autorizados para cambiar el modo de pagos desde admin.
+- `payments_mode` (persistido en `public.app_settings`): valor runtime (`test` o `prod`) que define qué credenciales usa backend en checkout.
