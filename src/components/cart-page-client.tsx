@@ -34,7 +34,8 @@ export default function CartPageClient() {
       })
       .join("\n");
 
-    const message = `Hola Ritual Studio, quiero comprar:%0A${lines}`;
+    const message = `Hola Ritual Studio, quiero comprar:
+${lines}`;
 
     return getWhatsAppHref(message);
   }, [items]);
