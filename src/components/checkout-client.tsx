@@ -387,10 +387,17 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
             setFeedback("Formulario listo. Puedes pagar con tarjeta y cuotas sin redirecciones.");
           },
           onSubmit: (formData: MpBrickFormData) => {
-            const normalizedPayerEmail = formData.payer.email.trim().toLowerCase();
             setCheckoutStatus("loading");
 
             return new Promise<void>((resolve) => {
+              const normalizedPayerEmail = formData.payer?.email?.trim().toLowerCase() ?? "";
+
+              if (!normalizedPayerEmail) {
+                setCheckoutStatus("error");
+                setFeedback("Ingresa un correo válido para continuar con el pago.");
+                resolve();
+                return;
+              }
               const currentParticipantsByLine = courseParticipantsByLineRef.current;
               const frontendValidationErrors = validateCourseParticipants(currentParticipantsByLine);
               setCourseErrorsByLine(frontendValidationErrors);
