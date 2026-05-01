@@ -10,7 +10,7 @@ export default function ContactoPage() {
       <div className="contact-grid">
         <article className="studio-card">
           <h2>WhatsApp</h2>
-          <p>+52 55 0000 0000</p>
+          <p>+52 81 8090 3028</p>
         </article>
         <article className="studio-card">
           <h2>Email</h2>
