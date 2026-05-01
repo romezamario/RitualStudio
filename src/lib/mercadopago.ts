@@ -264,10 +264,11 @@ export function validateMercadoPagoAmount(totalAmount: number) {
 
 export async function mpApiFetch<T>(
   path: string,
-  init: RequestInit & { accessToken?: string } = {},
+  init: RequestInit & { accessToken?: string; environment?: "prod" | "test" } = {},
 ): Promise<T> {
-  const accessToken = init.accessToken ?? getMercadoPagoAccessToken();
-  const publicKey = getMercadoPagoPublicKey();
+  const environment = init.environment ?? "prod";
+  const accessToken = init.accessToken ?? getMercadoPagoAccessToken(environment);
+  const publicKey = getMercadoPagoPublicKey(environment);
 
   if (!accessToken) {
     throw new Error("MP_ACCESS_TOKEN_PROD no está configurado.");
@@ -278,9 +279,11 @@ export async function mpApiFetch<T>(
   const publicKeyIsTest = /^TEST-/i.test(publicKey);
   const publicKeyIsProd = /^APP_USR-/i.test(publicKey);
 
-  if ((tokenIsTest && publicKeyIsProd) || (tokenIsProd && publicKeyIsTest)) {
+  if (publicKey && ((tokenIsTest && publicKeyIsProd) || (tokenIsProd && publicKeyIsTest))) {
     throw new Error(
-      "Detectamos llaves de Mercado Pago mezcladas: MP_PUBLIC_KEY_PROD y MP_ACCESS_TOKEN_PROD deben pertenecer al mismo entorno (TEST o APP_USR).",
+      environment === "test"
+        ? "Detectamos llaves de Mercado Pago mezcladas: MP_PUBLIC_KEY_TEST y MP_ACCESS_TOKEN_TEST deben pertenecer al mismo entorno (TEST o APP_USR)."
+        : "Detectamos llaves de Mercado Pago mezcladas: MP_PUBLIC_KEY_PROD y MP_ACCESS_TOKEN_PROD deben pertenecer al mismo entorno (TEST o APP_USR).",
     );
   }
 
@@ -306,7 +309,9 @@ export async function mpApiFetch<T>(
   if (!response.ok) {
     if (response.status === 401) {
       throw new Error(
-        "Mercado Pago respondió con 401 (Unauthorized). Revisa MP_ACCESS_TOKEN_PROD en Vercel: debe ser Access Token válido, sin prefijo 'Bearer', y del mismo entorno que MP_PUBLIC_KEY_PROD.",
+        environment === "test"
+          ? "Mercado Pago respondió con 401 (Unauthorized). Revisa MP_ACCESS_TOKEN_TEST en Vercel: debe ser Access Token válido, sin prefijo 'Bearer', y del mismo entorno que MP_PUBLIC_KEY_TEST."
+          : "Mercado Pago respondió con 401 (Unauthorized). Revisa MP_ACCESS_TOKEN_PROD en Vercel: debe ser Access Token válido, sin prefijo 'Bearer', y del mismo entorno que MP_PUBLIC_KEY_PROD.",
       );
     }
 

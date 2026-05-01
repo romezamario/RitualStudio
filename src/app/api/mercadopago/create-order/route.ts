@@ -297,6 +297,7 @@ export async function POST(request: Request) {
     };
 
     const payment = await mpApiFetch<MpPaymentResponse>("/v1/payments", {
+      environment: paymentMode,
       accessToken: mpAccessToken,
       method: "POST",
       headers: {

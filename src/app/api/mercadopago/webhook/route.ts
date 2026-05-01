@@ -745,6 +745,7 @@ export async function handleWebhook(request: Request, environment: "prod" | "tes
 
     if (dataId && topic.includes("payment")) {
       const payment = await mpApiFetch<MpPaymentResponse>(`/v1/payments/${dataId}`, {
+        environment,
         method: "GET",
         accessToken,
       });
@@ -778,6 +779,7 @@ export async function handleWebhook(request: Request, environment: "prod" | "tes
 
     if (dataId && topic.includes("order")) {
       const order = await mpApiFetch<MpOrderResponse>(`/v1/orders/${dataId}`, {
+        environment,
         method: "GET",
         accessToken,
       });
