@@ -15,16 +15,6 @@ function formatCurrency(value: number) {
   return `$${new Intl.NumberFormat("es-MX").format(value)} MXN`;
 }
 
-function formatSessionButtonLabel(startsAt: string) {
-  return new Date(startsAt).toLocaleString("es-MX", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
   const { slug } = await params;
   const { data, error } = await getPublicCourseBySlug(slug);
@@ -40,7 +30,6 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
   }
 
   const { course, sessions } = data;
-  const availableSessions = sessions.filter((session) => session.capacity - session.reservedSpots > 0);
   const courseImage = course.imageUrl
     ? toRenderableProductImageUrl(course.imageUrl, "product-detail")
     : "/images/logo.png";
@@ -69,20 +58,6 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
             <section className="studio-card">
               <p className="card-label">Precio por participante</p>
               <strong className="price-tag">{formatCurrency(course.price)}</strong>
-            </section>
-            <section className="studio-card">
-              <p className="card-label">Sesiones disponibles</p>
-              {availableSessions.length > 0 ? (
-                <div className="cta-row">
-                  {availableSessions.map((session) => (
-                    <Link key={session.id} href="#course-booking" className="btn btn-ghost">
-                      {formatSessionButtonLabel(session.startsAt)}
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <p>Sin cupo disponible por ahora.</p>
-              )}
             </section>
           </div>
 
