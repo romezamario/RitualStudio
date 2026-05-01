@@ -34,7 +34,7 @@ const organizationJsonLd = {
     "@type": "PostalAddress",
         addressCountry: "MX"
   },
-  sameAs: ["https://wa.me/525520904940"]
+  sameAs: ["https://wa.me/528180903028"]
 };
 
 export const metadata: Metadata = {

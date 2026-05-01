@@ -1,4 +1,4 @@
-const DEFAULT_WHATSAPP_NUMBER = "5520904940";
+const DEFAULT_WHATSAPP_NUMBER = "8180903028";
 
 function toWhatsAppNumber(value: string) {
   const digits = value.replace(/\D/g, "");

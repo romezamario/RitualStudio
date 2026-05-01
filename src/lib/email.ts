@@ -50,7 +50,7 @@ function getEmailFrom() {
 }
 
 function getSupportChannel() {
-  return process.env.EMAIL_SUPPORT_CHANNEL?.trim() || "WhatsApp 55 2090 4940";
+  return process.env.EMAIL_SUPPORT_CHANNEL?.trim() || "WhatsApp 81 8090 3028";
 }
 
 function formatPaidAt(rawDate: string) {
