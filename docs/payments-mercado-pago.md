@@ -65,6 +65,7 @@ Respuesta (resumen):
 - Para construir el `manifest` de validación (`id:{data.id};request-id:{x-request-id};ts:{ts};`), `data.id` se normaliza a lowercase cuando contiene caracteres alfanuméricos, alineando el cálculo HMAC con la validación esperada por Mercado Pago.
 - En auditoría (`payment_events.payload.signature`) se guardan ambos valores de `data.id`: original y normalizado, para trazabilidad y debugging.
 - Existe fallback de validación por hash de `rawBody` para robustez.
+- En eventos `payment` aprobados, el envío de comprobante reintenta una segunda lectura corta de la orden (250ms) antes de omitir el email para tolerar consistencia eventual entre upserts y lectura. Si aún no existe, se registra como `info` operativo (no `warning`) para reducir ruido en observabilidad.
 - Si no valida firma:
   - Se registra auditoría mínima en `payment_events` (`signature`, `webhook_processing` y `audit.ignored_reason="invalid_signature"`).
   - Se responde **HTTP 401** y se corta la ejecución antes de consultar APIs de MP o reconciliar pagos/cupos.

@@ -517,10 +517,19 @@ async function trySendPurchaseEmail({
   }
 
   const mercadoPagoOrderId = payment.order?.id ? String(payment.order.id) : "";
-  const order = await fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId);
+
+  let order = await fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId);
 
   if (!order?.id) {
-    console.warn("[MP webhook] No se encontró la orden para envío de comprobante:", mercadoPagoOrderId);
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    order = await fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId);
+  }
+
+  if (!order?.id) {
+    console.info(
+      "[MP webhook] Se omite envío de comprobante: orden aún no disponible para mercado_pago_order_id:",
+      mercadoPagoOrderId
+    );
     return;
   }
 
