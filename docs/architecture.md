@@ -14,7 +14,7 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 
 ### Frontend (browser/client)
 - Render de páginas y UX.
-- Inicialización de checkout client-side con `MP_PUBLIC_KEY_PROD`.
+- Inicialización de checkout client-side con public key de Mercado Pago resuelta por `payments_mode` (`MP_PUBLIC_KEY_PROD` o `MP_PUBLIC_KEY_TEST`).
 - Gestión de estado UI (ej. carrito, navegación, formularios).
 
 ### Backend (Next.js Route Handlers)

@@ -1,8 +1,11 @@
 import SiteShell from "@/components/site-shell";
 import CheckoutClient from "@/components/checkout-client";
+import { getPaymentMode } from "@/lib/payment-mode";
+import { getMercadoPagoPublicKey } from "@/lib/mercadopago";
 
-export default function CheckoutPage() {
-  const mercadoPagoPublicKey = process.env.MP_PUBLIC_KEY_PROD?.trim() ?? "";
+export default async function CheckoutPage() {
+  const paymentMode = await getPaymentMode();
+  const mercadoPagoPublicKey = getMercadoPagoPublicKey(paymentMode);
   return (
     <SiteShell
       eyebrow="Pago seguro"
