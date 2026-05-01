@@ -113,7 +113,7 @@ export default function CoursePurchaseActions({ course, initialSessions }: Cours
   };
 
   return (
-    <section className="studio-card">
+    <section id="course-booking" className="studio-card">
       <p className="card-label">Reserva tu lugar</p>
       <div className="stack-sm">
         <label className="course-session-selector">
