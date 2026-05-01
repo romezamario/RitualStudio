@@ -29,6 +29,16 @@ function formatSessionLabel(session: CourseCatalogSession) {
   });
 }
 
+function formatSessionButtonLabel(startsAt: string) {
+  return new Date(startsAt).toLocaleString("es-MX", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function CoursePurchaseActions({ course, initialSessions }: CoursePurchaseActionsProps) {
   const router = useRouter();
   const { addCourseToCart } = useCart();
@@ -113,28 +123,45 @@ export default function CoursePurchaseActions({ course, initialSessions }: Cours
   };
 
   return (
-    <section id="course-booking" className="studio-card">
-      <p className="card-label">Reserva tu lugar</p>
-      <div className="stack-sm">
-        <label className="course-session-selector">
-          Fecha y hora
-          <select
-            value={selectedSessionId}
-            onChange={(event) => setSelectedSessionId(event.target.value)}
-            className="course-session-select"
-          >
-            {sessions.map((session) => {
-              const remainingSpots = remainingSpotsBySession.get(session.id) ?? 0;
-              return (
-                <option key={session.id} value={session.id} disabled={remainingSpots <= 0}>
-                  {formatSessionLabel(session)} · Cupo restante: {remainingSpots}
-                </option>
-              );
-            })}
-          </select>
-        </label>
+    <>
+      <section className="studio-card">
+        <p className="card-label">Sesiones disponibles</p>
+        {sessions.length > 0 ? (
+          <div className="stack-sm">
+            <div className="cta-row">
+              {sessions.map((session) => {
+                const remainingSpots = remainingSpotsBySession.get(session.id) ?? 0;
+                const isSelected = selectedSessionId === session.id;
+                return (
+                  <button
+                    key={session.id}
+                    type="button"
+                    onClick={() => setSelectedSessionId(session.id)}
+                    className={`btn ${isSelected ? "btn-primary" : "btn-ghost"}`}
+                    disabled={remainingSpots <= 0}
+                    aria-pressed={isSelected}
+                  >
+                    {formatSessionButtonLabel(session.startsAt)}
+                  </button>
+                );
+              })}
+            </div>
+            {selectedSession ? (
+              <p>
+                Disponibilidad actual: <strong>{remainingSpotsBySession.get(selectedSession.id) ?? 0} lugares</strong>
+              </p>
+            ) : null}
+          </div>
+        ) : (
+          <p>Sin cupo disponible por ahora.</p>
+        )}
+      </section>
 
-        <div className="course-participants-stepper" aria-label="Selector de participantes">
+      <section id="course-booking" className="studio-card">
+        <p className="card-label">Reserva tu lugar</p>
+        <div className="stack-sm">
+
+          <div className="course-participants-stepper" aria-label="Selector de participantes">
           <p className="course-participants-title">Participantes</p>
           <div className="course-stepper-control">
             <button
@@ -160,32 +187,33 @@ export default function CoursePurchaseActions({ course, initialSessions }: Cours
             </button>
           </div>
           <p className="small-muted">Máximo {MAX_PARTICIPANTS} participantes por reserva.</p>
-        </div>
+          </div>
 
-        {selectedSession ? (
-          <p>
-            Fecha seleccionada: <strong>{formatSessionLabel(selectedSession)}</strong>
+          {selectedSession ? (
+            <p>
+              Fecha seleccionada: <strong>{formatSessionLabel(selectedSession)}</strong>
+            </p>
+          ) : null}
+
+          <p className="small-muted">
+            Cupo mostrado en tiempo real (snapshot). La disponibilidad final se valida en backend al pagar.
           </p>
-        ) : null}
 
-        <p className="small-muted">
-          Cupo mostrado en tiempo real (snapshot). La disponibilidad final se valida en backend al pagar.
-        </p>
+          <div className="cta-row">
+            <button type="button" className="btn btn-ghost" onClick={() => void refreshSessions()} disabled={isRefreshing}>
+              {isRefreshing ? "Actualizando..." : "Actualizar cupo"}
+            </button>
+            <button type="button" className="btn btn-primary" onClick={() => void handleAddCourseToCart()} disabled={!selectedSession}>
+              Agregar curso al carrito
+            </button>
+            <button type="button" className="btn btn-primary" onClick={() => void handleBuyNow()} disabled={!selectedSession}>
+              Comprar ahora
+            </button>
+          </div>
 
-        <div className="cta-row">
-          <button type="button" className="btn btn-ghost" onClick={() => void refreshSessions()} disabled={isRefreshing}>
-            {isRefreshing ? "Actualizando..." : "Actualizar cupo"}
-          </button>
-          <button type="button" className="btn btn-primary" onClick={() => void handleAddCourseToCart()} disabled={!selectedSession}>
-            Agregar curso al carrito
-          </button>
-          <button type="button" className="btn btn-primary" onClick={() => void handleBuyNow()} disabled={!selectedSession}>
-            Comprar ahora
-          </button>
+          {feedback ? <p className="cart-feedback">{feedback}</p> : null}
         </div>
-
-        {feedback ? <p className="cart-feedback">{feedback}</p> : null}
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
