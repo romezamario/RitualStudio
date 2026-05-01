@@ -1,6 +1,7 @@
 import { marketplaceProducts } from "@/data/marketplace-products";
 import { fetchMarketplaceProductsFromBackend } from "@/lib/marketplace-catalog";
 import { supabaseAdminRequest } from "@/lib/supabase-admin";
+import { validateMercadoPagoEnv } from "@/lib/mercadopago-env";
 
 export type CheckoutLineItemInput =
   | {
@@ -274,18 +275,10 @@ export async function mpApiFetch<T>(
     throw new Error("MP_ACCESS_TOKEN_PROD no está configurado.");
   }
 
-  const tokenIsTest = /^TEST-/i.test(accessToken);
-  const tokenIsProd = /^APP_USR-/i.test(accessToken);
-  const publicKeyIsTest = /^TEST-/i.test(publicKey);
-  const publicKeyIsProd = /^APP_USR-/i.test(publicKey);
-
-  if (publicKey && ((tokenIsTest && publicKeyIsProd) || (tokenIsProd && publicKeyIsTest))) {
-    throw new Error(
-      environment === "test"
-        ? "Detectamos llaves de Mercado Pago mezcladas: MP_PUBLIC_KEY_TEST y MP_ACCESS_TOKEN_TEST deben pertenecer al mismo entorno (TEST o APP_USR)."
-        : "Detectamos llaves de Mercado Pago mezcladas: MP_PUBLIC_KEY_PROD y MP_ACCESS_TOKEN_PROD deben pertenecer al mismo entorno (TEST o APP_USR).",
-    );
-  }
+  validateMercadoPagoEnv({
+    publicKey,
+    accessToken,
+  });
 
   const response = await fetch(`${MP_API_BASE}${path}`, {
     ...init,

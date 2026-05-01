@@ -139,3 +139,9 @@ Estados de `webhook_processing` usados por el sistema:
 - `payments_mode=test` usa `MP_ACCESS_TOKEN_TEST`, `MP_NOTIFICATION_URL_TEST`, `MP_WEBHOOK_SECRET_TEST` y `MP_PUBLIC_KEY_TEST`.
 - `payments_mode=prod` usa `MP_ACCESS_TOKEN_PROD`, `MP_NOTIFICATION_URL_PROD`, `MP_WEBHOOK_SECRET_PROD` y `MP_PUBLIC_KEY_PROD`.
 - Solo superusuario (correo incluido en `SUPERUSER_EMAILS`) puede cambiar modo desde `/admin/pagos`.
+
+
+## Guardas de entorno y seguridad
+- Antes de crear pagos se ejecuta una validación de entorno que compara public key y access token para evitar mezcla `TEST`/`APP_USR`.
+- Si la configuración es inválida, el backend responde `500` y no ejecuta llamadas a la API de Mercado Pago.
+- El checkout cliente valida formato de public key antes de montar Brick y emite warnings de diagnóstico sin exponer secretos.

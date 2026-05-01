@@ -11,7 +11,8 @@ import {
 } from "@/lib/mercadopago";
 import { supabaseAdminRequest } from "@/lib/supabase-admin";
 import { getPaymentMode } from "@/lib/payment-mode";
-import { getMercadoPagoAccessTokenByEnvironment } from "@/lib/mercadopago";
+import { getMercadoPagoAccessTokenByEnvironment, getMercadoPagoPublicKey } from "@/lib/mercadopago";
+import { validateMercadoPagoEnv } from "@/lib/mercadopago-env";
 import { getServerSessionTokens, getUserFromAccessToken } from "@/lib/supabase/server";
 
 function isValidEmail(email: string) {
@@ -211,10 +212,19 @@ export async function POST(request: Request) {
 
   try {
     const paymentMode = await getPaymentMode();
+    const mpPublicKey = getMercadoPagoPublicKey(paymentMode);
     const mpAccessToken = getMercadoPagoAccessTokenByEnvironment(paymentMode);
 
-    if (!mpAccessToken) {
-      return NextResponse.json({ error: `No está configurado MP_ACCESS_TOKEN_${paymentMode.toUpperCase()}.` }, { status: 500 });
+    try {
+      validateMercadoPagoEnv({ publicKey: mpPublicKey, accessToken: mpAccessToken });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Configuración inválida de Mercado Pago.";
+      console.error("[MP create-order] Invalid Mercado Pago environment", {
+        paymentMode,
+        publicKeyPrefix: mpPublicKey ? mpPublicKey.slice(0, 7) : "missing",
+        accessTokenPrefix: mpAccessToken ? mpAccessToken.slice(0, 7) : "missing",
+      });
+      return NextResponse.json({ error: message }, { status: 500 });
     }
 
     const { accessToken } = await getServerSessionTokens();
