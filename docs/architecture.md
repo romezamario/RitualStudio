@@ -73,3 +73,9 @@ Relación funcional:
 
 ## Documentation Governance
 Si se modifica arquitectura, actualizar este archivo y enlazar el cambio en README.
+
+
+## Payment Mode Runtime
+- `public.app_settings` mantiene `payments_mode` (`test`/`prod`) como fuente de verdad runtime.
+- `/admin/pagos` permite a superusuario conmutar el modo sin redeploy.
+- `create-order` usa el modo activo para elegir token y `notification_url` de Mercado Pago.

@@ -19,6 +19,7 @@ Guía de autenticación, sesiones, perfiles y autorización por rol.
 
 ## Roles
 - Roles soportados: `user`, `admin`.
+- Capacidad adicional: **superusuario operativo** por allowlist de correo (`SUPERUSER_EMAILS`) para tareas críticas (ej. cambiar `payments_mode`).
 - `profiles.role` es la fuente de verdad de privilegios operativos.
 - Rutas admin protegidas en layout server-side (`/admin/layout.tsx`).
 
