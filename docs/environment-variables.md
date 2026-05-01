@@ -73,3 +73,10 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 ## Payment Mode Toggle (Superusuario)
 - `SUPERUSER_EMAILS`: lista separada por comas de correos autorizados para cambiar el modo de pagos desde admin.
 - `payments_mode` (persistido en `public.app_settings`): valor runtime (`test` o `prod`) que define qué credenciales usa backend en checkout.
+
+
+## Validación cruzada de entorno (Mercado Pago)
+- Se agregó validación centralizada en `src/lib/mercadopago-env.ts` para asegurar consistencia entre llaves públicas y privadas por ambiente.
+- Compatibilidad adicional: `NEXT_PUBLIC_MP_PUBLIC_KEY` y `MP_ACCESS_TOKEN` pueden inyectarse como alias por ambiente (útil en Vercel Preview/Development).
+- Regla de prefijos: `TEST-` (test) y `APP_USR-` (producción). Si se mezclan, el backend bloquea el flujo con error controlado.
+- Logs seguros: solo prefijo parcial (7 chars), longitud y entorno detectado; nunca se imprime token completo.

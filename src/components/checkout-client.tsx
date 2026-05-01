@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { getCartItemLineKey, useCart } from "@/components/cart-context";
 import { useAuth } from "@/components/auth-context";
 import { MIN_MX_CARD_PAYMENT_AMOUNT, parseMxPrice } from "@/lib/mercadopago";
+import { detectPublicKeyEnvironment } from "@/lib/mercadopago-env";
 
 type CheckoutStatus = "idle" | "loading" | "approved" | "pending" | "rejected" | "error";
 
@@ -203,6 +204,32 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
   const [feedback, setFeedback] = useState("Completa tus datos para procesar el pago con tarjeta sin salir del sitio.");
   const isBrickMounted = useRef(false);
   const initializedPayerEmail = useRef("");
+
+
+  useEffect(() => {
+    const normalizedKey = mercadoPagoPublicKey?.trim() ?? "";
+
+    if (!normalizedKey) {
+      console.warn("[Checkout] NEXT_PUBLIC_MP_PUBLIC_KEY no está configurada; no se puede inicializar Mercado Pago Brick.");
+      return;
+    }
+
+    const keyEnv = detectPublicKeyEnvironment(normalizedKey);
+
+    if (!keyEnv) {
+      console.warn("[Checkout] La public key de Mercado Pago no coincide con prefijos esperados (TEST-/APP_USR-).", {
+        publicKeyPrefix: normalizedKey.slice(0, 7),
+        publicKeyLength: normalizedKey.length,
+      });
+      return;
+    }
+
+    console.info("[Checkout] Mercado Pago public key detectada", {
+      env: keyEnv,
+      publicKeyPrefix: normalizedKey.slice(0, 7),
+      publicKeyLength: normalizedKey.length,
+    });
+  }, [mercadoPagoPublicKey]);
 
   const total = useMemo(() => {
     return items.reduce((sum, item) => sum + parseMxPrice(item.price) * item.quantity, 0);
