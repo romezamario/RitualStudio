@@ -19,7 +19,8 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: fallback retrocompatible.
 
 ### Mercado Pago
-- `MP_PUBLIC_KEY_PROD`: llave pública para bricks/tokenización en frontend.
+- `MP_PUBLIC_KEY_PROD`: llave pública preferida para bricks/tokenización en frontend.
+- `MP_PUBLIC_KEY_TEST` (opcional): llave pública de pruebas para referencia operativa/documental. No la usa el checkout de producción actual.
 
 ### Integración metadata (operativa)
 - `NEXT_PUBLIC_GITHUB_REPOSITORY`
