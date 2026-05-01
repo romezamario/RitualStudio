@@ -104,7 +104,7 @@ Respuesta (resumen):
 - `MP_ACCESS_TOKEN_TEST` solo backend (exclusivo para endpoint de pruebas del webhook).
 - `MP_NOTIFICATION_URL_PROD` y `MP_NOTIFICATION_URL_TEST` solo backend; definen el endpoint absoluto que se envía como `notification_url` según entorno.
 - `MP_NOTIFICATION_URL` se mantiene como fallback legacy opcional para retrocompatibilidad.
-- `MP_PUBLIC_KEY_PROD` solo para inicialización del checkout client-side. `MP_PUBLIC_KEY_TEST` queda documentada para referencia en pruebas.
+- La public key del checkout client-side también se resuelve por `payments_mode`: `MP_PUBLIC_KEY_PROD` en `prod` y `MP_PUBLIC_KEY_TEST` en `test`.
 - Estado final de pago lo determina backend/webhook, nunca solo frontend.
 - No aceptar monto final calculado en cliente.
 
