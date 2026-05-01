@@ -169,6 +169,7 @@ Notas:
 3. Configura variables de entorno por ambiente (Preview/Production).
 4. Usa PRs para validar previews antes de merge a `main`.
 5. Confirma que endpoints de Mercado Pago webhook apunten al dominio correcto de producción.
+6. Vercel está configurado para omitir deployments cuando el commit solo cambia documentación (`**/*.md`, `docs/**`, `supabase/**/*.md`). Si hay cambios de código/configuración/migraciones SQL, el deployment sí se ejecuta.
 
 Guía de arquitectura/deploy en [`docs/architecture.md`](./docs/architecture.md).
 
