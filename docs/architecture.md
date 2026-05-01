@@ -37,7 +37,7 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 - Tabla `public.profiles` vinculada a `auth.users`.
 - Función `public.is_admin()` para políticas RLS.
 - Rutas administrativas protegidas por validación server-side (`/admin/*`).
-- Módulo administrativo de cursos (`/admin/cursos`) con endpoints backend para CRUD de cursos y sesiones (`/api/admin/courses/*`).
+- Módulo administrativo de cursos con dos pantallas: `/admin/cursos` para CRUD de cursos y `/admin/cursos/[courseId]/sesiones` para CRUD de sesiones de un curso específico; ambos usan endpoints backend ` /api/admin/courses/*`.
 - Módulo de cuenta `/mi-cuenta/pedidos` renderizado server-side: usa token de sesión (`sb-access-token`) para consultas REST con RLS y aplica validación defensiva adicional filtrando por `orders.user_id = auth user`.
 - El dashboard `/mi-cuenta` incluye tarjeta de perfil con CTA a `/mi-cuenta/perfil` para centralizar la edición de datos personales (nombre/teléfono) en una ruta dedicada.
 - La ruta `/mi-cuenta/perfil` opera con flujo App/API/Supabase: formulario cliente -> `PATCH /api/auth/profile` -> actualización de `auth.users` (email) y `public.profiles` (`full_name`, `phone`) bajo sesión autenticada.
