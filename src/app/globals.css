@@ -1293,6 +1293,53 @@ p {
   text-transform: uppercase;
 }
 
+
+.checkout-success-card p,
+.checkout-success-summary li strong,
+.checkout-success-table td {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 680px) {
+  .checkout-success-table {
+    min-width: 100%;
+  }
+
+  .checkout-success-table thead {
+    display: none;
+  }
+
+  .checkout-success-table,
+  .checkout-success-table tbody,
+  .checkout-success-table tr,
+  .checkout-success-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .checkout-success-table tr {
+    border-bottom: 1px solid color-mix(in srgb, var(--smoke) 26%, white);
+    padding: 0.45rem 0;
+  }
+
+  .checkout-success-table td {
+    border-bottom: 0;
+    display: grid;
+    gap: 0.2rem;
+    grid-template-columns: minmax(120px, 45%) minmax(0, 1fr);
+    padding: 0.35rem 0.2rem;
+  }
+
+  .checkout-success-table td::before {
+    color: var(--muted);
+    content: attr(data-label);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+}
+
 .orders-table-card {
   background: var(--panel);
   border: 1px solid var(--line);

@@ -353,10 +353,10 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
 
                   return (
                     <tr key={`${item.slug ?? item.name ?? "item"}-${index}`}>
-                      <td>{item.name ?? item.slug ?? "Producto"}</td>
-                      <td>{quantity}</td>
-                      <td>{toCurrency(unitPrice)}</td>
-                      <td>{toCurrency(subtotal)}</td>
+                      <td data-label="Producto">{item.name ?? item.slug ?? "Producto"}</td>
+                      <td data-label="Cantidad">{quantity}</td>
+                      <td data-label="Precio unitario">{toCurrency(unitPrice)}</td>
+                      <td data-label="Subtotal">{toCurrency(subtotal)}</td>
                     </tr>
                   );
                 })}
