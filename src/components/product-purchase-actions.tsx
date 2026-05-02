@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MarketplaceProduct } from "@/data/marketplace-products";
 import { useCart } from "@/components/cart-context";
@@ -8,6 +9,7 @@ import { useCart } from "@/components/cart-context";
 type ProductPurchaseActionsProps = {
   product: MarketplaceProduct;
   showDeliveryCalendar?: boolean;
+  showMarketplaceLink?: boolean;
 };
 
 type DeliveryWindow = "morning" | "afternoon";
@@ -43,7 +45,11 @@ function buildDeliveryDates(now: Date) {
   };
 }
 
-export default function ProductPurchaseActions({ product, showDeliveryCalendar = true }: ProductPurchaseActionsProps) {
+export default function ProductPurchaseActions({
+  product,
+  showDeliveryCalendar = true,
+  showMarketplaceLink = false,
+}: ProductPurchaseActionsProps) {
   const router = useRouter();
   const { addProductToCart } = useCart();
   const [feedback, setFeedback] = useState("");
@@ -121,6 +127,11 @@ export default function ProductPurchaseActions({ product, showDeliveryCalendar =
       ) : null}
 
       <div className="purchase-actions">
+        {showMarketplaceLink ? (
+          <Link href="/marketplace" className="btn btn-ghost">
+            Volver al marketplace
+          </Link>
+        ) : null}
         <button type="button" className="btn btn-ghost" onClick={handleAddToCart}>
           Agregar al carrito
         </button>
