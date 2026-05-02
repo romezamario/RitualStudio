@@ -102,6 +102,7 @@ NEXT_PUBLIC_SITE_VERSION=
 # WhatsApp
 NEXT_PUBLIC_WHATSAPP_NUMBER=
 NEXT_PUBLIC_WHATSAPP_MESSAGE=
+NEXT_PUBLIC_INSTAGRAM_URL= # ícono de Instagram en footer (opcional)
 
 # Supabase (frontend/server público)
 NEXT_PUBLIC_SUPABASE_URL=
@@ -128,6 +129,9 @@ RESEND_API_KEY=
 RESEND_FROM_EMAIL= # remitente principal recomendado
 EMAIL_FROM= # fallback legacy opcional de compatibilidad
 EMAIL_SUPPORT_CHANNEL=
+EMAIL_SOCIAL_INSTAGRAM_URL= # si no se define, usa el Instagram oficial por defecto
+EMAIL_SOCIAL_FACEBOOK_URL=
+EMAIL_SOCIAL_TIKTOK_URL=
 
 # Metadata de integración (opcional)
 NEXT_PUBLIC_GITHUB_REPOSITORY=

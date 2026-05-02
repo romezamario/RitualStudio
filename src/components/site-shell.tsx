@@ -15,6 +15,7 @@ const links = [
 
 const whatsappHref = getWhatsAppHref(process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ?? "Hola Ritual Studio, quiero más información.");
 const siteVersion = process.env.NEXT_PUBLIC_SITE_VERSION?.trim() || packageJson.version;
+const instagramUrl = process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() || "https://www.instagram.com/ritualstudiomx?igsh=aTFiZmFjbnAxODkz";
 
 type SiteShellProps = {
   title: string;
@@ -45,7 +46,22 @@ export default function SiteShell({ title, subtitle, eyebrow, children }: SiteSh
           <p>
             © {new Date().getFullYear()} Ritual Studio · v{siteVersion}
           </p>
-          <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>
+          <div className="site-footer-links">
+            <Link href={instagramUrl} target="_blank" rel="noreferrer" aria-label="Instagram de Ritual Studio" className="site-footer-social-link">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="site-footer-social-icon"
+              >
+                <rect x="3.5" y="3.5" width="17" height="17" rx="5.5" stroke="currentColor" strokeWidth="1.8" />
+                <circle cx="12" cy="12" r="4.25" stroke="currentColor" strokeWidth="1.8" />
+                <circle cx="17.2" cy="6.8" r="1.2" fill="currentColor" />
+              </svg>
+            </Link>
+            <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>
+          </div>
         </div>
       </footer>
 

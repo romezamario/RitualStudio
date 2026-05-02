@@ -12,6 +12,7 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 ### WhatsApp
 - `NEXT_PUBLIC_WHATSAPP_NUMBER`: número base para CTA.
 - `NEXT_PUBLIC_WHATSAPP_MESSAGE`: mensaje prellenado.
+- `NEXT_PUBLIC_INSTAGRAM_URL` (opcional): URL de Instagram usada en el ícono del footer; si falta, usa la cuenta oficial de Ritual Studio por defecto.
 
 ### Supabase (public config)
 - `NEXT_PUBLIC_SUPABASE_URL`: URL base de proyecto Supabase.
@@ -52,7 +53,7 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - `EMAIL_SUPPORT_CHANNEL`: canal mostrado en comprobantes.
 - `SITE_URL` (opcional): URL canónica server-side usada como fallback para links en emails.
 - `EMAIL_ACCOUNT_ORDERS_URL` (opcional): URL absoluta personalizada para CTA de "Revisar mis compras" en email; si no existe se deriva como `<SITE_URL>/mi-cuenta/pedidos` (o `NEXT_PUBLIC_SITE_URL`).
-- `EMAIL_SOCIAL_INSTAGRAM_URL` (opcional): link de Instagram mostrado en comprobante.
+- `EMAIL_SOCIAL_INSTAGRAM_URL` (opcional): link de Instagram mostrado en comprobante. Si no se configura, se usa por defecto `https://www.instagram.com/ritualstudiomx?igsh=aTFiZmFjbnAxODkz`.
 - `EMAIL_SOCIAL_FACEBOOK_URL` (opcional): link de Facebook mostrado en comprobante.
 - `EMAIL_SOCIAL_TIKTOK_URL` (opcional): link de TikTok mostrado en comprobante.
 
