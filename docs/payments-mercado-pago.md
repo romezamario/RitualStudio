@@ -142,6 +142,7 @@ Estados de `webhook_processing` usados por el sistema:
 - En `payments_mode=test`, `create-order` etiqueta cada cobro con prefijo `[TEST]` en `description` y genera `external_reference` con segmento `ritual-test-*`. En `payments_mode=prod` no se agrega prefijo visible al usuario en la descripción del pago.
 - `payments_mode=prod` usa `MP_ACCESS_TOKEN_PROD`, `MP_NOTIFICATION_URL_PROD`, `MP_WEBHOOK_SECRET_PROD` y `MP_PUBLIC_KEY_PROD`.
 - Solo superusuario (correo incluido en `SUPERUSER_EMAILS`) puede cambiar modo desde `/admin/pagos`.
+- En `/admin/pagos`, la sección de verificación incluye al final un listado paginado de pagos recientes (bloques de 10) ordenado de más reciente a más antiguo vía `/v1/payments/search` de Mercado Pago.
 
 
 ## Guardas de entorno y seguridad

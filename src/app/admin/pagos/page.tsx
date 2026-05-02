@@ -5,6 +5,15 @@ import { supabaseAdminRequest } from "@/lib/supabase-admin";
 import { getCurrentUserProfile, isSuperuserProfile } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+type AdminRecentPayment = {
+  id?: string | number;
+  status?: string;
+  date_created?: string;
+  transaction_amount?: number;
+  external_reference?: string;
+  order?: { id?: string | number } | null;
+};
+
 type AdminPaymentLookup = {
   payment?: Record<string, unknown> | null;
   order?: Record<string, unknown> | null;
@@ -33,6 +42,29 @@ async function updatePaymentMode(formData: FormData) {
   }
 
   redirect("/admin/pagos");
+}
+
+
+async function listRecentPayments(mode: "prod" | "test", page: number): Promise<{ results: AdminRecentPayment[]; error?: string }> {
+  const token = getMercadoPagoAccessTokenByEnvironment(mode);
+  if (!token) return { results: [], error: `Falta MP_ACCESS_TOKEN_${mode === "test" ? "TEST" : "PROD"}.` };
+
+  const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  const offset = (safePage - 1) * 10;
+
+  try {
+    const response = await mpApiFetch(`/v1/payments/search?sort=date_created&criteria=desc&limit=10&offset=${offset}`, { accessToken: token, environment: mode });
+    const results = Array.isArray((response as { results?: unknown[] }).results)
+      ? ((response as { results: unknown[] }).results as AdminRecentPayment[])
+      : [];
+
+    return { results };
+  } catch (error) {
+    return {
+      results: [],
+      error: error instanceof Error ? error.message : "No fue posible obtener pagos recientes.",
+    };
+  }
 }
 
 async function lookupPaymentVerification(mode: "prod" | "test", query: string): Promise<AdminPaymentLookup> {
@@ -91,7 +123,7 @@ async function lookupPaymentVerification(mode: "prod" | "test", query: string): 
 export default async function AdminPaymentsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string }>;
+  searchParams?: Promise<{ q?: string; p?: string }>;
 }) {
   const { user, isAdmin, profile } = await getCurrentUserProfile();
 
@@ -103,7 +135,10 @@ export default async function AdminPaymentsPage({
   const isSuperuser = isSuperuserProfile(profile);
   const params = searchParams ? await searchParams : undefined;
   const lookupQuery = params?.q?.trim() ?? "";
+  const recentPaymentsPage = Number(params?.p ?? "1");
+  const safeRecentPaymentsPage = Number.isFinite(recentPaymentsPage) && recentPaymentsPage > 0 ? Math.floor(recentPaymentsPage) : 1;
   const verification = lookupQuery ? await lookupPaymentVerification(currentMode, lookupQuery) : null;
+  const recentPayments = await listRecentPayments(currentMode, safeRecentPaymentsPage);
 
   return (
     <SiteShell eyebrow="Administrador" title="Modo de pago y verificación" subtitle="Control de modo test/prod y verificación de pagos vía webhook de Mercado Pago.">
@@ -143,6 +178,59 @@ export default async function AdminPaymentsPage({
             <p><strong>Estado:</strong> {verification.payment?.status ? String(verification.payment.status) : "-"}</p>
             <p><strong>Order MP:</strong> {verification.order?.id ? String(verification.order.id) : "-"}</p>
             <p><strong>Eventos webhook (últimos 5):</strong> {verification.webhookEvents.length}</p>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="studio-card" style={{ marginTop: 16 }}>
+        <p className="card-label">Últimos pagos</p>
+        <h2>Historial de pagos (10 por página)</h2>
+        <p>Listado del más reciente al más antiguo según Mercado Pago usando el modo activo.</p>
+
+        {recentPayments.error ? <p className="form-hint" style={{ marginTop: 12 }}>{recentPayments.error}</p> : null}
+
+        {!recentPayments.error && recentPayments.results.length === 0 ? (
+          <p style={{ marginTop: 12 }}>No se encontraron pagos en esta página.</p>
+        ) : null}
+
+        {recentPayments.results.length > 0 ? (
+          <div style={{ marginTop: 12, overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: "left", padding: "8px 4px" }}>Pago</th>
+                  <th style={{ textAlign: "left", padding: "8px 4px" }}>Estado</th>
+                  <th style={{ textAlign: "left", padding: "8px 4px" }}>Monto</th>
+                  <th style={{ textAlign: "left", padding: "8px 4px" }}>Fecha</th>
+                  <th style={{ textAlign: "left", padding: "8px 4px" }}>External ref</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentPayments.results.map((payment, index) => (
+                  <tr key={`${String(payment.id ?? "payment")}-${index}`}>
+                    <td style={{ padding: "8px 4px" }}>{payment.id ? String(payment.id) : "-"}</td>
+                    <td style={{ padding: "8px 4px" }}>{payment.status ?? "-"}</td>
+                    <td style={{ padding: "8px 4px" }}>{typeof payment.transaction_amount === "number" ? payment.transaction_amount.toLocaleString("es-AR", { style: "currency", currency: "ARS" }) : "-"}</td>
+                    <td style={{ padding: "8px 4px" }}>{payment.date_created ? new Date(payment.date_created).toLocaleString("es-AR") : "-"}</td>
+                    <td style={{ padding: "8px 4px" }}>{payment.external_reference ?? "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+              <a
+                className="btn"
+                aria-disabled={safeRecentPaymentsPage <= 1}
+                href={safeRecentPaymentsPage <= 1 ? "#" : `/admin/pagos?p=${safeRecentPaymentsPage - 1}${lookupQuery ? `&q=${encodeURIComponent(lookupQuery)}` : ""}`}
+                style={safeRecentPaymentsPage <= 1 ? { pointerEvents: "none", opacity: 0.5 } : undefined}
+              >
+                Anteriores 10
+              </a>
+              <a className="btn" href={`/admin/pagos?p=${safeRecentPaymentsPage + 1}${lookupQuery ? `&q=${encodeURIComponent(lookupQuery)}` : ""}`}>
+                Siguientes 10
+              </a>
+            </div>
           </div>
         ) : null}
       </div>
