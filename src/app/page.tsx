@@ -22,7 +22,7 @@ const opcionesHome: HomeOption[] = [
     span: "wide"
   },
   {
-    titulo: "Cursos",
+    titulo: "Experiencias",
     descripcion: "Workshops presenciales para técnica, composición y narrativa botánica.",
     href: "/cursos",
     url: "https://images.unsplash.com/photo-1455659817273-f96807779a8a?auto=format&fit=crop&w=1200&q=80",
@@ -66,7 +66,7 @@ export default function Home() {
     <SiteShell
       eyebrow="Estudio floral editorial"
       title="Explora Ritual Studio desde un wallpaper vivo de experiencias"
-      subtitle="Un acceso visual a nuestras principales líneas: tienda floral, cursos, diseño personalizado, eventos, nosotros y contacto."
+      subtitle="Un acceso visual a nuestras principales líneas: tienda floral, experiencias, diseño personalizado, eventos, nosotros y contacto."
     >
       <section className="home-wallpaper" aria-label="Navegación principal de Ritual Studio">
         {opcionesHome.map((item) => (

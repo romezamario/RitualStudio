@@ -15,9 +15,9 @@ export default async function CoursesPage() {
 
   return (
     <SiteShell
-      eyebrow="Cursos Ritual Studio"
+      eyebrow="Experiencias Ritual Studio"
       title="Aprende diseño floral con experiencias presenciales"
-      subtitle="Explora cursos disponibles, revisa sesiones y compra tus lugares en línea."
+      subtitle="Explora experiencias disponibles, revisa sesiones y compra tus lugares en línea."
     >
       {error ? <p className="scroll-hint">{error}</p> : null}
 
@@ -62,7 +62,7 @@ export default async function CoursesPage() {
         </div>
       ) : (
         <article className="studio-card">
-          <h2>Próximamente más cursos</h2>
+          <h2>Próximamente más experiencias</h2>
           <p>Estamos preparando nuevas fechas. Escríbenos para recibir aviso cuando publiquemos la próxima edición.</p>
           <Link href="/contacto" className="btn btn-ghost">
             Contactar a Ritual Studio
