@@ -97,8 +97,8 @@ async function lookupPaymentVerification(mode: "prod" | "test", query: string): 
     const paymentId = payment?.id ? String(payment.id) : null;
     const mpOrderId = orderId ? String(orderId) : null;
     const filters = [
-      paymentId ? `payload->reconciliation->payment_id=eq.${encodeURIComponent(paymentId)}` : null,
-      mpOrderId ? `payload->reconciliation->mercado_pago_order_id=eq.${encodeURIComponent(mpOrderId)}` : null,
+      paymentId ? `payload->reconciliation->>payment_id.eq.${encodeURIComponent(paymentId)}` : null,
+      mpOrderId ? `payload->reconciliation->>mercado_pago_order_id.eq.${encodeURIComponent(mpOrderId)}` : null,
     ].filter(Boolean);
 
     const queryPath = filters.length
