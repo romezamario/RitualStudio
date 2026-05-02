@@ -76,6 +76,15 @@ export type MpPaymentResponse = {
   [key: string]: unknown;
 };
 
+type MercadoPagoSdkModule = {
+  MercadoPagoConfig: new (options: { accessToken: string }) => unknown;
+  Payment: new (client: unknown) => {
+    create?: (input: { body: Record<string, unknown>; requestOptions?: Record<string, unknown> }) => Promise<unknown>;
+    get?: (input: { id: string }) => Promise<unknown>;
+    search?: (input: { options: Record<string, unknown> }) => Promise<unknown>;
+  };
+};
+
 const MP_API_BASE = "https://api.mercadopago.com";
 export const MIN_MX_CARD_PAYMENT_AMOUNT = 10;
 const MAX_PRODUCT_QUANTITY_PER_LINE = 10;
@@ -280,6 +289,11 @@ export async function mpApiFetch<T>(
     accessToken,
   });
 
+  const sdkData = await tryMercadoPagoSdkRequest<T>({ path, init, accessToken });
+  if (sdkData !== null) {
+    return sdkData;
+  }
+
   const response = await fetch(`${MP_API_BASE}${path}`, {
     ...init,
     headers: {
@@ -333,6 +347,68 @@ export async function mpApiFetch<T>(
   }
 
   return data as T;
+}
+
+async function tryMercadoPagoSdkRequest<T>({
+  path,
+  init,
+  accessToken,
+}: {
+  path: string;
+  init: RequestInit;
+  accessToken: string;
+}): Promise<T | null> {
+  if (!path.startsWith("/v1/payments")) {
+    return null;
+  }
+
+  let sdk: MercadoPagoSdkModule | null = null;
+  try {
+    sdk = (await import("mercadopago")) as MercadoPagoSdkModule;
+  } catch {
+    return null;
+  }
+
+  const client = new sdk.MercadoPagoConfig({ accessToken });
+  const paymentApi = new sdk.Payment(client);
+  const method = (init.method ?? "GET").toUpperCase();
+
+  if (method === "POST" && path === "/v1/payments" && paymentApi.create) {
+    const body = init.body && typeof init.body === "string" ? (JSON.parse(init.body) as Record<string, unknown>) : {};
+    const response = await paymentApi.create({
+      body,
+      requestOptions: extractMercadoPagoRequestOptions(init.headers),
+    });
+    return response as T;
+  }
+
+  const paymentByIdMatch = path.match(/^\/v1\/payments\/([^/?#]+)/);
+  if (method === "GET" && paymentByIdMatch && paymentApi.get) {
+    const response = await paymentApi.get({ id: decodeURIComponent(paymentByIdMatch[1]) });
+    return response as T;
+  }
+
+  if (method === "GET" && path.startsWith("/v1/payments/search") && paymentApi.search) {
+    const [, queryString = ""] = path.split("?");
+    const options = Object.fromEntries(new URLSearchParams(queryString).entries());
+    const response = await paymentApi.search({ options });
+    return response as T;
+  }
+
+  return null;
+}
+
+function extractMercadoPagoRequestOptions(headers: RequestInit["headers"]): Record<string, unknown> | undefined {
+  const resolvedHeaders = new Headers(headers ?? {});
+  const idempotencyKey = resolvedHeaders.get("X-Idempotency-Key") ?? resolvedHeaders.get("x-idempotency-key");
+
+  if (!idempotencyKey) {
+    return undefined;
+  }
+
+  return {
+    idempotencyKey,
+  };
 }
 
 export function mapPaymentStatus(status: string | undefined) {

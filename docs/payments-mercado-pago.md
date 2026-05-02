@@ -46,6 +46,8 @@ Respuesta (resumen):
    - incrementar `course_sessions.reserved_spots`;
    - persistir `order_course_items` y `course_participants`.
 5. Backend llama `POST /v1/payments` de Mercado Pago con `X-Idempotency-Key`.
+   - Para endpoints de pagos (`/v1/payments`, `/v1/payments/{id}`, `/v1/payments/search`) se usa el SDK oficial `mercadopago/sdk-nodejs` en server-side.
+   - Si el SDK no está disponible en runtime, `mpApiFetch` conserva fallback HTTP directo para evitar caída total del checkout/webhook.
    - En esa llamada se envía `notification_url` para que Mercado Pago publique eventos de pago al webhook del proyecto.
 6. Backend actualiza orden/pago en Supabase con respuesta de Mercado Pago.
 
