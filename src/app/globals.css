@@ -1004,14 +1004,29 @@ p {
   border-radius: 0.8rem;
   color: var(--ink);
   display: flex;
-  justify-content: space-between;
   padding: 0.58rem 0.72rem;
   text-align: left;
 }
 
-.delivery-slot strong {
-  font-size: 0.82rem;
+.delivery-time-picker {
+  display: grid;
+  gap: 0.45rem;
 }
+
+.delivery-time-picker span {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.delivery-time-picker select {
+  background: color-mix(in srgb, white 70%, var(--rose-mist));
+  border: 1px solid color-mix(in srgb, var(--smoke) 40%, white);
+  border-radius: 0.6rem;
+  color: var(--ink);
+  font: inherit;
+  padding: 0.55rem 0.65rem;
+}
+
 
 .delivery-slot.is-selected {
   background: color-mix(in srgb, var(--rose-mist) 45%, white);
