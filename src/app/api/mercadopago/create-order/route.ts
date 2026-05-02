@@ -417,16 +417,19 @@ export async function POST(request: Request) {
     const status = getValidationErrorStatus(errorMessage);
 
     if (currentPaymentMode === "test" && createdOrderId && status >= 500) {
+      const fallbackPaymentId = `test-bypass-${createdOrderId}`;
       const { error: testModeOrderUpdateError } = await supabaseAdminRequest<unknown[]>(
         `/rest/v1/orders?id=eq.${encodeURIComponent(createdOrderId)}`,
         {
           method: "PATCH",
           body: JSON.stringify({
-            status: "error",
+            status: "approved",
             metadata: {
               fallback_reason: "test_mode_500_bypass",
               fallback_error_message: errorMessage,
               fallback_at: new Date().toISOString(),
+              fallback_simulated_success: true,
+              fallback_payment_id: fallbackPaymentId,
             },
           }),
         },
@@ -443,11 +446,11 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         order_id: null,
-        payment_id: null,
-        status: "error",
+        payment_id: fallbackPaymentId,
+        status: "approved",
         status_detail: "test_mode_500_bypass",
         external_reference: currentExternalReference,
-        normalized_status: "error",
+        normalized_status: "approved",
       });
     }
 
