@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-context";
+import SiteShell from "@/components/site-shell";
 
 type FormState = {
   email: string;
@@ -57,61 +58,70 @@ export default function AccountProfilePage() {
 
   if (!isAuthenticated) {
     return (
-      <section className="container stack-lg">
+      <SiteShell
+        eyebrow="Mi cuenta"
+        title="Mi perfil"
+        subtitle="Inicia sesión para editar tus datos personales y mantener tu cuenta siempre actualizada."
+      >
         <article className="studio-card stack-sm">
           <p className="card-label">Perfil</p>
-          <h1>Inicia sesión para editar tu perfil</h1>
+          <h2>Inicia sesión para editar tu perfil</h2>
           <Link href="/login" className="btn btn-primary">
             Ir a iniciar sesión
           </Link>
         </article>
-      </section>
+      </SiteShell>
     );
   }
 
   return (
-    <section className="container stack-lg">
-      <article className="studio-card stack-md">
+    <SiteShell
+      eyebrow="Mi cuenta"
+      title="Actualiza tus datos"
+      subtitle="Mantén tu información de contacto al día para agilizar compras, entregas y notificaciones de tu cuenta."
+    >
+      <article className="studio-card account-profile-card stack-md">
         <p className="card-label">Perfil</p>
-        <h1>Actualiza tus datos</h1>
 
-        <form onSubmit={handleSubmit} className="stack-sm" noValidate>
-          <label className="stack-xs" htmlFor="profile-email">
-            <span>Correo</span>
-            <input
-              id="profile-email"
-              type="email"
-              value={form.email}
-              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-              placeholder="tu-correo@ejemplo.com"
-              required
-            />
-          </label>
+        <form onSubmit={handleSubmit} className="account-profile-form stack-md" noValidate>
+          <div className="account-profile-grid">
+            <label className="stack-xs" htmlFor="profile-email">
+              <span>Correo</span>
+              <input
+                id="profile-email"
+                type="email"
+                value={form.email}
+                onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+                placeholder="tu-correo@ejemplo.com"
+                required
+              />
+            </label>
 
-          <label className="stack-xs" htmlFor="profile-full-name">
-            <span>Nombre completo</span>
-            <input
-              id="profile-full-name"
-              type="text"
-              value={form.full_name}
-              onChange={(event) => setForm((prev) => ({ ...prev, full_name: event.target.value }))}
-              placeholder="Tu nombre completo"
-            />
-          </label>
+            <label className="stack-xs" htmlFor="profile-full-name">
+              <span>Nombre completo</span>
+              <input
+                id="profile-full-name"
+                type="text"
+                value={form.full_name}
+                onChange={(event) => setForm((prev) => ({ ...prev, full_name: event.target.value }))}
+                placeholder="Tu nombre completo"
+              />
+            </label>
 
-          <label className="stack-xs" htmlFor="profile-phone">
-            <span>Teléfono</span>
-            <input
-              id="profile-phone"
-              type="tel"
-              value={form.phone}
-              onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
-              placeholder="+52 55 1234 5678"
-            />
-          </label>
+            <label className="stack-xs" htmlFor="profile-phone">
+              <span>Teléfono</span>
+              <input
+                id="profile-phone"
+                type="tel"
+                value={form.phone}
+                onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
+                placeholder="+52 55 1234 5678"
+              />
+            </label>
+          </div>
 
-          {errorMessage ? <p role="alert">{errorMessage}</p> : null}
-          {successMessage ? <p role="status">{successMessage}</p> : null}
+          {errorMessage ? <p className="auth-feedback auth-feedback-error" role="alert">{errorMessage}</p> : null}
+          {successMessage ? <p className="auth-feedback auth-feedback-success" role="status">{successMessage}</p> : null}
 
           <div className="button-row">
             <button className="btn btn-primary" type="submit" disabled={!canSubmit}>
@@ -123,6 +133,6 @@ export default function AccountProfilePage() {
           </div>
         </form>
       </article>
-    </section>
+    </SiteShell>
   );
 }
