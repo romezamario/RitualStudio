@@ -425,7 +425,7 @@ p {
 
 
 .home-hero {
-  margin-top: 2.2rem;
+  margin-top: 2.8rem;
 }
 
 .home-hero-content {
@@ -448,8 +448,10 @@ p {
 }
 
 .home-hero-content h2 {
-  font-size: clamp(1.9rem, 3.8vw, 3.25rem);
-  line-height: 1.08;
+  font-size: clamp(2.05rem, 4vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.016em;
+  line-height: 1.05;
   max-width: 16ch;
 }
 
@@ -511,13 +513,13 @@ p {
   gap: 1rem;
   grid-auto-flow: dense;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-top: 2.2rem;
+  margin-top: 3rem;
 }
 
 .wallpaper-card {
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--line) 82%, white);
   border-radius: 1.2rem;
-  box-shadow: 0 12px 28px rgba(74, 74, 74, 0.12);
+  box-shadow: 0 8px 20px rgba(74, 74, 74, 0.08);
   min-height: 280px;
   overflow: hidden;
   position: relative;
@@ -532,7 +534,7 @@ p {
 }
 
 .wallpaper-card::after {
-  background: linear-gradient(180deg, rgba(24, 23, 23, 0.08) 18%, rgba(24, 23, 23, 0.72) 100%);
+  background: linear-gradient(180deg, rgba(24, 23, 23, 0.28) 10%, rgba(24, 23, 23, 0.66) 100%);
   content: "";
   inset: 0;
   position: absolute;
@@ -599,16 +601,43 @@ p {
 
 .feature-grid {
   display: grid;
-  gap: 1rem;
+  gap: 1.15rem;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 2.4rem;
+  margin-top: 1.35rem;
+}
+
+.section-block {
+  margin-top: 3.2rem;
+}
+
+.section-intro {
+  align-items: baseline;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 74%, white);
+  display: flex;
+  gap: 0.65rem;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+}
+
+.section-tag {
+  color: color-mix(in srgb, var(--smoke) 84%, var(--charcoal));
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.section-microcopy {
+  color: color-mix(in srgb, var(--ink) 72%, white);
+  font-size: 0.9rem;
+  margin: 0;
 }
 
 .studio-card {
   background: var(--panel);
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, white);
   border-radius: 1.1rem;
-  box-shadow: 0 9px 26px rgba(74, 74, 74, 0.08);
+  box-shadow: 0 6px 18px rgba(74, 74, 74, 0.06);
   display: grid;
   gap: 0.7rem;
   padding: 1.25rem;
@@ -829,7 +858,7 @@ p {
 .story-block {
   display: grid;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 3.2rem;
   max-width: 70ch;
 }
 
@@ -857,6 +886,10 @@ p {
 .story-block p {
   color: color-mix(in srgb, var(--ink) 82%, white);
   font-size: 1.02rem;
+}
+
+.contact-highlight {
+  margin-top: 3.2rem;
 }
 
 .contact-grid {
@@ -1334,6 +1367,38 @@ p {
   .product-meta-grid .cta-row .btn {
     justify-content: center;
     width: 100%;
+  }
+
+  .home-hero {
+    margin-top: 1.6rem;
+  }
+
+  .home-hero-content {
+    padding: 1.25rem;
+  }
+
+  .home-hero-content h2 {
+    font-size: clamp(1.95rem, 8vw, 2.45rem);
+  }
+
+  .home-hero-cta {
+    flex-direction: column;
+  }
+
+  .home-hero-button {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .section-intro {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .home-wallpaper {
+    gap: 0.8rem;
+    margin-top: 2rem;
   }
 
   .site-footer-inner {
