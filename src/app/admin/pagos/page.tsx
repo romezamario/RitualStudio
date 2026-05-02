@@ -212,7 +212,18 @@ export default async function AdminPaymentsPage({
                     <td style={{ padding: "8px 4px" }}>{payment.id ? String(payment.id) : "-"}</td>
                     <td style={{ padding: "8px 4px" }}>{payment.status ?? "-"}</td>
                     <td style={{ padding: "8px 4px" }}>{typeof payment.transaction_amount === "number" ? payment.transaction_amount.toLocaleString("es-AR", { style: "currency", currency: "ARS" }) : "-"}</td>
-                    <td style={{ padding: "8px 4px" }}>{payment.date_created ? formatDateTimeMx(payment.date_created) : "-"}</td>
+                    <td style={{ padding: "8px 4px" }}>
+                      {payment.date_created
+                        ? formatDateTimeMx(payment.date_created, {
+                            day: "numeric",
+                            month: "numeric",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })
+                        : "-"}
+                    </td>
                     <td style={{ padding: "8px 4px" }}>{payment.external_reference ?? "-"}</td>
                   </tr>
                 ))}
