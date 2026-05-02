@@ -33,8 +33,9 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 
 ## Order Lifecycle (Current)
 - Al crear orden de pago se genera `external_reference` único.
-- La orden local se crea antes del cobro y puede asociar `orders.user_id` cuando checkout tiene sesión autenticada.
-- Se persisten orden y pago en Supabase usando `X-Idempotency-Key` por intento de cobro.
+- La orden local se crea de forma transaccional previa al cobro para reservar contexto (ítems, metadata y cupos), y puede asociar `orders.user_id` cuando checkout tiene sesión autenticada.
+- Si la invocación al servicio de Mercado Pago falla (ej. `500`, `internal_server_error` o timeout), el backend libera cupos reservados y elimina la orden local para no persistir pedidos sin intento de cobro válido.
+- Cuando Mercado Pago responde correctamente, se persisten orden y pago en Supabase usando `X-Idempotency-Key` por intento de cobro.
 - El webhook vuelve a sincronizar/actualizar estado para consistencia operativa.
 - Estados normalizados para UI: `approved`, `pending`, `rejected`, `error`.
 - Después de checkout exitoso sin sesión, la UI promueve registro/login y, tras autenticación, ejecuta vinculación automática de compras pendientes al historial de la cuenta.

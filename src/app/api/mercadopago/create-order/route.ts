@@ -183,6 +183,16 @@ async function releaseCourseCapacity(orderId: string, reason: string) {
   }
 }
 
+async function deleteOrderDraft(orderId: string) {
+  const { error } = await supabaseAdminRequest<unknown[]>(`/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`, {
+    method: "DELETE",
+  });
+
+  if (error) {
+    console.error("[MP create-order] No se pudo eliminar orden local tras falla del pago:", error);
+  }
+}
+
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as MpCreateOrderInput | null;
 
@@ -209,6 +219,8 @@ export async function POST(request: Request) {
   if (!Number.isInteger(installments) || installments < 1 || installments > 24) {
     return NextResponse.json({ error: "Cuotas inválidas." }, { status: 400 });
   }
+
+  let createdOrderId: string | null = null;
 
   try {
     const paymentMode = await getPaymentMode();
@@ -290,6 +302,7 @@ export async function POST(request: Request) {
     }
 
     const orderId = orderRows[0].id;
+    createdOrderId = orderId;
 
     await reserveCourseCapacity(orderId, lineItems, validatedCourseParticipants);
 
@@ -395,6 +408,11 @@ export async function POST(request: Request) {
       total_amount: payment.transaction_amount ?? totalAmount,
     });
   } catch (error) {
+    if (createdOrderId) {
+      await releaseCourseCapacity(createdOrderId, "create-order-mp-request-failed");
+      await deleteOrderDraft(createdOrderId);
+    }
+
     console.error("[MP create-order] Error procesando orden:", error);
     const errorMessage =
       error instanceof Error ? error.message : "No fue posible procesar el pago en este momento. Intenta nuevamente.";
