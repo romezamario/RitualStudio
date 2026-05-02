@@ -109,17 +109,28 @@ export async function POST(request: Request) {
   );
 
   if (requestedExternalReference) {
-    const hasRecentOwnershipProof = matchingGuestOrders.some(
-      (order) =>
-        order.external_reference?.trim() === requestedExternalReference &&
-        isRecentIsoDate(order.created_at, RECENT_REFERENCE_WINDOW_HOURS)
+    const matchingReferenceOrders = matchingGuestOrders.filter(
+      (order) => order.external_reference?.trim() === requestedExternalReference
+    );
+
+    if (!matchingReferenceOrders.length) {
+      return NextResponse.json(
+        {
+          error:
+            "No encontramos una compra pendiente para esta referencia en el correo de tu cuenta. Verifica que iniciaste sesión con el mismo correo usado en el checkout.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const hasRecentOwnershipProof = matchingReferenceOrders.some((order) =>
+      isRecentIsoDate(order.created_at, RECENT_REFERENCE_WINDOW_HOURS)
     );
 
     if (!hasRecentOwnershipProof) {
       return NextResponse.json(
         {
-          error:
-            "No pudimos validar la referencia reciente de checkout para vincular compras. Vuelve desde la pantalla de confirmación de compra.",
+          error: `La referencia de checkout existe, pero venció la ventana de vinculación de ${RECENT_REFERENCE_WINDOW_HOURS} horas. Vuelve a comprar o contacta soporte con tu referencia de orden.`,
         },
         { status: 403 }
       );
