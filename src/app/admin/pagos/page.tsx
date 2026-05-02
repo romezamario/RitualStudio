@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 type AdminPaymentLookup = {
   payment?: Record<string, unknown> | null;
   order?: Record<string, unknown> | null;
-  webhookEvents: Array<{ id: string; type?: string | null; action?: string | null; created_at?: string | null; payload?: Record<string, unknown> | null }>;
+  webhookEvents: Array<{ id: string; type?: string | null; action?: string | null; received_at?: string | null; payload?: Record<string, unknown> | null }>;
   error?: string;
 };
 
@@ -69,8 +69,8 @@ async function lookupPaymentVerification(mode: "prod" | "test", query: string): 
     ].filter(Boolean);
 
     const queryPath = filters.length
-      ? `/rest/v1/payment_events?select=id,type,action,created_at,payload&or=(${filters.join(",")})&order=created_at.desc&limit=5`
-      : "/rest/v1/payment_events?select=id,type,action,created_at,payload&limit=0";
+      ? `/rest/v1/payment_events?select=id,type,action,received_at,payload&or=(${filters.join(",")})&order=received_at.desc&limit=5`
+      : "/rest/v1/payment_events?select=id,type,action,received_at,payload&limit=0";
 
     const { data, error } = await supabaseAdminRequest<AdminPaymentLookup["webhookEvents"]>(queryPath, { method: "GET" });
 
