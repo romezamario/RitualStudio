@@ -3,6 +3,44 @@
 import Link from "next/link";
 import { useAuth } from "@/components/auth-context";
 
+const adminCards = [
+  {
+    label: "Administración",
+    title: "Pedidos admin",
+    description: "Revisa y administra pedidos del estudio con seguimiento operativo y validación backend.",
+    href: "/admin/pedidos",
+    cta: "Ir a pedidos admin"
+  },
+  {
+    label: "Administración",
+    title: "Productos admin",
+    description: "Gestiona el catálogo del marketplace, disponibilidad y estructura comercial de productos.",
+    href: "/admin/productos",
+    cta: "Ir a productos admin"
+  },
+  {
+    label: "Administración",
+    title: "Cursos admin",
+    description: "Administra cursos, sesiones y cupos para mantener el calendario operativo del estudio.",
+    href: "/admin/cursos",
+    cta: "Ir a cursos admin"
+  },
+  {
+    label: "Administración",
+    title: "Usuarios admin",
+    description: "Gestiona cuentas de usuarios con permisos administrativos de forma centralizada.",
+    href: "/admin/usuarios",
+    cta: "Ir a usuarios admin"
+  },
+  {
+    label: "Administración",
+    title: "Modo de pagos",
+    description: "Configura el modo de operación de Mercado Pago (test o producción) desde una ruta protegida.",
+    href: "/admin/pagos",
+    cta: "Ir a modo de pagos"
+  }
+] as const;
+
 export default function AccountDashboardClient() {
   const { user } = useAuth();
 
@@ -44,30 +82,18 @@ export default function AccountDashboardClient() {
         </Link>
       </article>
 
-      {user?.role === "admin" ? (
-        <article className="studio-card">
-          <p className="card-label">Administración</p>
-          <h2>Accesos de operación</h2>
-          <p>
-            Gestiona pedidos del estudio, productos del marketplace, cursos con sesiones/cupos y cuentas de
-            usuarios con permisos administrativos.
-          </p>
-          <div className="cta-row">
-            <Link href="/admin/pedidos" className="btn btn-ghost">
-              Pedidos admin
-            </Link>
-            <Link href="/admin/productos" className="btn btn-ghost">
-              Productos admin
-            </Link>
-            <Link href="/admin/cursos" className="btn btn-ghost">
-              Cursos admin
-            </Link>
-            <Link href="/admin/usuarios" className="btn btn-ghost">
-              Usuarios admin
-            </Link>
-          </div>
-        </article>
-      ) : null}
+      {user?.role === "admin"
+        ? adminCards.map((card) => (
+            <article className="studio-card" key={card.href}>
+              <p className="card-label">{card.label}</p>
+              <h2>{card.title}</h2>
+              <p>{card.description}</p>
+              <Link href={card.href} className="text-link">
+                {card.cta}
+              </Link>
+            </article>
+          ))
+        : null}
     </div>
   );
 }
