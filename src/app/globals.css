@@ -911,6 +911,60 @@ p {
   gap: 0.6rem;
 }
 
+
+
+.purchase-actions-wrap {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+}
+
+.delivery-calendar {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+}
+
+.delivery-calendar h3 {
+  font-size: 1.2rem;
+}
+
+.delivery-calendar-note,
+.delivery-calendar-selection {
+  color: color-mix(in srgb, var(--ink) 78%, white);
+  font-size: 0.86rem;
+}
+
+.delivery-calendar-grid {
+  display: grid;
+  gap: 0.55rem;
+  max-height: 235px;
+  overflow: auto;
+}
+
+.delivery-slot {
+  align-items: center;
+  background: color-mix(in srgb, white 72%, var(--rose-mist));
+  border: 1px solid color-mix(in srgb, var(--smoke) 40%, white);
+  border-radius: 0.8rem;
+  color: var(--ink);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.58rem 0.72rem;
+  text-align: left;
+}
+
+.delivery-slot strong {
+  font-size: 0.82rem;
+}
+
+.delivery-slot.is-selected {
+  background: color-mix(in srgb, var(--rose-mist) 45%, white);
+  border-color: var(--charcoal);
+}
 .purchase-actions {
   display: flex;
   flex-wrap: wrap;
