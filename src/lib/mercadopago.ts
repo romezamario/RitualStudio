@@ -21,6 +21,8 @@ export type ValidatedLineItem = {
   kind: "product" | "course";
   slug: string;
   name: string;
+  description?: string;
+  categoryId?: string;
   unitPrice: number;
   quantity: number;
   subtotal: number;
@@ -192,6 +194,8 @@ async function validateCourseLineItem(entry: Extract<CheckoutLineItemInput, { ki
     kind: "course" as const,
     slug: course.slug,
     name: course.title,
+    description: `Curso Ritual Studio · sesión ${new Date(session.starts_at).toLocaleDateString("es-MX")}`,
+    categoryId: "services",
     unitPrice,
     quantity: entry.quantity,
     subtotal,
@@ -239,6 +243,8 @@ export async function validateAndPriceLineItems(items: CheckoutLineItemInput[]):
         kind: "product" as const,
         slug: product.slug,
         name: product.name,
+        description: product.description,
+        categoryId: "home",
         unitPrice,
         quantity: entry.quantity,
         subtotal,

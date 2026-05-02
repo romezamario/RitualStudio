@@ -309,6 +309,16 @@ export async function POST(request: Request) {
         .map((item) => `${item.quantity}x ${item.name}`)
         .join(" | ")
         .slice(0, isTestModePayment ? 232 : 240)}`,
+      additional_info: {
+        items: lineItems.map((item, index) => ({
+          id: item.slug,
+          title: item.name,
+          description: item.description ?? item.name,
+          category_id: item.categoryId ?? (item.kind === "course" ? "services" : "home"),
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+        })),
+      },
       notification_url: resolveMercadoPagoNotificationUrl(request, paymentMode),
     };
 
