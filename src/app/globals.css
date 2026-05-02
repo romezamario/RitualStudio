@@ -990,34 +990,19 @@ p {
   font-size: 0.86rem;
 }
 
-.delivery-calendar-grid {
-  display: grid;
-  gap: 0.55rem;
-  max-height: 235px;
-  overflow: auto;
-}
-
-.delivery-slot {
-  align-items: center;
-  background: color-mix(in srgb, white 72%, var(--rose-mist));
-  border: 1px solid color-mix(in srgb, var(--smoke) 40%, white);
-  border-radius: 0.8rem;
-  color: var(--ink);
-  display: flex;
-  padding: 0.58rem 0.72rem;
-  text-align: left;
-}
-
+.delivery-date-picker,
 .delivery-time-picker {
   display: grid;
   gap: 0.45rem;
 }
 
+.delivery-date-picker span,
 .delivery-time-picker span {
   font-size: 0.9rem;
   font-weight: 600;
 }
 
+.delivery-date-picker input,
 .delivery-time-picker select {
   background: color-mix(in srgb, white 70%, var(--rose-mist));
   border: 1px solid color-mix(in srgb, var(--smoke) 40%, white);
@@ -1027,11 +1012,6 @@ p {
   padding: 0.55rem 0.65rem;
 }
 
-
-.delivery-slot.is-selected {
-  background: color-mix(in srgb, var(--rose-mist) 45%, white);
-  border-color: var(--charcoal);
-}
 .purchase-actions {
   display: flex;
   flex-wrap: wrap;

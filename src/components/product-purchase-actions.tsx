@@ -12,11 +12,6 @@ type ProductPurchaseActionsProps = {
 
 type DeliveryWindow = "morning" | "afternoon";
 
-type DeliveryDateOption = {
-  dateIso: string;
-  dateLabel: string;
-};
-
 const SLOT_LABELS: Record<DeliveryWindow, string> = { morning: "08:00 - 14:00", afternoon: "14:00 - 20:00" };
 const MIN_DELIVERY_LEAD_HOURS = 36;
 const DATES_TO_DISPLAY = 14;
@@ -26,7 +21,7 @@ function buildDeliveryDates(now: Date) {
   const firstAvailableDate = new Date(minimumAllowed);
   firstAvailableDate.setHours(0, 0, 0, 0);
 
-  const options: DeliveryDateOption[] = [];
+  const options: string[] = [];
   const cursor = new Date(firstAvailableDate);
 
   const dateFormatter = new Intl.DateTimeFormat("es-MX", {
@@ -38,32 +33,40 @@ function buildDeliveryDates(now: Date) {
 
   for (let index = 0; index < DATES_TO_DISPLAY; index += 1) {
     const dateIso = cursor.toISOString().slice(0, 10);
-    const formattedDate = dateFormatter.format(cursor);
-    const dateLabel = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-
-    options.push({ dateIso, dateLabel });
+    options.push(dateIso);
     cursor.setDate(cursor.getDate() + 1);
   }
 
-  return options;
+  return {
+    options,
+    dateFormatter,
+  };
 }
 
 export default function ProductPurchaseActions({ product, showDeliveryCalendar = true }: ProductPurchaseActionsProps) {
   const router = useRouter();
   const { addProductToCart } = useCart();
   const [feedback, setFeedback] = useState("");
-  const deliveryDates = useMemo(() => buildDeliveryDates(new Date()), []);
-  const [selectedDateIso, setSelectedDateIso] = useState(deliveryDates[0]?.dateIso ?? "");
+  const { options: deliveryDates, dateFormatter } = useMemo(() => buildDeliveryDates(new Date()), []);
+  const [selectedDateIso, setSelectedDateIso] = useState(deliveryDates[0] ?? "");
   const [selectedWindow, setSelectedWindow] = useState<DeliveryWindow>("morning");
 
-  const selectedDate = deliveryDates.find((date) => date.dateIso === selectedDateIso);
+  const selectedDate = deliveryDates.find((dateIso) => dateIso === selectedDateIso);
+  const selectedDateLabel = selectedDate
+    ? (() => {
+        const [year, month, day] = selectedDate.split("-").map(Number);
+        const date = new Date(year, month - 1, day);
+        const formatted = dateFormatter.format(date);
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+      })()
+    : "";
   const selectedWindowLabel = SLOT_LABELS[selectedWindow];
 
   const handleAddToCart = () => {
     addProductToCart({
       product,
-      deliveryDateIso: selectedDate?.dateIso,
-      deliveryDateLabel: selectedDate?.dateLabel,
+      deliveryDateIso: selectedDate,
+      deliveryDateLabel: selectedDateLabel,
       deliveryWindowLabel: selectedWindowLabel,
     });
     setFeedback("Producto agregado al carrito");
@@ -76,8 +79,8 @@ export default function ProductPurchaseActions({ product, showDeliveryCalendar =
   const handleBuyNow = () => {
     addProductToCart({
       product,
-      deliveryDateIso: selectedDate?.dateIso,
-      deliveryDateLabel: selectedDate?.dateLabel,
+      deliveryDateIso: selectedDate,
+      deliveryDateLabel: selectedDateLabel,
       deliveryWindowLabel: selectedWindowLabel,
     });
     router.push("/checkout");
@@ -90,22 +93,16 @@ export default function ProductPurchaseActions({ product, showDeliveryCalendar =
           <h3>Selecciona fecha de entrega</h3>
           <p className="delivery-calendar-note">La entrega mínima se habilita con 36 horas de anticipación.</p>
 
-          <div className="delivery-calendar-grid">
-            {deliveryDates.map((date) => {
-              const isActive = selectedDateIso === date.dateIso;
-
-              return (
-                <button
-                  key={date.dateIso}
-                  type="button"
-                  className={`delivery-slot${isActive ? " is-selected" : ""}`}
-                  onClick={() => setSelectedDateIso(date.dateIso)}
-                >
-                  <span>{date.dateLabel}</span>
-                </button>
-              );
-            })}
-          </div>
+          <label className="delivery-date-picker">
+            <span>Selecciona día de entrega</span>
+            <input
+              type="date"
+              value={selectedDateIso}
+              min={deliveryDates[0]}
+              max={deliveryDates[deliveryDates.length - 1]}
+              onChange={(event) => setSelectedDateIso(event.target.value)}
+            />
+          </label>
 
           <label className="delivery-time-picker">
             <span>Selecciona tiempo de entrega</span>
@@ -115,9 +112,9 @@ export default function ProductPurchaseActions({ product, showDeliveryCalendar =
             </select>
           </label>
 
-          {selectedDate ? (
+          {selectedDateLabel ? (
             <p className="delivery-calendar-selection">
-              Entrega estimada: <strong>{selectedDate.dateLabel}</strong> · <strong>{selectedWindowLabel}</strong>
+              Entrega estimada: <strong>{selectedDateLabel}</strong> · <strong>{selectedWindowLabel}</strong>
             </p>
           ) : null}
         </section>
