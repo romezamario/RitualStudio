@@ -81,7 +81,7 @@ export default async function MarketplacePage() {
                         <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
                           Ver detalle
                         </Link>
-                        <ProductPurchaseActions product={product} />
+                        <ProductPurchaseActions product={product} showDeliveryCalendar={false} />
                       </div>
                     </article>
                   ))}

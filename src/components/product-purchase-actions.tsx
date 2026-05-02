@@ -7,6 +7,7 @@ import { useCart } from "@/components/cart-context";
 
 type ProductPurchaseActionsProps = {
   product: MarketplaceProduct;
+  showDeliveryCalendar?: boolean;
 };
 
 type DeliveryWindow = "morning" | "afternoon";
@@ -61,7 +62,7 @@ function buildDeliverySlots(now: Date) {
   return slots;
 }
 
-export default function ProductPurchaseActions({ product }: ProductPurchaseActionsProps) {
+export default function ProductPurchaseActions({ product, showDeliveryCalendar = true }: ProductPurchaseActionsProps) {
   const router = useRouter();
   const { addProductToCart } = useCart();
   const [feedback, setFeedback] = useState("");
@@ -96,35 +97,37 @@ export default function ProductPurchaseActions({ product }: ProductPurchaseActio
 
   return (
     <div className="purchase-actions-wrap">
-      <section className="delivery-calendar" aria-label="Calendario de entrega">
-        <h3>Selecciona fecha de entrega</h3>
-        <p className="delivery-calendar-note">La entrega mínima se habilita con 36 horas de anticipación.</p>
+      {showDeliveryCalendar ? (
+        <section className="delivery-calendar" aria-label="Calendario de entrega">
+          <h3>Selecciona fecha de entrega</h3>
+          <p className="delivery-calendar-note">La entrega mínima se habilita con 36 horas de anticipación.</p>
 
-        <div className="delivery-calendar-grid">
-          {deliverySlots.map((slot) => {
-            const key = `${slot.dateIso}-${slot.window}`;
-            const isActive = selectedSlotKey === key;
+          <div className="delivery-calendar-grid">
+            {deliverySlots.map((slot) => {
+              const key = `${slot.dateIso}-${slot.window}`;
+              const isActive = selectedSlotKey === key;
 
-            return (
-              <button
-                key={key}
-                type="button"
-                className={`delivery-slot${isActive ? " is-selected" : ""}`}
-                onClick={() => setSelectedSlotKey(key)}
-              >
-                <span>{slot.dateLabel}</span>
-                <strong>{slot.label}</strong>
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={`delivery-slot${isActive ? " is-selected" : ""}`}
+                  onClick={() => setSelectedSlotKey(key)}
+                >
+                  <span>{slot.dateLabel}</span>
+                  <strong>{slot.label}</strong>
+                </button>
+              );
+            })}
+          </div>
 
-        {selectedSlot ? (
-          <p className="delivery-calendar-selection">
-            Entrega estimada: <strong>{selectedSlot.dateLabel}</strong> · <strong>{selectedSlot.label}</strong>
-          </p>
-        ) : null}
-      </section>
+          {selectedSlot ? (
+            <p className="delivery-calendar-selection">
+              Entrega estimada: <strong>{selectedSlot.dateLabel}</strong> · <strong>{selectedSlot.label}</strong>
+            </p>
+          ) : null}
+        </section>
+      ) : null}
 
       <div className="purchase-actions">
         <button type="button" className="btn btn-ghost" onClick={handleAddToCart}>
