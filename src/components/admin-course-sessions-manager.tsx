@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { formatDateTimeMx } from "@/lib/date-time";
 
 type AdminCourseSession = {
   id: string;
@@ -158,7 +159,7 @@ export default function AdminCourseSessionsManager({ courseId }: { courseId: str
           <div className="cta-row"><button type="submit" className="btn btn-primary">{editingSessionId ? "Guardar sesión" : "Crear sesión"}</button>{editingSessionId ? <button type="button" className="btn btn-ghost" onClick={resetSessionForm}>Cancelar edición</button> : null}</div>
         </form>
         <div className="admin-product-list">
-          {sortedSessions.map((session) => <article key={session.id} className="studio-card"><h3>{new Date(session.startsAt).toLocaleString("es-MX")}</h3><p>Fin: {session.endsAt ? new Date(session.endsAt).toLocaleString("es-MX") : "No definido"}</p><p>Cupo: {session.capacity} · Reservados: {session.reservedSpots}</p><p>Estatus: {session.isActive ? "Activa" : "Inactiva"}</p><div className="cta-row"><button type="button" className="btn btn-ghost" onClick={() => startSessionEdit(session)}>Editar sesión</button><button type="button" className="btn btn-ghost" onClick={() => void deleteSession(session.id)}>Eliminar sesión</button></div></article>)}
+          {sortedSessions.map((session) => <article key={session.id} className="studio-card"><h3>{formatDateTimeMx(session.startsAt)}</h3><p>Fin: {session.endsAt ? formatDateTimeMx(session.endsAt) : "No definido"}</p><p>Cupo: {session.capacity} · Reservados: {session.reservedSpots}</p><p>Estatus: {session.isActive ? "Activa" : "Inactiva"}</p><div className="cta-row"><button type="button" className="btn btn-ghost" onClick={() => startSessionEdit(session)}>Editar sesión</button><button type="button" className="btn btn-ghost" onClick={() => void deleteSession(session.id)}>Eliminar sesión</button></div></article>)}
           {!sortedSessions.length ? <p>No hay sesiones para este curso.</p> : null}
         </div>
       </> : null}

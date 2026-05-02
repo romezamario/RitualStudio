@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/cart-context";
 import type { CourseCatalogCourse, CourseCatalogSession } from "@/lib/courses-catalog";
+import { formatDateTimeMx } from "@/lib/date-time";
 
 type CoursePurchaseActionsProps = {
   course: CourseCatalogCourse;
@@ -23,14 +24,14 @@ function formatCurrency(value: number) {
 }
 
 function formatSessionLabel(session: CourseCatalogSession) {
-  return new Date(session.startsAt).toLocaleString("es-MX", {
+  return formatDateTimeMx(session.startsAt, {
     dateStyle: "full",
     timeStyle: "short",
   });
 }
 
 function formatSessionButtonLabel(startsAt: string) {
-  return new Date(startsAt).toLocaleString("es-MX", {
+  return formatDateTimeMx(startsAt, {
     weekday: "short",
     day: "2-digit",
     month: "short",

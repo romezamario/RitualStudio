@@ -4,6 +4,7 @@ import { getPaymentMode, setPaymentMode } from "@/lib/payment-mode";
 import { supabaseAdminRequest } from "@/lib/supabase-admin";
 import { getCurrentUserProfile, isSuperuserProfile } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { formatDateTimeMx } from "@/lib/date-time";
 
 type AdminRecentPayment = {
   id?: string | number;
@@ -211,7 +212,7 @@ export default async function AdminPaymentsPage({
                     <td style={{ padding: "8px 4px" }}>{payment.id ? String(payment.id) : "-"}</td>
                     <td style={{ padding: "8px 4px" }}>{payment.status ?? "-"}</td>
                     <td style={{ padding: "8px 4px" }}>{typeof payment.transaction_amount === "number" ? payment.transaction_amount.toLocaleString("es-AR", { style: "currency", currency: "ARS" }) : "-"}</td>
-                    <td style={{ padding: "8px 4px" }}>{payment.date_created ? new Date(payment.date_created).toLocaleString("es-AR") : "-"}</td>
+                    <td style={{ padding: "8px 4px" }}>{payment.date_created ? formatDateTimeMx(payment.date_created) : "-"}</td>
                     <td style={{ padding: "8px 4px" }}>{payment.external_reference ?? "-"}</td>
                   </tr>
                 ))}
