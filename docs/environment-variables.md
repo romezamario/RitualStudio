@@ -46,9 +46,10 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - `MP_NOTIFICATION_URL_TEST`: URL absoluta (https) para enviar como `notification_url` en pagos de pruebas (recomendado `/api/mercadopago/webhook/test`).
 - `MP_NOTIFICATION_URL` (legacy opcional): fallback retrocompatible si aún no se migraron variables por ambiente.
 - `EMAIL_PROVIDER`: proveedor de correo (`resend`, `disabled`, etc.).
-- `EMAIL_FROM`: remitente para correos transaccionales.
-- `EMAIL_SUPPORT_CHANNEL`: canal mostrado en comprobantes.
 - `RESEND_API_KEY`: API key de Resend.
+- `RESEND_FROM_EMAIL`: remitente principal para correos transaccionales (recomendado).
+- `EMAIL_FROM` (legacy opcional): fallback temporal de remitente para compatibilidad retroactiva.
+- `EMAIL_SUPPORT_CHANNEL`: canal mostrado en comprobantes.
 
 ## Variables nuevas para cursos (estado actual)
 - Para la venta/admin de cursos **no se agregaron variables nuevas** en esta iteración.

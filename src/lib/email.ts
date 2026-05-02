@@ -48,7 +48,7 @@ function getEmailProvider() {
 }
 
 function getEmailFrom() {
-  return process.env.EMAIL_FROM?.trim() || "";
+  return process.env.RESEND_FROM_EMAIL?.trim() || process.env.EMAIL_FROM?.trim() || "";
 }
 
 function getSupportChannel() {
@@ -151,7 +151,7 @@ async function sendWithResend(input: SendPurchaseConfirmationEmailInput): Promis
     return {
       ok: false,
       provider: "resend",
-      error: "Faltan variables RESEND_API_KEY o EMAIL_FROM para enviar correo.",
+      error: "Faltan variables RESEND_API_KEY o RESEND_FROM_EMAIL para enviar correo (EMAIL_FROM queda como fallback legacy opcional).",
     };
   }
 
