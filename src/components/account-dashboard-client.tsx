@@ -34,10 +34,10 @@ const adminCards = [
   },
   {
     label: "Administración",
-    title: "Modo de pagos",
+    title: "Modo de pago y verificación",
     description: "Configura el modo de operación de Mercado Pago (test o producción) desde una ruta protegida.",
     href: "/admin/pagos",
-    cta: "Ir a modo de pagos"
+    cta: "Ir a modo de pago y verificación"
   }
 ] as const;
 
