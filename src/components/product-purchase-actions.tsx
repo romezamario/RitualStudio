@@ -71,7 +71,12 @@ export default function ProductPurchaseActions({ product }: ProductPurchaseActio
   const selectedSlot = deliverySlots.find((slot) => `${slot.dateIso}-${slot.window}` === selectedSlotKey);
 
   const handleAddToCart = () => {
-    addProductToCart(product);
+    addProductToCart({
+      product,
+      deliveryDateIso: selectedSlot?.dateIso,
+      deliveryDateLabel: selectedSlot?.dateLabel,
+      deliveryWindowLabel: selectedSlot?.label,
+    });
     setFeedback("Producto agregado al carrito");
 
     window.setTimeout(() => {
@@ -80,7 +85,12 @@ export default function ProductPurchaseActions({ product }: ProductPurchaseActio
   };
 
   const handleBuyNow = () => {
-    addProductToCart(product);
+    addProductToCart({
+      product,
+      deliveryDateIso: selectedSlot?.dateIso,
+      deliveryDateLabel: selectedSlot?.dateLabel,
+      deliveryWindowLabel: selectedSlot?.label,
+    });
     router.push("/checkout");
   };
 
