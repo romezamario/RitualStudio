@@ -54,6 +54,15 @@ export default function ProductPurchaseActions({
   const { addProductToCart } = useCart();
   const [feedback, setFeedback] = useState("");
   const { options: deliveryDates, dateFormatter } = useMemo(() => buildDeliveryDates(new Date()), []);
+  const weekdayFormatter = useMemo(
+    () => new Intl.DateTimeFormat("es-MX", { weekday: "short", timeZone: "America/Mexico_City" }),
+    [],
+  );
+  const dayFormatter = useMemo(() => new Intl.DateTimeFormat("es-MX", { day: "numeric", timeZone: "America/Mexico_City" }), []);
+  const monthFormatter = useMemo(
+    () => new Intl.DateTimeFormat("es-MX", { month: "short", timeZone: "America/Mexico_City" }),
+    [],
+  );
   const [selectedDateIso, setSelectedDateIso] = useState(deliveryDates[0] ?? "");
   const [selectedWindow, setSelectedWindow] = useState<DeliveryWindow>("morning");
 
@@ -67,6 +76,17 @@ export default function ProductPurchaseActions({
       })()
     : "";
   const selectedWindowLabel = SLOT_LABELS[selectedWindow];
+  const deliveryDateCards = deliveryDates.map((dateIso) => {
+    const [year, month, day] = dateIso.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+
+    return {
+      iso: dateIso,
+      weekday: weekdayFormatter.format(date),
+      day: dayFormatter.format(date),
+      month: monthFormatter.format(date),
+    };
+  });
 
   const handleAddToCart = () => {
     addProductToCart({
@@ -101,13 +121,26 @@ export default function ProductPurchaseActions({
 
           <label className="delivery-date-picker">
             <span>Selecciona día de entrega</span>
-            <input
-              type="date"
-              value={selectedDateIso}
-              min={deliveryDates[0]}
-              max={deliveryDates[deliveryDates.length - 1]}
-              onChange={(event) => setSelectedDateIso(event.target.value)}
-            />
+            <div className="delivery-date-cards" role="radiogroup" aria-label="Selecciona día de entrega">
+              {deliveryDateCards.map((dateCard) => {
+                const isSelected = dateCard.iso === selectedDateIso;
+
+                return (
+                  <button
+                    key={dateCard.iso}
+                    type="button"
+                    className={isSelected ? "delivery-date-card is-selected" : "delivery-date-card"}
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => setSelectedDateIso(dateCard.iso)}
+                  >
+                    <span>{dateCard.weekday.replace(".", "")}</span>
+                    <strong>{dateCard.day}</strong>
+                    <small>{dateCard.month.replace(".", "")}</small>
+                  </button>
+                );
+              })}
+            </div>
           </label>
 
           <label className="delivery-time-picker">
