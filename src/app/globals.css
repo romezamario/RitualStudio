@@ -396,6 +396,25 @@ p {
   text-underline-offset: 0.16em;
 }
 
+.site-footer-links {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.8rem;
+}
+
+.site-footer-social-link {
+  align-items: center;
+  color: inherit;
+  display: inline-flex;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.site-footer-social-icon {
+  height: 1.1rem;
+  width: 1.1rem;
+}
+
 .eyebrow {
   color: var(--muted);
   font-size: 0.82rem;

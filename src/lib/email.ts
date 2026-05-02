@@ -71,8 +71,9 @@ function getAccountOrdersUrl() {
 }
 
 function getSocialLinks() {
+  const defaultInstagramUrl = "https://www.instagram.com/ritualstudiomx?igsh=aTFiZmFjbnAxODkz";
   return [
-    { label: "Instagram", url: process.env.EMAIL_SOCIAL_INSTAGRAM_URL?.trim() || "" },
+    { label: "Instagram", url: process.env.EMAIL_SOCIAL_INSTAGRAM_URL?.trim() || defaultInstagramUrl },
     { label: "Facebook", url: process.env.EMAIL_SOCIAL_FACEBOOK_URL?.trim() || "" },
     { label: "TikTok", url: process.env.EMAIL_SOCIAL_TIKTOK_URL?.trim() || "" },
   ].filter((social) => social.url);
