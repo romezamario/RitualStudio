@@ -140,6 +140,10 @@ export default function Home() {
       </section>
 
       <section className="home-wallpaper" aria-label="Navegación principal de Ritual Studio">
+        <div className="section-intro">
+          <p className="section-tag">Explora</p>
+          <p className="section-microcopy">Elige cómo quieres comenzar tu experiencia floral.</p>
+        </div>
         {opcionesHome.map((item) => (
           <Link
             key={item.titulo}
@@ -156,7 +160,12 @@ export default function Home() {
         ))}
       </section>
 
-      <section className="feature-grid" aria-label="Categorías por ocasión">
+      <section className="section-block" aria-label="Categorías por ocasión">
+        <div className="section-intro">
+          <p className="section-tag">Categorías clave</p>
+          <p className="section-microcopy">Ideas rápidas para regalar según la ocasión.</p>
+        </div>
+        <div className="feature-grid">
         {categoryItems.map((item) => (
           <article key={item.title} className="studio-card">
             <p className="card-label">Categoría</p>
@@ -167,9 +176,15 @@ export default function Home() {
             </Link>
           </article>
         ))}
+              </div>
       </section>
 
-      <section className="feature-grid" aria-label="Más vendidos y selección del estudio">
+      <section className="section-block" aria-label="Más vendidos y selección del estudio">
+        <div className="section-intro">
+          <p className="section-tag">Selección editorial</p>
+          <p className="section-microcopy">Piezas destacadas por el estudio esta semana.</p>
+        </div>
+        <div className="feature-grid">
         {featuredItems.map((item) => (
           <article key={item.title} className="studio-card">
             <p className="card-label">Más vendidos · Selección del estudio</p>
@@ -180,16 +195,18 @@ export default function Home() {
             </Link>
           </article>
         ))}
+              </div>
       </section>
 
       <section className="story-block" aria-label="Diferenciadores de Ritual Studio">
+        <p className="section-tag">Nuestro enfoque</p>
         <h2>¿Por qué Ritual Studio?</h2>
         {studioDifferentiators.map((differentiator) => (
           <p key={differentiator}>{differentiator}</p>
         ))}
       </section>
 
-      <section className="studio-card" aria-label="Asesoría y contacto" style={{ marginTop: "2.2rem" }}>
+      <section className="studio-card contact-highlight" aria-label="Asesoría y contacto">
         <p className="card-label">Asesoría floral</p>
         <h2>Conversemos sobre tu idea y armemos una propuesta contigo.</h2>
         <p>
