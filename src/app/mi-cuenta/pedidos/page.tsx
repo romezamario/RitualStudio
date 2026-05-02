@@ -358,17 +358,6 @@ export default async function AccountOrdersPage({ searchParams }: OrdersPageProp
                         </li>
                       </ul>
 
-                      {order.external_reference ? (
-                        <div className="cta-row" style={{ marginTop: "0.75rem" }}>
-                          <Link
-                            href={`/checkout/exito?external_reference=${encodeURIComponent(order.external_reference)}`}
-                            className="btn btn-secondary"
-                          >
-                            Consultar pago
-                          </Link>
-                        </div>
-                      ) : null}
-
                       {products.length > 0 ? (
                         <div>
                           <p className="card-label" style={{ marginTop: "1rem" }}>
@@ -432,6 +421,17 @@ export default async function AccountOrdersPage({ searchParams }: OrdersPageProp
                               </div>
                             );
                           })}
+                        </div>
+                      ) : null}
+
+                      {order.external_reference ? (
+                        <div className="cta-row" style={{ justifyContent: "flex-end", marginTop: "1rem" }}>
+                          <Link
+                            href={`/checkout/exito?external_reference=${encodeURIComponent(order.external_reference)}`}
+                            className="btn btn-primary"
+                          >
+                            Consultar pago
+                          </Link>
                         </div>
                       ) : null}
                     </div>
