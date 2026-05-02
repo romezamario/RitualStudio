@@ -361,6 +361,11 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
   const [selectedAddressId, setSelectedAddressId] = useState("new");
   const [saveAddressInBook, setSaveAddressInBook] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState<AddressDraft>(INITIAL_ADDRESS_DRAFT);
+  const selectedSavedAddressRef = useRef<DeliveryAddress | null>(null);
+  const deliveryAddressRef = useRef<AddressDraft>(INITIAL_ADDRESS_DRAFT);
+  const saveAddressInBookRef = useRef(false);
+  const savedAddressesRef = useRef<DeliveryAddress[]>([]);
+  const addressBookStorageKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!addressBookStorageKey) {
@@ -382,6 +387,26 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
     () => savedAddresses.find((address) => address.id === selectedAddressId) ?? null,
     [savedAddresses, selectedAddressId],
   );
+
+  useEffect(() => {
+    selectedSavedAddressRef.current = selectedSavedAddress;
+  }, [selectedSavedAddress]);
+
+  useEffect(() => {
+    deliveryAddressRef.current = deliveryAddress;
+  }, [deliveryAddress]);
+
+  useEffect(() => {
+    saveAddressInBookRef.current = saveAddressInBook;
+  }, [saveAddressInBook]);
+
+  useEffect(() => {
+    savedAddressesRef.current = savedAddresses;
+  }, [savedAddresses]);
+
+  useEffect(() => {
+    addressBookStorageKeyRef.current = addressBookStorageKey;
+  }, [addressBookStorageKey]);
 
 
   const updateCourseParticipant = useCallback((lineKey: string, index: number, value: string) => {
@@ -458,21 +483,23 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
                 resolve();
                 return;
               }
-              const activeAddress = selectedSavedAddress
+              const currentSelectedSavedAddress = selectedSavedAddressRef.current;
+              const currentDeliveryAddress = deliveryAddressRef.current;
+              const activeAddress = currentSelectedSavedAddress
                 ? {
-                    recipientName: selectedSavedAddress.recipientName,
-                    phone: selectedSavedAddress.phone,
-                    street: selectedSavedAddress.street,
-                    exteriorNumber: selectedSavedAddress.exteriorNumber,
-                    interiorNumber: selectedSavedAddress.interiorNumber ?? "",
-                    neighborhood: selectedSavedAddress.neighborhood,
-                    city: selectedSavedAddress.city,
-                    state: selectedSavedAddress.state,
-                    postalCode: selectedSavedAddress.postalCode,
-                    references: selectedSavedAddress.references ?? "",
-                    label: selectedSavedAddress.label,
+                    recipientName: currentSelectedSavedAddress.recipientName,
+                    phone: currentSelectedSavedAddress.phone,
+                    street: currentSelectedSavedAddress.street,
+                    exteriorNumber: currentSelectedSavedAddress.exteriorNumber,
+                    interiorNumber: currentSelectedSavedAddress.interiorNumber ?? "",
+                    neighborhood: currentSelectedSavedAddress.neighborhood,
+                    city: currentSelectedSavedAddress.city,
+                    state: currentSelectedSavedAddress.state,
+                    postalCode: currentSelectedSavedAddress.postalCode,
+                    references: currentSelectedSavedAddress.references ?? "",
+                    label: currentSelectedSavedAddress.label,
                   }
-                : deliveryAddress;
+                : currentDeliveryAddress;
 
               if (!validateAddressDraft(activeAddress)) {
                 setCheckoutStatus("error");
@@ -538,14 +565,21 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
                   const normalized = result.normalized_status ?? "error";
                   setCheckoutStatus(normalized);
 
-                  if (normalized === "approved" && saveAddressInBook && !selectedSavedAddress && addressBookStorageKey) {
+                  if (
+                    normalized === "approved" &&
+                    saveAddressInBookRef.current &&
+                    !currentSelectedSavedAddress &&
+                    addressBookStorageKeyRef.current
+                  ) {
+                    const currentSavedAddresses = savedAddressesRef.current;
                     const nextAddress: DeliveryAddress = {
-                      ...addressDraftToDeliveryAddress(deliveryAddress, savedAddresses.length + 1),
-                      isDefault: savedAddresses.length === 0,
+                      ...addressDraftToDeliveryAddress(currentDeliveryAddress, currentSavedAddresses.length + 1),
+                      isDefault: currentSavedAddresses.length === 0,
                     };
-                    const nextAddresses = [...savedAddresses, nextAddress];
+                    const nextAddresses = [...currentSavedAddresses, nextAddress];
                     setSavedAddresses(nextAddresses);
-                    persistAddressBook(addressBookStorageKey, nextAddresses);
+                    savedAddressesRef.current = nextAddresses;
+                    persistAddressBook(addressBookStorageKeyRef.current, nextAddresses);
                   }
 
                   if (normalized === "approved") {
