@@ -156,3 +156,36 @@ Estados de `webhook_processing` usados por el sistema:
 - Antes de crear pagos se ejecuta una validación de entorno que compara public key y access token para evitar mezcla `TEST`/`APP_USR`.
 - Si la configuración es inválida, el backend responde `500` y no ejecuta llamadas a la API de Mercado Pago.
 - El checkout cliente valida formato de public key antes de montar Brick y emite warnings de diagnóstico sin exponer secretos.
+
+## Reproceso interno de emails de confirmación (consistencia eventual)
+
+Para evitar pérdida de confirmación cuando el webhook acredita el pago antes de que la orden tenga metadata completa (`items`, email o referencia), el sistema **no revierte** el pago y agenda reintento de email.
+
+- En webhook (`trySendPurchaseEmail`), si faltan datos de envío:
+  - `orders.metadata.email_confirmation.status = "pending_email_retry"`
+  - `orders.metadata.email_confirmation.next_retry_at = <ISO timestamp>`
+  - `orders.metadata.email_confirmation.last_attempt_at`, `attempts`, `error`
+- El pago permanece `approved`; este flujo no debe mutar `orders.status` fuera de la sincronización de pago.
+
+### Endpoint interno
+
+- `POST /api/internal/mercadopago/retry-purchase-email`
+- Autenticación: `Authorization: Bearer <MP_EMAIL_RETRY_SECRET>`.
+- Selecciona órdenes `approved` con:
+  - `payment_confirmation_email_sent_at IS NULL`
+  - `metadata.email_confirmation.status = pending_email_retry`
+  - `metadata.email_confirmation.next_retry_at <= now()`
+- Reintenta `sendPurchaseConfirmationEmail` con backoff exponencial y límite de intentos.
+- Registra en metadata:
+  - `attempts`
+  - `last_attempt_at`
+  - `last_error`/`error`
+  - `next_retry_at`
+  - `status` (`pending_email_retry`, `sent`, `failed_final`, `skipped`)
+
+### Política de reintentos (email)
+
+- Base: 5 minutos.
+- Backoff: exponencial hasta 6 horas por intento.
+- Máximo: 5 intentos.
+- Al alcanzar el máximo: `status = failed_final` y sin nueva programación.

@@ -51,7 +51,9 @@ type OrderMetadata = {
     error?: string;
     attempts?: number;
     last_attempt_at?: string;
-  };
+    next_retry_at?: string;
+    status?: "pending_email_retry" | "sent" | "failed_final" | "skipped";
+    };
   [key: string]: unknown;
 };
 
@@ -576,12 +578,16 @@ async function trySendPurchaseEmail({
   const paidAt = fallbackPaidAt ?? new Date().toISOString();
 
   if (!customerEmail || !externalReference || !paymentId || !items.length) {
+    const nowIso = new Date().toISOString();
+    const nextRetryAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
     const failedMetadata = mergeOrderMetadata(order.metadata, {
       email_confirmation: {
         sent: false,
         error: "No se pudo enviar correo: faltan email, referencia, payment_id o items en metadata.",
         attempts: emailAttempts + 1,
-        last_attempt_at: new Date().toISOString(),
+        last_attempt_at: nowIso,
+        next_retry_at: nextRetryAt,
+        status: "pending_email_retry",
       },
     });
 
@@ -619,6 +625,8 @@ async function trySendPurchaseEmail({
           skipped: sendResult.skipped ?? false,
           attempts: emailAttempts + 1,
           last_attempt_at: new Date().toISOString(),
+          next_retry_at: undefined,
+          status: sendResult.skipped ? "skipped" : "sent",
           error: undefined,
         }
       : {
@@ -627,6 +635,7 @@ async function trySendPurchaseEmail({
           error: sendResult.error ?? "No fue posible enviar el correo de confirmación.",
           attempts: emailAttempts + 1,
           last_attempt_at: new Date().toISOString(),
+          status: "failed_final",
         },
   });
 

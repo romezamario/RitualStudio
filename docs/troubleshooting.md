@@ -131,3 +131,26 @@
 1. Actualizar archivos en `/docs` según impacto.
 2. Ajustar resumen en `README.md`.
 3. Mantener `AGENTS.md` solo con reglas operativas.
+
+### Email de confirmación no enviado pese a pago aprobado
+
+Síntoma: la orden está en `approved` pero no hay comprobante de email.
+
+Diagnóstico recomendado:
+1. Verificar `orders.payment_confirmation_email_sent_at` (si tiene valor, ya se envió o se marcó como enviado idempotentemente).
+2. Revisar `orders.metadata.email_confirmation`:
+   - `status`
+   - `attempts`
+   - `last_attempt_at`
+   - `next_retry_at`
+   - `error` / `last_error`
+3. Si `status = pending_email_retry` y `next_retry_at <= now()`, ejecutar reproceso interno.
+
+Reproceso manual (interno):
+- `POST /api/internal/mercadopago/retry-purchase-email`
+- Header: `Authorization: Bearer <MP_EMAIL_RETRY_SECRET>`
+
+Reglas operativas:
+- El reproceso **nunca** debe degradar el estado del pago (`orders.status`).
+- El objetivo del reproceso es completar confirmación por email, no reconciliar el pago.
+- Si se alcanza máximo de intentos, queda `failed_final` y requiere intervención operativa (validar datos faltantes o proveedor de correo).
