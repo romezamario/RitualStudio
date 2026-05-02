@@ -1,3 +1,4 @@
+import AdminUsersManager from "@/components/admin-users-manager";
 import SiteShell from "@/components/site-shell";
 
 export default function AdminUsersPage() {
@@ -5,16 +6,9 @@ export default function AdminUsersPage() {
     <SiteShell
       eyebrow="Administrador"
       title="Gestión de usuarios"
-      subtitle="Espacio para administrar roles, permisos y estado de cuentas dentro del sitio."
+      subtitle="Da de alta administradores existentes en Supabase y consulta cuántos administradores activos hay."
     >
-      <div className="studio-card">
-        <p className="card-label">Panel admin</p>
-        <h2>Control de roles</h2>
-        <p>
-          Este módulo será la base para administrar usuarios normales y administradores con diferentes permisos de
-          navegación y operación.
-        </p>
-      </div>
+      <AdminUsersManager />
     </SiteShell>
   );
 }

@@ -48,8 +48,11 @@ Incluye:
 - trigger `set_updated_at` aplicado en tablas con columna `updated_at`.
 
 ## Promotion to Admin
-La promoción inicial de admin se hace desde SQL por operador autorizado.
-No debe existir elevación de rol desde frontend.
+- El módulo `/admin/usuarios` permite que un usuario con rol `admin` promueva a otro usuario existente en `public.profiles` al rol `admin` usando su correo.
+- Restricción: no puede otorgar capacidades de superusuario (`SUPERUSER_EMAILS`) desde este módulo.
+- Si el correo no existe en Supabase (`public.profiles`), la API responde error y se debe crear primero el usuario.
+- Endpoint involucrado: `GET/POST /api/admin/users` (server-side, validación de sesión admin).
+
 
 ## Security Rules
 - Nunca usar `SUPABASE_SERVICE_ROLE_KEY` en cliente.
