@@ -677,7 +677,6 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
       <section className="checkout-layout" aria-label="Pago con Mercado Pago embebido">
         <article className="studio-card checkout-summary">
           <p className="card-label">Resumen de compra</p>
-          <h2>Checkout embebido</h2>
           <section className="checkout-delivery-address" aria-label="Dirección de entrega">
             <h3>Dirección de entrega</h3>
             {savedAddresses.length ? (
