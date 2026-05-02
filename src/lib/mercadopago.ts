@@ -362,6 +362,12 @@ async function tryMercadoPagoSdkRequest<T>({
     return null;
   }
 
+  const method = (init.method ?? "GET").toUpperCase();
+
+  if (method === "GET" && path.startsWith("/v1/payments/search")) {
+    return null;
+  }
+
   let sdk: MercadoPagoSdkModule | null = null;
   try {
     sdk = (await import("mercadopago")) as MercadoPagoSdkModule;
@@ -371,7 +377,6 @@ async function tryMercadoPagoSdkRequest<T>({
 
   const client = new sdk.MercadoPagoConfig({ accessToken });
   const paymentApi = new sdk.Payment(client);
-  const method = (init.method ?? "GET").toUpperCase();
 
   if (method === "POST" && path === "/v1/payments" && paymentApi.create) {
     const body = init.body && typeof init.body === "string" ? (JSON.parse(init.body) as Record<string, unknown>) : {};
@@ -386,10 +391,6 @@ async function tryMercadoPagoSdkRequest<T>({
   if (method === "GET" && paymentByIdMatch && paymentApi.get) {
     const response = await paymentApi.get({ id: decodeURIComponent(paymentByIdMatch[1]) });
     return response as T;
-  }
-
-  if (method === "GET" && path.startsWith("/v1/payments/search")) {
-    return null;
   }
 
   return null;
