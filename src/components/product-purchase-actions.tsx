@@ -18,6 +18,7 @@ type DeliveryWindow = "morning" | "afternoon";
 const SLOT_LABELS: Record<DeliveryWindow, string> = { morning: "08:00 - 14:00", afternoon: "14:00 - 20:00" };
 const MIN_DELIVERY_LEAD_HOURS = 36;
 const DEFAULT_DATES_TO_DISPLAY = 14;
+const DELIVERY_TIMEZONE = "America/Mexico_City";
 
 function buildDeliveryDates(now: Date, datesToDisplay: number) {
   const minimumAllowed = new Date(now.getTime() + MIN_DELIVERY_LEAD_HOURS * 60 * 60 * 1000);
@@ -31,7 +32,7 @@ function buildDeliveryDates(now: Date, datesToDisplay: number) {
     weekday: "long",
     day: "numeric",
     month: "long",
-    timeZone: "America/Mexico_City",
+    timeZone: DELIVERY_TIMEZONE,
   });
 
     const safeDatesToDisplay = Number.isFinite(datesToDisplay) && datesToDisplay > 0 ? Math.trunc(datesToDisplay) : DEFAULT_DATES_TO_DISPLAY;
@@ -57,6 +58,18 @@ export default function ProductPurchaseActions({
   const router = useRouter();
   const { addProductToCart } = useCart();
   const [feedback, setFeedback] = useState("");
+  const weekdayFormatter = useMemo(
+    () => new Intl.DateTimeFormat("es-MX", { weekday: "short", timeZone: DELIVERY_TIMEZONE }),
+    [],
+  );
+  const dayFormatter = useMemo(
+    () => new Intl.DateTimeFormat("es-MX", { day: "numeric", timeZone: DELIVERY_TIMEZONE }),
+    [],
+  );
+  const monthFormatter = useMemo(
+    () => new Intl.DateTimeFormat("es-MX", { month: "short", timeZone: DELIVERY_TIMEZONE }),
+    [],
+  );
   const { options: deliveryDates, dateFormatter } = useMemo(
     () => buildDeliveryDates(new Date(), deliveryDatesToDisplay),
     [deliveryDatesToDisplay],
