@@ -310,7 +310,7 @@ export async function POST(request: Request) {
         .join(" | ")
         .slice(0, isTestModePayment ? 232 : 240)}`,
       additional_info: {
-        items: lineItems.map((item, index) => ({
+        items: lineItems.map((item) => ({
           id: item.slug,
           title: item.name,
           description: item.description ?? item.name,
