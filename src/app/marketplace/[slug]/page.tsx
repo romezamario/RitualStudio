@@ -102,10 +102,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
 
             <div className="cta-row">
-              <Link href="/marketplace" className="btn btn-ghost">
-                Volver al marketplace
-              </Link>
-              <ProductPurchaseActions product={product} />
+              <ProductPurchaseActions product={product} showMarketplaceLink />
             </div>
           </div>
         </article>
