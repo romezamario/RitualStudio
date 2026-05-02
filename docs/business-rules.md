@@ -87,5 +87,6 @@ Los cambios en lógica comercial deben reflejarse en este archivo.
 - En navegación normal del catálogo, las miniaturas/listados solicitan variantes ligeras (`thumb`) y la variante grande (`detail`) solo se pide al abrir la vista de detalle del producto/curso.
 - La variante `original` queda reservada para acciones explícitas de descarga/revisión interna y no participa en cards, listados, carrito o PDP estándar.
 
-- En `/admin/pedidos`, administración puede operar estados logísticos de pedidos con productos: `por_entregar`, `en_reparto`, `entregado`.
+- En `/admin/pedidos`, la operación se separa por pestañas de estado logístico: `por_entregar`, `en_reparto`, `entregado`.
+- La pestaña `entregado` pagina en bloques de 10 elementos (últimos entregados); `por_entregar` y `en_reparto` no tienen paginación.
 - Cuando un admin cambia a `en_reparto` o `entregado`, el backend envía email transaccional al `customer_email` de la orden (solo si la orden contiene productos).
