@@ -424,6 +424,88 @@ p {
 }
 
 
+.home-hero {
+  margin-top: 2.2rem;
+}
+
+.home-hero-content {
+  background: linear-gradient(135deg, rgba(34, 31, 31, 0.9), rgba(34, 31, 31, 0.68));
+  border: 1px solid color-mix(in srgb, var(--charcoal) 45%, white);
+  border-radius: 1.25rem;
+  box-shadow: 0 14px 34px rgba(34, 31, 31, 0.24);
+  color: #fffaf6;
+  display: grid;
+  gap: 1rem;
+  max-width: 58rem;
+  padding: clamp(1.4rem, 2.4vw, 2.4rem);
+}
+
+.home-hero-kicker {
+  color: color-mix(in srgb, #fffaf6 84%, #d8cdbf);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.home-hero-content h2 {
+  font-size: clamp(1.9rem, 3.8vw, 3.25rem);
+  line-height: 1.08;
+  max-width: 16ch;
+}
+
+.home-hero-content > p {
+  color: color-mix(in srgb, #fffaf6 87%, #d8cdbf);
+  font-size: 1.02rem;
+  max-width: 60ch;
+}
+
+.home-hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.home-hero-button {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 600;
+  min-height: 2.9rem;
+  padding: 0.75rem 1.15rem;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.home-hero-button-primary {
+  background: #fffaf6;
+  color: #2f2a2a;
+}
+
+.home-hero-button-primary:hover,
+.home-hero-button-primary:focus-visible {
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 250, 246, 0.3), 0 8px 20px rgba(22, 20, 20, 0.25);
+  transform: translateY(-1px);
+}
+
+.home-hero-button-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 250, 246, 0.65);
+  color: #fffaf6;
+}
+
+.home-hero-button-secondary:hover,
+.home-hero-button-secondary:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 3px rgba(255, 250, 246, 0.3), 0 8px 20px rgba(22, 20, 20, 0.2);
+  transform: translateY(-1px);
+}
+
+.home-hero-button:focus-visible {
+  outline: 2px solid #fffaf6;
+  outline-offset: 2px;
+}
+
 .home-wallpaper {
   display: grid;
   gap: 1rem;
@@ -1002,7 +1084,6 @@ p {
   font-weight: 600;
 }
 
-.delivery-date-picker input,
 .delivery-time-picker select {
   background: color-mix(in srgb, white 70%, var(--rose-mist));
   border: 1px solid color-mix(in srgb, var(--smoke) 40%, white);
@@ -1010,6 +1091,61 @@ p {
   color: var(--ink);
   font: inherit;
   padding: 0.55rem 0.65rem;
+}
+
+.delivery-date-cards {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+}
+
+.delivery-date-card {
+  align-items: center;
+  background: linear-gradient(180deg, color-mix(in srgb, white 75%, var(--rose-mist)) 0%, color-mix(in srgb, white 58%, var(--rose-mist)) 100%);
+  border: 1px solid color-mix(in srgb, var(--smoke) 42%, white);
+  border-radius: 0.8rem;
+  color: color-mix(in srgb, var(--ink) 85%, black);
+  cursor: pointer;
+  display: grid;
+  gap: 0.1rem;
+  justify-items: center;
+  min-height: 84px;
+  padding: 0.5rem 0.4rem;
+  text-transform: capitalize;
+  transition: transform 150ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.delivery-date-card span {
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.delivery-date-card strong {
+  font-size: 1.22rem;
+  line-height: 1.1;
+}
+
+.delivery-date-card small {
+  color: color-mix(in srgb, var(--ink) 62%, white);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+}
+
+.delivery-date-card:hover {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--gold) 16%, transparent);
+  transform: translateY(-1px);
+}
+
+.delivery-date-card:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold) 72%, white);
+  outline-offset: 2px;
+}
+
+.delivery-date-card.is-selected {
+  background: linear-gradient(170deg, color-mix(in srgb, var(--gold) 24%, white) 0%, color-mix(in srgb, var(--rose) 16%, white) 100%);
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--gold) 24%, transparent);
 }
 
 .purchase-actions {
