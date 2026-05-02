@@ -321,9 +321,14 @@ export async function mpApiFetch<T>(
       .filter(Boolean)
       .join(" | ");
 
-    const baseMessage = errorData?.message ?? errorData?.error ?? `Mercado Pago respondió con ${response.status}.`;
-
-    const errorMessage = causeDetails ? `${baseMessage} (${causeDetails})` : baseMessage;
+    const mpRequestId = response.headers.get("x-request-id") ?? response.headers.get("x-idempotency-key") ?? null;
+    const baseMessage = errorData?.message ?? errorData?.error ?? "Error desconocido";
+    const errorPrefix = `Mercado Pago respondió con ${response.status}`;
+    const errorCore = causeDetails ? `${baseMessage} (${causeDetails})` : baseMessage;
+    const errorWithRequest = mpRequestId
+      ? `${errorPrefix}: ${errorCore}. request_id=${mpRequestId}`
+      : `${errorPrefix}: ${errorCore}`;
+    const errorMessage = errorWithRequest;
     throw new Error(errorMessage);
   }
 
