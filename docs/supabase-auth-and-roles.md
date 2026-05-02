@@ -65,6 +65,7 @@ No debe existir elevación de rol desde frontend.
 - Comprobación opcional adicional: si llega `external_reference`, el endpoint exige que exista una orden reciente (ventana de 24 h) con esa referencia para el mismo correo antes de ejecutar el claim.
 - Trazabilidad: cada claim exitoso registra evento en `public.order_claim_events` (orden, usuario que reclamó, método y referencia).
 - Garantía de no sobrescritura: nunca se reasignan órdenes ya vinculadas a otro usuario (`user_id` distinto de `null`).
+- UX defensiva: si la referencia pertenece al mismo correo pero la orden ya tiene `user_id`, el endpoint responde `200` con mensaje informativo ("ya vinculada") en lugar de error de "compra pendiente no encontrada".
 
 ## Pending / TODO
 - Documentar matriz de permisos por pantalla/endpoint.
