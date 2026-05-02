@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import SiteShell from "@/components/site-shell";
 
@@ -81,22 +82,42 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <SiteShell
-      eyebrow="Florería premium en Bogotá"
-      title="Flores de autor para regalar, celebrar y diseñar momentos memorables"
-      subtitle="Compra online, coordina tu evento o solicita una propuesta personalizada con el equipo de Ritual Studio."
+      eyebrow="Ritual Studio"
+      title="Flores premium para regalar, celebrar y transformar espacios"
+      subtitle="Compra online con entrega confiable o solicita un diseño floral personalizado para momentos memorables."
     >
-      <section className="hero-block" aria-label="Presentación principal de Ritual Studio">
-        <h1>Diseño floral con intención para cada ocasión.</h1>
-        <p className="lead">
-          Desde bouquets listos para entrega hasta proyectos a medida: te acompañamos en regalos, celebraciones y espacios
-          con una propuesta estética y operativa de alto nivel.
-        </p>
-        <div className="cta-row">
-          <Link href="/marketplace" className="btn btn-primary">
-            Ver marketplace
-          </Link>
-          <Link href="/custom" className="btn btn-ghost">
-            Solicitar diseño a medida
+      <section className="home-hero" aria-labelledby="home-hero-title">
+        <div className="home-hero-content">
+          <p className="home-hero-kicker">Ritual Studio</p>
+          <h2 id="home-hero-title">Flores que elevan cada ocasión.</h2>
+          <p>
+            Diseño floral premium con entrega confiable y propuestas personalizadas para regalos, eventos y
+            espacios con identidad propia.
+          </p>
+          <div className="home-hero-cta">
+            <Link href="/marketplace" className="home-hero-button home-hero-button-primary">
+              Comprar flores
+            </Link>
+            <Link href="/custom" className="home-hero-button home-hero-button-secondary">
+              Solicitar diseño a medida
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-wallpaper" aria-label="Navegación principal de Ritual Studio">
+        {opcionesHome.map((item) => (
+          <Link
+            key={item.titulo}
+            href={item.href}
+            className={`wallpaper-card${item.span ? ` wallpaper-card-${item.span}` : ""}`}
+          >
+            <Image src={item.url} alt={item.titulo} width={1200} height={1400} sizes={WALLPAPER_IMAGE_SIZES} />
+            <div className="wallpaper-overlay">
+              <p className="wallpaper-kicker">Ritual Studio</p>
+              <h2>{item.titulo}</h2>
+              <p>{item.descripcion}</p>
+            </div>
           </Link>
         </div>
       </section>
