@@ -67,6 +67,17 @@ No debe existir elevación de rol desde frontend.
 - Garantía de no sobrescritura: nunca se reasignan órdenes ya vinculadas a otro usuario (`user_id` distinto de `null`).
 - UX defensiva: si la referencia pertenece al mismo correo pero la orden ya tiene `user_id`, el endpoint responde `200` con mensaje informativo ("ya vinculada") en lugar de error de "compra pendiente no encontrada".
 
+
+## RLS: `public.app_settings`
+Migración aplicada:
+- `supabase/migrations/20260502120000_app_settings_rls.sql`
+
+Cobertura:
+- RLS habilitado para `public.app_settings`;
+- lectura permitida para `anon/authenticated` solo de la clave pública `payments_mode`;
+- actualización restringida a usuarios autenticados con `public.is_admin()`;
+- `anon/authenticated` sin grants directos de escritura (sin `insert/delete`).
+
 ## Pending / TODO
 - Documentar matriz de permisos por pantalla/endpoint.
 - Definir reglas de auditoría para cambios de rol.
