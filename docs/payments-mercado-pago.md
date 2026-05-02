@@ -77,6 +77,9 @@ Respuesta (resumen):
 
 ## Persistence Strategy
 - Tabla `orders`: referencia externa, estado, total, metadata y raw response.
+- `orders.payment_confirmation_email_sent_at` (nullable) funciona como marca principal anti-duplicado para confirmación por email; si ya tiene valor, el webhook omite el envío y solo actualiza bitácora en metadata.
+- `orders.metadata.email_confirmation` se mantiene como bitácora extendida (attempts, last_attempt_at, errores/proveedor), pero la decisión idempotente de envío se basa primero en la columna persistente.
+- Cuando el envío resulta `ok` (incluye `skipped` controlado del proveedor), se persisten en la misma actualización tanto `metadata.email_confirmation` como `payment_confirmation_email_sent_at=now()`.
 - Tabla `payments`: id de pago MP, método (`payment_method`), tipo de método (`payment_method_type`), estado, monto y raw response.
 - En webhook, al hacer upsert de `payments`, se debe mantener `order_id` (UUID interno) resolviendo primero la orden por `mercado_pago_order_id`; esto asegura que vistas de cuenta (que consultan `payments` por `order_id`) puedan mostrar el método de pago incluso cuando la actualización proviene solo del webhook.
 - Tabla `payment_events`: auditoría operativa del webhook en `payload` (firma validada, snapshots MP, reconciliación de cupos y resultado de procesamiento).

@@ -31,6 +31,7 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 4. Backend persiste `orders` y `payments` en Supabase.
 5. Webhook (`/api/mercadopago/webhook`) actualiza estado real de pago y refuerza consistencia.
 6. (Opcional) se envía comprobante por email mediante proveedor configurado.
+7. Idempotencia de comprobante: `orders.payment_confirmation_email_sent_at` actúa como marca de columna para evitar reenvíos entre reintentos/duplicados de webhook; `orders.metadata.email_confirmation` conserva trazabilidad extendida.
 
 ## Data & Access Model
 - Roles base: `user`, `admin`.
