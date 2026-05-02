@@ -44,6 +44,7 @@ export default async function CoursesPage() {
                 <h3>{course.title}</h3>
                 <p>{course.description ?? "Experiencia guiada por el equipo floral de Ritual Studio."}</p>
                 <div className="price-stack">
+                  {course.hasOffer && course.originalPrice ? <span className="small-muted">Antes {formatCurrency(course.originalPrice)}</span> : null}
                   <strong className="price-tag">{formatCurrency(course.price)}</strong>
                   <span>{course.sessionsCount} sesiones publicadas</span>
                 </div>

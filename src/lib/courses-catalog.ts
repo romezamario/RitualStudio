@@ -16,6 +16,8 @@ export type CourseCatalogCourse = {
   title: string;
   description: string | null;
   price: number;
+  originalPrice?: number;
+  hasOffer: boolean;
   isActive: boolean;
   imageUrl: string | null;
 };
@@ -26,6 +28,8 @@ type CourseRow = {
   title: string;
   description: string | null;
   price: number;
+  original_price: number | null;
+  has_offer: boolean | null;
   is_active: boolean;
   image_url: string | null;
 };
@@ -48,7 +52,7 @@ export async function getPublicCourseBySlug(slug: string) {
   const normalizedSlug = slug.trim().toLowerCase();
 
   const courseResult = await supabasePublicReadRequest<CourseRow[]>(
-    `/rest/v1/courses?select=id,slug,title,description,price,is_active,image_url&slug=eq.${encodeURIComponent(normalizedSlug)}&is_active=eq.true&limit=1`,
+    `/rest/v1/courses?select=id,slug,title,description,price,original_price,has_offer,is_active,image_url&slug=eq.${encodeURIComponent(normalizedSlug)}&is_active=eq.true&limit=1`,
     {
       next: {
         revalidate: 60,
@@ -83,6 +87,8 @@ export async function getPublicCourseBySlug(slug: string) {
     title: row.title,
     description: row.description,
     price: Number(row.price),
+    originalPrice: row.original_price !== null ? Number(row.original_price) : undefined,
+    hasOffer: row.has_offer ?? false,
     isActive: row.is_active,
     imageUrl: row.image_url,
   };
@@ -112,7 +118,7 @@ export type PublicCoursesListItem = CourseCatalogCourse & {
 
 export async function listPublicCourses() {
   const coursesResult = await supabasePublicReadRequest<CourseWithSessionsCountRow[]>(
-    "/rest/v1/courses?select=id,slug,title,description,price,is_active,image_url,course_sessions(count)&is_active=eq.true&order=title.asc",
+    "/rest/v1/courses?select=id,slug,title,description,price,original_price,has_offer,is_active,image_url,course_sessions(count)&is_active=eq.true&order=title.asc",
     {
       next: {
         revalidate: 60,
@@ -131,6 +137,8 @@ export async function listPublicCourses() {
     title: row.title,
     description: row.description,
     price: Number(row.price),
+    originalPrice: row.original_price !== null ? Number(row.original_price) : undefined,
+    hasOffer: row.has_offer ?? false,
     isActive: row.is_active,
     imageUrl: row.image_url,
     sessionsCount: row.course_sessions?.[0]?.count ?? 0,

@@ -52,6 +52,8 @@ type CourseRow = {
   slug: string;
   title: string;
   price: number;
+  original_price: number | null;
+  has_offer: boolean | null;
   is_active: boolean;
 };
 
@@ -172,7 +174,7 @@ async function validateCourseLineItem(entry: Extract<CheckoutLineItemInput, { ki
 
   const session = sessionData[0];
   const { data: courseData, error: courseError } = await supabaseAdminRequest<CourseRow[]>(
-    `/rest/v1/courses?id=eq.${encodeURIComponent(session.course_id)}&slug=eq.${encodeURIComponent(entry.slug)}&is_active=eq.true&select=id,slug,title,price,is_active&limit=1`,
+    `/rest/v1/courses?id=eq.${encodeURIComponent(session.course_id)}&slug=eq.${encodeURIComponent(entry.slug)}&is_active=eq.true&select=id,slug,title,price,original_price,has_offer,is_active&limit=1`,
     { method: "GET" },
   );
 

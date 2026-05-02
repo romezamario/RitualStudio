@@ -57,6 +57,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
           <div className="product-meta-grid">
             <section className="studio-card">
               <p className="card-label">Precio por participante</p>
+              {course.hasOffer && course.originalPrice ? <span className="small-muted">Antes {formatCurrency(course.originalPrice)}</span> : null}
               <strong className="price-tag">{formatCurrency(course.price)}</strong>
             </section>
           </div>
