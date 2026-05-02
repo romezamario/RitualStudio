@@ -27,6 +27,7 @@ Sitio web de **Ritual Studio**, estudio floral premium con enfoque editorial/com
 Ritual Studio es una aplicación Next.js (App Router) que actualmente incluye:
 
 - Home tipo wallpaper navegable con mosaico visual y páginas editoriales/comerciales (`/`, `/marketplace`, `/custom`, `/eventos`, `/nosotros`, `/contacto`).
+- Sección “Compra por ocasión” en home con tarjetas compactas (imagen + microcopy) para intención de compra: Cumpleaños, Amor, Aniversario, Agradecimiento, Condolencias y Corporativo (enlace actual a `/marketplace`, preparada para filtros por query params/tags).
 - Marketplace y detalle de producto (`/marketplace`, `/marketplace/[slug]`).
 - Venta de experiencias con landing/listado y detalle por slug con sesiones con cupo (`/cursos`, `/cursos/[slug]`), incluyendo CTA de "Ver detalle" en cards para abrir la vista extendida del curso.
 - Marketplace y detalle de producto (`/marketplace`, `/marketplace/[slug]`), incluyendo calendario de entrega en PDP con ventanas 08:00-14:00 y 14:00-20:00, respetando una anticipación mínima de 36 horas.
