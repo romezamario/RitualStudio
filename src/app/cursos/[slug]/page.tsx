@@ -21,7 +21,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
 
   if (error || !data) {
     return (
-      <SiteShell eyebrow="Cursos" title="Curso no encontrado" subtitle="Revisa las experiencias disponibles.">
+      <SiteShell eyebrow="Experiencias" title="Curso no encontrado" subtitle="Revisa las experiencias disponibles.">
         <Link href="/" className="btn btn-ghost">
           Volver al inicio
         </Link>
@@ -35,7 +35,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
     : "/images/logo.png";
 
   return (
-    <SiteShell eyebrow="Cursos Ritual Studio" title={course.title} subtitle={course.description ?? "Curso experiencial presencial."}>
+    <SiteShell eyebrow="Experiencias Ritual Studio" title={course.title} subtitle={course.description ?? "Curso experiencial presencial."}>
       <article className="product-detail">
         <div className="product-detail-image-wrap">
           <Image
