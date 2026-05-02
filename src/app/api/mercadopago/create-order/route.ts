@@ -221,9 +221,12 @@ export async function POST(request: Request) {
   }
 
   let createdOrderId: string | null = null;
+  let currentPaymentMode: "prod" | "test" | null = null;
+  let currentExternalReference: string | null = null;
 
   try {
     const paymentMode = await getPaymentMode();
+    currentPaymentMode = paymentMode;
     const mpPublicKey = getMercadoPagoPublicKey(paymentMode);
     const mpAccessToken = getMercadoPagoAccessTokenByEnvironment(paymentMode);
 
@@ -250,6 +253,7 @@ export async function POST(request: Request) {
     const externalReference = isTestModePayment
       ? `ritual-test-${Date.now()}-${randomUUID().slice(0, 8)}`
       : `ritual-${Date.now()}-${randomUUID().slice(0, 8)}`;
+    currentExternalReference = externalReference;
     const idempotencyKey = randomUUID();
 
     const orderInsert = {
@@ -408,15 +412,51 @@ export async function POST(request: Request) {
       total_amount: payment.transaction_amount ?? totalAmount,
     });
   } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "No fue posible procesar el pago en este momento. Intenta nuevamente.";
+    const status = getValidationErrorStatus(errorMessage);
+
+    if (currentPaymentMode === "test" && createdOrderId && status >= 500) {
+      const { error: testModeOrderUpdateError } = await supabaseAdminRequest<unknown[]>(
+        `/rest/v1/orders?id=eq.${encodeURIComponent(createdOrderId)}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            status: "error",
+            metadata: {
+              fallback_reason: "test_mode_500_bypass",
+              fallback_error_message: errorMessage,
+              fallback_at: new Date().toISOString(),
+            },
+          }),
+        },
+      );
+
+      if (testModeOrderUpdateError) {
+        console.error("[MP create-order] No se pudo actualizar orden fallback de test:", testModeOrderUpdateError);
+      }
+
+      console.warn("[MP create-order] Test mode fallback activado por error 500 en registro de pago.", {
+        orderId: createdOrderId,
+        externalReference: currentExternalReference,
+      });
+
+      return NextResponse.json({
+        order_id: null,
+        payment_id: null,
+        status: "error",
+        status_detail: "test_mode_500_bypass",
+        external_reference: currentExternalReference,
+        normalized_status: "error",
+      });
+    }
+
     if (createdOrderId) {
       await releaseCourseCapacity(createdOrderId, "create-order-mp-request-failed");
       await deleteOrderDraft(createdOrderId);
     }
 
     console.error("[MP create-order] Error procesando orden:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "No fue posible procesar el pago en este momento. Intenta nuevamente.";
-    const status = getValidationErrorStatus(errorMessage);
 
     return NextResponse.json({ error: errorMessage }, { status });
   }

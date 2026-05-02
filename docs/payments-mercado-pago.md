@@ -146,6 +146,7 @@ Estados de `webhook_processing` usados por el sistema:
 - El checkout resuelve modo activo desde `public.app_settings` (`payments_mode`).
 - `payments_mode=test` usa `MP_ACCESS_TOKEN_TEST`, `MP_NOTIFICATION_URL_TEST`, `MP_WEBHOOK_SECRET_TEST` y `MP_PUBLIC_KEY_TEST`.
 - En `payments_mode=test`, `create-order` etiqueta cada cobro con prefijo `[TEST]` en `description` y genera `external_reference` con segmento `ritual-test-*`. En `payments_mode=prod` no se agrega prefijo visible al usuario en la descripción del pago.
+- En `payments_mode=test`, si `create-order` enfrenta un error interno (`5xx`) después de crear la orden local, se activa un fallback para pruebas: la orden se conserva con `status="error"` y metadata `fallback_reason="test_mode_500_bypass"` para permitir validar flujos posteriores sin bloquear QA por fallas transitorias de registro.
 - `payments_mode=prod` usa `MP_ACCESS_TOKEN_PROD`, `MP_NOTIFICATION_URL_PROD`, `MP_WEBHOOK_SECRET_PROD` y `MP_PUBLIC_KEY_PROD`.
 - Solo superusuario (correo incluido en `SUPERUSER_EMAILS`) puede cambiar modo desde `/admin/pagos`.
 - En `/admin/pagos`, la sección de verificación incluye al final un listado paginado de pagos recientes (bloques de 10) ordenado de más reciente a más antiguo vía `/v1/payments/search` de Mercado Pago.
