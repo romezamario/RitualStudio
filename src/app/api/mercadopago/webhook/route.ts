@@ -63,6 +63,7 @@ type OrderRecord = {
   total_amount?: number | string | null;
   metadata?: OrderMetadata | null;
   created_at?: string | null;
+  payment_confirmation_email_sent_at?: string | null;
 };
 
 type OrderCourseItemRecord = {
@@ -315,7 +316,7 @@ async function fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId: string) {
   }
 
   const { data, error } = await supabaseAdminRequest<OrderRecord[]>(
-    `/rest/v1/orders?select=id,external_reference,mercado_pago_order_id,customer_email,total_amount,metadata,created_at&mercado_pago_order_id=eq.${encodeURIComponent(
+    `/rest/v1/orders?select=id,external_reference,mercado_pago_order_id,customer_email,total_amount,metadata,created_at,payment_confirmation_email_sent_at&mercado_pago_order_id=eq.${encodeURIComponent(
       mercadoPagoOrderId
     )}&order=created_at.desc&limit=1`
   );
@@ -341,14 +342,28 @@ async function fetchOrderCourseItems(orderId: string) {
   return data ?? [];
 }
 
-async function persistEmailConfirmationMetadata(orderId: string, metadata: OrderMetadata) {
+async function persistEmailConfirmationMetadata({
+  orderId,
+  metadata,
+  markAsSent,
+}: {
+  orderId: string;
+  metadata: OrderMetadata;
+  markAsSent?: boolean;
+}) {
+  const payload: Record<string, unknown> = {
+    metadata,
+  };
+
+  if (markAsSent) {
+    payload.payment_confirmation_email_sent_at = new Date().toISOString();
+  }
+
   const { error } = await supabaseAdminRequest<unknown[]>(
     `/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`,
     {
       method: "PATCH",
-      body: JSON.stringify({
-        metadata,
-      }),
+      body: JSON.stringify(payload),
     }
   );
 
@@ -534,9 +549,23 @@ async function trySendPurchaseEmail({
   }
 
   const emailAttempts = Number(order.metadata?.email_confirmation?.attempts ?? 0);
-  const alreadySent = order.metadata?.email_confirmation?.sent === true;
 
-  if (alreadySent) {
+  if (order.payment_confirmation_email_sent_at) {
+    const skippedMetadata = mergeOrderMetadata(order.metadata, {
+      email_confirmation: {
+        sent: true,
+        skipped: true,
+        sent_at: order.payment_confirmation_email_sent_at,
+        attempts: emailAttempts + 1,
+        last_attempt_at: new Date().toISOString(),
+        error: undefined,
+      },
+    });
+
+    await persistEmailConfirmationMetadata({
+      orderId: order.id,
+      metadata: skippedMetadata,
+    });
     return;
   }
 
@@ -556,7 +585,10 @@ async function trySendPurchaseEmail({
       },
     });
 
-    await persistEmailConfirmationMetadata(order.id, failedMetadata);
+    await persistEmailConfirmationMetadata({
+      orderId: order.id,
+      metadata: failedMetadata,
+    });
     return;
   }
 
@@ -598,7 +630,11 @@ async function trySendPurchaseEmail({
         },
   });
 
-  await persistEmailConfirmationMetadata(order.id, nextMetadata);
+  await persistEmailConfirmationMetadata({
+    orderId: order.id,
+    metadata: nextMetadata,
+    markAsSent: sendResult.ok,
+  });
 }
 
 type WebhookFailurePolicy = "mp-retry-5xx" | "internal-retry-200" | "non-retryable-200";
