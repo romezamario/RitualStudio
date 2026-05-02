@@ -388,11 +388,8 @@ async function tryMercadoPagoSdkRequest<T>({
     return response as T;
   }
 
-  if (method === "GET" && path.startsWith("/v1/payments/search") && paymentApi.search) {
-    const [, queryString = ""] = path.split("?");
-    const options = Object.fromEntries(new URLSearchParams(queryString).entries());
-    const response = await paymentApi.search({ options });
-    return response as T;
+  if (method === "GET" && path.startsWith("/v1/payments/search")) {
+    return null;
   }
 
   return null;
