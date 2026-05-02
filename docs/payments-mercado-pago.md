@@ -134,7 +134,7 @@ Estados de `webhook_processing` usados por el sistema:
 - Documentar job automático de reconciliación para órdenes pendientes sin confirmación webhook en ventana esperada.
 
 
-## Modo de pagos conmutable (superusuario)
+## Modo de pago y verificación conmutable (superusuario)
 - El checkout resuelve modo activo desde `public.app_settings` (`payments_mode`).
 - `payments_mode=test` usa `MP_ACCESS_TOKEN_TEST`, `MP_NOTIFICATION_URL_TEST`, `MP_WEBHOOK_SECRET_TEST` y `MP_PUBLIC_KEY_TEST`.
 - En `payments_mode=test`, `create-order` etiqueta cada cobro con prefijo `[TEST]` en `description` y genera `external_reference` con segmento `ritual-test-*`. En `payments_mode=prod` no se agrega prefijo visible al usuario en la descripción del pago.
