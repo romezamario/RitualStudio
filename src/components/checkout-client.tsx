@@ -678,42 +678,7 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
         <article className="studio-card checkout-summary">
           <p className="card-label">Resumen de compra</p>
           <h2>Checkout embebido</h2>
-          <ul>
-            {items.map((item) => (
-              <li key={getCartItemLineKey(item)}>
-                <span>
-                  {item.name}
-                  {item.kind === "product" && item.deliveryDateLabel && item.deliveryWindowLabel ? (
-                    <>
-                      <br />
-                      <small>
-                        Entrega: {item.deliveryDateLabel} · {item.deliveryWindowLabel}
-                      </small>
-                    </>
-                  ) : null}
-                  {item.kind === "course" ? (
-                    <>
-                      <br />
-                      <small>Sesión: {formatCourseSessionDate(item.sessionStartsAt)}</small>
-                      <br />
-                      <small>Participantes: {item.quantity}</small>
-                    </>
-                  ) : null}
-                </span>
-                <strong>
-                  {item.quantity} x {item.price}
-                </strong>
-              </li>
-            ))}
-          </ul>
-          <p className="checkout-total">Total: ${total.toLocaleString("es-MX")} MXN</p>
-        </article>
-
-        <article className="studio-card checkout-form-shell">
-          <div className={`checkout-feedback checkout-feedback-${checkoutStatus}`} role="status" aria-live="polite">
-            {feedback}
-          </div>
-                    <section className="checkout-delivery-address" aria-label="Dirección de entrega">
+          <section className="checkout-delivery-address" aria-label="Dirección de entrega">
             <h3>Dirección de entrega</h3>
             {savedAddresses.length ? (
               <label className="checkout-address-select">
@@ -757,6 +722,41 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
               </>
             ) : null}
           </section>
+          <ul>
+            {items.map((item) => (
+              <li key={getCartItemLineKey(item)}>
+                <span>
+                  {item.name}
+                  {item.kind === "product" && item.deliveryDateLabel && item.deliveryWindowLabel ? (
+                    <>
+                      <br />
+                      <small>
+                        Entrega: {item.deliveryDateLabel} · {item.deliveryWindowLabel}
+                      </small>
+                    </>
+                  ) : null}
+                  {item.kind === "course" ? (
+                    <>
+                      <br />
+                      <small>Sesión: {formatCourseSessionDate(item.sessionStartsAt)}</small>
+                      <br />
+                      <small>Participantes: {item.quantity}</small>
+                    </>
+                  ) : null}
+                </span>
+                <strong>
+                  {item.quantity} x {item.price}
+                </strong>
+              </li>
+            ))}
+          </ul>
+          <p className="checkout-total">Total: ${total.toLocaleString("es-MX")} MXN</p>
+        </article>
+
+        <article className="studio-card checkout-form-shell">
+          <div className={`checkout-feedback checkout-feedback-${checkoutStatus}`} role="status" aria-live="polite">
+            {feedback}
+          </div>
           {courseLines.length ? (
             <section className="checkout-participants" aria-label="Participantes por sesión">
               <h3>Participantes</h3>
