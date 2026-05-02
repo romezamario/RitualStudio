@@ -50,6 +50,11 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - `RESEND_FROM_EMAIL`: remitente principal para correos transaccionales (recomendado).
 - `EMAIL_FROM` (legacy opcional): fallback temporal de remitente para compatibilidad retroactiva.
 - `EMAIL_SUPPORT_CHANNEL`: canal mostrado en comprobantes.
+- `SITE_URL` (opcional): URL canónica server-side usada como fallback para links en emails.
+- `EMAIL_ACCOUNT_ORDERS_URL` (opcional): URL absoluta personalizada para CTA de "Revisar mis compras" en email; si no existe se deriva como `<SITE_URL>/mi-cuenta/pedidos` (o `NEXT_PUBLIC_SITE_URL`).
+- `EMAIL_SOCIAL_INSTAGRAM_URL` (opcional): link de Instagram mostrado en comprobante.
+- `EMAIL_SOCIAL_FACEBOOK_URL` (opcional): link de Facebook mostrado en comprobante.
+- `EMAIL_SOCIAL_TIKTOK_URL` (opcional): link de TikTok mostrado en comprobante.
 
 ## Variables nuevas para cursos (estado actual)
 - Para la venta/admin de cursos **no se agregaron variables nuevas** en esta iteración.
