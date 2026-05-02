@@ -15,6 +15,9 @@ export type ProductCartItem = {
   image: MarketplaceProduct["image"];
   category: MarketplaceProduct["category"];
   quantity: number;
+  deliveryDateIso?: string;
+  deliveryDateLabel?: string;
+  deliveryWindowLabel?: string;
 };
 
 export type CourseCartItem = {
@@ -43,10 +46,17 @@ export type AddCourseToCartInput = {
   participants: number;
 };
 
+export type AddProductToCartInput = {
+  product: MarketplaceProduct;
+  deliveryDateIso?: string;
+  deliveryDateLabel?: string;
+  deliveryWindowLabel?: string;
+};
+
 type CartContextValue = {
   items: CartItem[];
   totalItems: number;
-  addProductToCart: (product: MarketplaceProduct) => void;
+  addProductToCart: (input: AddProductToCartInput) => void;
   addCourseToCart: (input: AddCourseToCartInput) => void;
   removeFromCart: (lineKey: string) => void;
   clearCart: () => void;
@@ -73,7 +83,7 @@ function sanitizeCartItems(rawItems: unknown): CartItem[] {
   }
 
   return rawItems
-    .map((entry) => {
+    .map((entry): CartItem | null => {
       if (!entry || typeof entry !== "object") {
         return null;
       }
@@ -85,6 +95,9 @@ function sanitizeCartItems(rawItems: unknown): CartItem[] {
       const maybeImage = "image" in entry ? String(entry.image) : "";
       const maybeCategory = "category" in entry ? String(entry.category) : "";
       const maybeQuantity = "quantity" in entry ? Number(entry.quantity) : 0;
+      const maybeDeliveryDateIso = "deliveryDateIso" in entry ? String(entry.deliveryDateIso ?? "") : "";
+      const maybeDeliveryDateLabel = "deliveryDateLabel" in entry ? String(entry.deliveryDateLabel ?? "") : "";
+      const maybeDeliveryWindowLabel = "deliveryWindowLabel" in entry ? String(entry.deliveryWindowLabel ?? "") : "";
 
       if (!maybeSlug || !maybeName || !maybePrice || !maybeImage || !Number.isInteger(maybeQuantity) || maybeQuantity < 1) {
         return null;
@@ -125,6 +138,9 @@ function sanitizeCartItems(rawItems: unknown): CartItem[] {
         image: maybeImage,
         category: maybeCategory as MarketplaceProduct["category"],
         quantity: clampQuantityByKind("product", maybeQuantity),
+        deliveryDateIso: maybeDeliveryDateIso || undefined,
+        deliveryDateLabel: maybeDeliveryDateLabel || undefined,
+        deliveryWindowLabel: maybeDeliveryWindowLabel || undefined,
       };
     })
     .filter((item): item is CartItem => item !== null);
@@ -164,14 +180,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     () => ({
       items,
       totalItems: items.reduce((sum, item) => sum + item.quantity, 0),
-      addProductToCart: (product) => {
+      addProductToCart: ({ product, deliveryDateIso, deliveryDateLabel, deliveryWindowLabel }) => {
         setItems((currentItems) => {
           const existingItem = currentItems.find((entry) => entry.kind === "product" && entry.slug === product.slug);
 
           if (existingItem) {
             return currentItems.map((entry) =>
               entry.kind === "product" && entry.slug === product.slug
-                ? { ...entry, quantity: clampQuantityByKind("product", entry.quantity + 1) }
+                ? {
+                    ...entry,
+                    quantity: clampQuantityByKind("product", entry.quantity + 1),
+                    deliveryDateIso: deliveryDateIso ?? entry.deliveryDateIso,
+                    deliveryDateLabel: deliveryDateLabel ?? entry.deliveryDateLabel,
+                    deliveryWindowLabel: deliveryWindowLabel ?? entry.deliveryWindowLabel,
+                  }
                 : entry,
             );
           }
@@ -186,6 +208,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               image: product.image,
               category: product.category,
               quantity: 1,
+              deliveryDateIso,
+              deliveryDateLabel,
+              deliveryWindowLabel,
             },
           ];
         });

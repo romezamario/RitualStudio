@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { getCartItemLineKey, useCart } from "@/components/cart-context";
 import { useAuth } from "@/components/auth-context";
 import { MIN_MX_CARD_PAYMENT_AMOUNT, parseMxPrice } from "@/lib/mercadopago";
+import { formatDateTimeMx } from "@/lib/date-time";
 import { detectPublicKeyEnvironment } from "@/lib/mercadopago-env";
 
 type CheckoutStatus = "idle" | "loading" | "approved" | "pending" | "rejected" | "error";
@@ -137,6 +138,13 @@ function getHumanReadableBrickError(error: unknown, isProductionKey: boolean) {
   }
 
   return fallback;
+}
+
+function formatCourseSessionDate(startsAt: string) {
+  return formatDateTimeMx(startsAt, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 function validateCourseParticipants(courseParticipantsByLine: CourseParticipantsByLine) {
@@ -587,7 +595,25 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
           <ul>
             {items.map((item) => (
               <li key={getCartItemLineKey(item)}>
-                <span>{item.name}</span>
+                <span>
+                  {item.name}
+                  {item.kind === "product" && item.deliveryDateLabel && item.deliveryWindowLabel ? (
+                    <>
+                      <br />
+                      <small>
+                        Entrega: {item.deliveryDateLabel} · {item.deliveryWindowLabel}
+                      </small>
+                    </>
+                  ) : null}
+                  {item.kind === "course" ? (
+                    <>
+                      <br />
+                      <small>Sesión: {formatCourseSessionDate(item.sessionStartsAt)}</small>
+                      <br />
+                      <small>Participantes: {item.quantity}</small>
+                    </>
+                  ) : null}
+                </span>
                 <strong>
                   {item.quantity} x {item.price}
                 </strong>

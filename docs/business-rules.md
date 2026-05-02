@@ -31,6 +31,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - Email alterno de comprobante es opcional, pero si se envía debe ser válido.
 - Cuotas (`installments`) permitidas: 1 a 24.
 - Si el carrito contiene cursos, checkout exige captura de nombres de participantes por sesión (`quantity` nombres por cada línea de curso).
+- El resumen de checkout muestra metadatos operativos por línea: en productos, fecha/ventana de entrega seleccionada; en cursos, fecha/hora de sesión y número de participantes elegidos.
 - Validaciones de participantes (frontend y backend): nombres no vacíos, mínimo 2 caracteres y sin duplicados exactos por sesión.
 - Regla de consistencia de participantes: el total de participantes capturados por `course_session_id` debe coincidir exactamente con `quantity` de cada línea de curso o la orden se rechaza antes de invocar a Mercado Pago.
 
