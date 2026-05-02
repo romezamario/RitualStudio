@@ -675,6 +675,17 @@ p {
   gap: 0.4rem;
 }
 
+.studio-form input,
+.studio-form textarea,
+.studio-form select {
+  background: color-mix(in srgb, white 78%, var(--rose-mist));
+  border: 1px solid color-mix(in srgb, var(--smoke) 45%, white);
+  border-radius: 0.7rem;
+  color: var(--ink);
+  font: inherit;
+  padding: 0.75rem 0.85rem;
+}
+
 .input {
   background: color-mix(in srgb, white 78%, var(--rose-mist));
   border: 1px solid color-mix(in srgb, var(--smoke) 45%, white);
@@ -1703,6 +1714,9 @@ p {
   display: grid;
   gap: 0.75rem;
   grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 1rem;
+  max-width: none;
+  width: 100%;
 }
 
 .admin-users-label {
@@ -1715,7 +1729,13 @@ p {
 .admin-users-table-wrap {
   border: 1px solid color-mix(in srgb, var(--smoke) 45%, white);
   border-radius: 0.9rem;
+  margin-top: 1rem;
   overflow: hidden;
+}
+
+.admin-users-feedback,
+.admin-users-status {
+  margin-top: 0.8rem;
 }
 
 .admin-users-table {
