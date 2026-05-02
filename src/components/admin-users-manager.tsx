@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 type AdminUser = {
   id: string;
   email: string | null;
+  full_name: string | null;
 };
 
 export default function AdminUsersManager() {
@@ -13,6 +14,7 @@ export default function AdminUsersManager() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [processingUserId, setProcessingUserId] = useState<string | null>(null);
 
   const loadAdmins = async () => {
     setLoading(true);
@@ -71,6 +73,32 @@ export default function AdminUsersManager() {
     }
   };
 
+  const handleDeactivateAdmin = async (admin: AdminUser) => {
+    setProcessingUserId(admin.id);
+    setFeedback("");
+
+    try {
+      const response = await fetch("/api/admin/users", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: admin.id }),
+      });
+
+      const body = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(body?.error ?? "No fue posible dar de baja al administrador.");
+      }
+
+      setFeedback(body?.message ?? "Administrador dado de baja correctamente.");
+      await loadAdmins();
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "No fue posible dar de baja al administrador.");
+    } finally {
+      setProcessingUserId(null);
+    }
+  };
+
   return (
     <div className="studio-card">
       <p className="card-label">Panel admin</p>
@@ -95,13 +123,39 @@ export default function AdminUsersManager() {
 
       {feedback ? <p style={{ marginTop: 12 }}>{feedback}</p> : null}
 
-      <ul style={{ marginTop: 16 }}>
-        {loading ? <li>Cargando administradores...</li> : null}
-        {!loading && admins.length === 0 ? <li>No hay administradores registrados.</li> : null}
-        {admins.map((admin) => (
-          <li key={admin.id}>{admin.email ?? "(sin correo)"}</li>
-        ))}
-      </ul>
+      {loading ? <p style={{ marginTop: 16 }}>Cargando administradores...</p> : null}
+      {!loading && admins.length === 0 ? <p style={{ marginTop: 16 }}>No hay administradores registrados.</p> : null}
+
+      {!loading && admins.length > 0 ? (
+        <div style={{ marginTop: 16, overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: "left", padding: "8px 6px" }}>Nombre</th>
+                <th style={{ textAlign: "left", padding: "8px 6px" }}>Correo</th>
+                <th style={{ textAlign: "left", padding: "8px 6px" }}>Opciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {admins.map((admin) => (
+                <tr key={admin.id}>
+                  <td style={{ padding: "8px 6px" }}>{admin.full_name?.trim() ? admin.full_name : "(sin nombre)"}</td>
+                  <td style={{ padding: "8px 6px" }}>{admin.email ?? "(sin correo)"}</td>
+                  <td style={{ padding: "8px 6px" }}>
+                    <button
+                      type="button"
+                      onClick={() => void handleDeactivateAdmin(admin)}
+                      disabled={processingUserId === admin.id}
+                    >
+                      {processingUserId === admin.id ? "Procesando..." : "Dar de baja"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
     </div>
   );
 }

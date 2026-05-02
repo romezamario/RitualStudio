@@ -49,9 +49,11 @@ Incluye:
 
 ## Promotion to Admin
 - El módulo `/admin/usuarios` permite que un usuario con rol `admin` promueva a otro usuario existente en `public.profiles` al rol `admin` usando su correo.
-- Restricción: no puede otorgar capacidades de superusuario (`SUPERUSER_EMAILS`) desde este módulo.
+- También permite **dar de baja administradores** existentes (cambiar `role` a `user`) desde la misma pantalla.
+- La UI muestra una tabla con `full_name`, `email` y acciones operativas (alta/baja) para trazabilidad rápida.
+- Restricción: no puede otorgar ni revocar capacidades de superusuario (`SUPERUSER_EMAILS`) desde este módulo.
 - Si el correo no existe en Supabase (`public.profiles`), la API responde error y se debe crear primero el usuario.
-- Endpoint involucrado: `GET/POST /api/admin/users` (server-side, validación de sesión admin).
+- Endpoint involucrado: `GET/POST/DELETE /api/admin/users` (server-side, validación de sesión admin).
 
 
 ## Security Rules
