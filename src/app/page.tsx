@@ -9,6 +9,13 @@ type CategoryItem = {
   href: string;
 };
 
+type OccasionItem = {
+  title: string;
+  microcopy: string;
+  imageUrl: string;
+  queryTag: string;
+};
+
 type FeaturedItem = {
   title: string;
   note: string;
@@ -81,6 +88,56 @@ const categoryItems: CategoryItem[] = [
     href: "/custom"
   }
 ];
+
+const marketplaceFiltersEnabled = false;
+
+const occasionItems: OccasionItem[] = [
+  {
+    title: "Cumpleaños",
+    microcopy: "Sorprende hoy con flores alegres y listas para regalar.",
+    imageUrl: "/images/wallpaper-marketplace.jpg",
+    queryTag: "cumpleanos"
+  },
+  {
+    title: "Amor",
+    microcopy: "Bouquets románticos para celebrar momentos especiales.",
+    imageUrl: "/images/wallpaper-custom.jpg",
+    queryTag: "amor"
+  },
+  {
+    title: "Aniversario",
+    microcopy: "Composiciones elegantes para recordar su historia juntos.",
+    imageUrl: "/images/wallpaper-eventos.jpg",
+    queryTag: "aniversario"
+  },
+  {
+    title: "Agradecimiento",
+    microcopy: "Un detalle floral para agradecer con intención y estilo.",
+    imageUrl: "/images/wallpaper-marketplace.jpg",
+    queryTag: "agradecimiento"
+  },
+  {
+    title: "Condolencias",
+    microcopy: "Arreglos sobrios para acompañar y expresar apoyo.",
+    imageUrl: "/images/wallpaper-custom.jpg",
+    queryTag: "condolencias"
+  },
+  {
+    title: "Corporativo",
+    microcopy: "Regalos florales para clientes, equipos y aliados clave.",
+    imageUrl: "/images/wallpaper-eventos.jpg",
+    queryTag: "corporativo"
+  }
+];
+
+function buildOccasionHref(queryTag: string) {
+  if (!marketplaceFiltersEnabled) {
+    return "/marketplace";
+  }
+
+  const params = new URLSearchParams({ ocasion: queryTag });
+  return `/marketplace?${params.toString()}`;
+}
 
 const featuredItems: FeaturedItem[] = [
   {
@@ -177,6 +234,26 @@ export default function Home() {
           </article>
         ))}
               </div>
+      </section>
+
+      <section className="section-block" aria-label="Compra por ocasión">
+        <div className="section-intro">
+          <p className="section-tag">Compra por ocasión</p>
+          <p className="section-microcopy">
+            Elige una intención de compra y te llevamos al marketplace con opciones sugeridas.
+          </p>
+        </div>
+        <div className="occasion-grid">
+          {occasionItems.map((item) => (
+            <Link key={item.title} href={buildOccasionHref(item.queryTag)} className="occasion-card">
+              <Image src={item.imageUrl} alt={item.title} width={800} height={560} />
+              <div className="occasion-card-body">
+                <h3>{item.title}</h3>
+                <p>{item.microcopy}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <section className="section-block" aria-label="Más vendidos y selección del estudio">
