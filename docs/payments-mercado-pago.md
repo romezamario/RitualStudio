@@ -50,6 +50,7 @@ Respuesta (resumen):
   - Para listados (`/v1/payments/search`) se usa HTTP directo para evitar warnings deprecados del SDK en runtime (Node DEP0169).
    - Si el SDK no está disponible en runtime, `mpApiFetch` conserva fallback HTTP directo para evitar caída total del checkout/webhook.
    - En esa llamada se envía `notification_url` para que Mercado Pago publique eventos de pago al webhook del proyecto.
+   - También se envía `additional_info.items[]` con `id`, `title`, `description`, `category_id`, `quantity` y `unit_price` por línea para mejorar score de aprobación y detalle antifraude.
 6. Backend actualiza orden/pago en Supabase con respuesta de Mercado Pago.
 
 ## Checkout Embebido (Card Payment Brick)
