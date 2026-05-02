@@ -47,18 +47,18 @@ async function lookupPaymentVerification(mode: "prod" | "test", query: string): 
     let order: Record<string, unknown> | null = null;
 
     if (/^\d+$/.test(trimmed)) {
-      payment = await mpApiFetch(`/v1/payments/${trimmed}`, token);
+      payment = await mpApiFetch(`/v1/payments/${trimmed}`, { accessToken: token, environment: mode });
     }
 
     if (!payment) {
-      const search = await mpApiFetch(`/v1/payments/search?sort=date_created&criteria=desc&external_reference=${encodeURIComponent(trimmed)}&limit=1`, token);
+      const search = await mpApiFetch(`/v1/payments/search?sort=date_created&criteria=desc&external_reference=${encodeURIComponent(trimmed)}&limit=1`, { accessToken: token, environment: mode });
       const results = Array.isArray((search as { results?: unknown[] }).results) ? (search as { results: unknown[] }).results : [];
       payment = (results[0] as Record<string, unknown> | undefined) ?? null;
     }
 
     const orderId = payment?.order && typeof payment.order === "object" ? (payment.order as { id?: string | number }).id : null;
     if (orderId) {
-      order = await mpApiFetch(`/merchant_orders/${String(orderId)}`, token);
+      order = await mpApiFetch(`/merchant_orders/${String(orderId)}`, { accessToken: token, environment: mode });
     }
 
     const paymentId = payment?.id ? String(payment.id) : null;
