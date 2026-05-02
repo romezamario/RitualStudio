@@ -56,7 +56,7 @@ function getSupportChannel() {
 }
 
 function getSiteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL?.trim() || process.env.SITE_URL?.trim() || "";
+  return process.env.SITE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || "";
 }
 
 function getAccountOrdersUrl() {
@@ -105,6 +105,8 @@ function buildPurchaseConfirmationTemplate(input: SendPurchaseConfirmationEmailI
   const safeSiteUrl = siteUrl ? escapeHtml(siteUrl) : "";
   const safeOrdersUrl = ordersUrl ? escapeHtml(ordersUrl) : "";
 
+  const calloutBoxStyle = "background:#fff;border:1px solid #e7ded7;border-radius:10px;padding:14px 16px;margin:0 0 14px;";
+
   const itemsRowsHtml = input.items
     .map(
       (item) => `
@@ -126,7 +128,7 @@ function buildPurchaseConfirmationTemplate(input: SendPurchaseConfirmationEmailI
     .join("\n");
 
   const socialLinksHtml = socialLinks
-    .map((social) => `<a href="${escapeHtml(social.url)}" style="color:#2f2925;">${escapeHtml(social.label)}</a>`)
+    .map((social) => `<a href="${escapeHtml(social.url)}" style="color:#2f2925;text-decoration:none;">${escapeHtml(social.label)}</a>`)
     .join(" · ");
 
   const socialLinksText = socialLinks.map((social) => `${social.label}: ${social.url}`).join(" | ");
@@ -142,6 +144,11 @@ function buildPurchaseConfirmationTemplate(input: SendPurchaseConfirmationEmailI
         <p style="margin:0 0 12px;"><strong>Folio / referencia:</strong> ${safeExternalReference}</p>
         <p style="margin:0 0 12px;"><strong>ID de pago:</strong> ${safePaymentId}</p>
         <p style="margin:0 0 18px;"><strong>Fecha (hora de México):</strong> ${escapeHtml(formattedDate)}</p>
+
+        <div style="${calloutBoxStyle}">
+          <p style="margin:0 0 8px;"><strong>Resumen rápido</strong></p>
+          <p style="margin:0;line-height:1.5;">Tu pago ya fue acreditado y nuestro equipo comenzará a preparar tu pedido. Conserva este folio para cualquier aclaración.</p>
+        </div>
 
         <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e7ded7;">
           <thead>
@@ -160,9 +167,12 @@ function buildPurchaseConfirmationTemplate(input: SendPurchaseConfirmationEmailI
         <p style="margin:18px 0 8px;font-size:18px;"><strong>Total pagado: ${toCurrency(input.totalAmount)}</strong></p>
         <p style="margin:0 0 8px;">Canal de soporte: ${safeSupportChannel}</p>
         <p style="margin:0 0 8px;color:#5f5751;">Comprobante enviado a: ${safeTo}</p>
-        ${safeOrdersUrl ? `<p style="margin:0 0 8px;"><a href="${safeOrdersUrl}" style="color:#2f2925;">Revisar mis compras</a></p>` : ""}
-        ${safeSiteUrl ? `<p style="margin:0 0 8px;"><a href="${safeSiteUrl}" style="color:#2f2925;">Visitar Ritual Studio</a></p>` : ""}
-        ${socialLinksHtml ? `<p style="margin:0;color:#5f5751;">Síguenos: ${socialLinksHtml}</p>` : ""}
+        ${safeOrdersUrl || safeSiteUrl ? `<div style="${calloutBoxStyle}">
+          <p style="margin:0 0 8px;"><strong>Siguientes pasos</strong></p>
+          ${safeOrdersUrl ? `<p style="margin:0 0 6px;"><a href="${safeOrdersUrl}" style="color:#2f2925;">Revisar mis compras</a></p>` : ""}
+          ${safeSiteUrl ? `<p style="margin:0;"><a href="${safeSiteUrl}" style="color:#2f2925;">Visitar Ritual Studio</a></p>` : ""}
+        </div>` : ""}
+        <p style="margin:10px 0 0;color:#5f5751;">${socialLinksHtml ? `Síguenos: ${socialLinksHtml}` : "Pronto recibirás actualizaciones de tu pedido por este medio."}</p>
       </div>
     `,
     text: `Gracias por confiar en Ritual Studio.
