@@ -298,6 +298,7 @@ export async function POST(request: Request) {
         receipt_email: normalizedReceiptEmail ?? payer.email,
         idempotency_key: idempotencyKey,
         payment_mode: paymentMode,
+        delivery_address: body.delivery_address ?? null,
         course_participants: Object.fromEntries(validatedCourseParticipants),
       },
     };

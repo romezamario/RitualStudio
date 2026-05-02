@@ -10,6 +10,20 @@ type PurchasedItem = {
   subtotal?: number;
 };
 
+type DeliveryAddress = {
+  label?: string;
+  recipientName?: string;
+  phone?: string;
+  street?: string;
+  exteriorNumber?: string;
+  interiorNumber?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  references?: string;
+};
+
 type OrderRow = {
   external_reference?: string;
   mercado_pago_order_id?: string | null;
@@ -18,6 +32,7 @@ type OrderRow = {
   customer_email?: string | null;
   metadata?: {
     items?: PurchasedItem[];
+    delivery_address?: DeliveryAddress;
   } | null;
   created_at?: string;
   updated_at?: string;
@@ -266,6 +281,7 @@ export async function GET(request: Request) {
   }
 
   const items = Array.isArray(order?.metadata?.items) ? order.metadata.items : [];
+  const deliveryAddress = order?.metadata?.delivery_address ?? null;
   const consolidatedStatus = consolidateStatus(order?.status, payment?.status);
 
   return NextResponse.json({
@@ -281,6 +297,7 @@ export async function GET(request: Request) {
       customer_email: order?.customer_email ?? null,
       payment_method: payment?.payment_method ?? null,
       items,
+      delivery_address: deliveryAddress,
       timestamps: {
         order_created_at: order?.created_at ?? null,
         order_updated_at: order?.updated_at ?? null,

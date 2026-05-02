@@ -13,6 +13,20 @@ type PurchasedItem = {
   subtotal?: number;
 };
 
+type DeliveryAddress = {
+  label?: string;
+  recipientName?: string;
+  phone?: string;
+  street?: string;
+  exteriorNumber?: string;
+  interiorNumber?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  references?: string;
+};
+
 type OrderSummaryResponse = {
   found: boolean;
   error?: string;
@@ -27,6 +41,7 @@ type OrderSummaryResponse = {
     customer_email?: string | null;
     payment_method?: string | null;
     items?: PurchasedItem[];
+    delivery_address?: DeliveryAddress | null;
     timestamps?: {
       order_created_at?: string | null;
       order_updated_at?: string | null;
@@ -88,6 +103,20 @@ function formatDate(rawDate?: string | null) {
     dateStyle: "full",
     timeStyle: "short",
   });
+}
+
+function formatDeliveryAddress(address?: DeliveryAddress | null) {
+  if (!address) {
+    return "No disponible";
+  }
+
+  const ext = address.exteriorNumber?.trim() ? ` #${address.exteriorNumber.trim()}` : "";
+  const interior = address.interiorNumber?.trim() ? ` Int ${address.interiorNumber.trim()}` : "";
+  const line = `${address.street?.trim() ?? ""}${ext}${interior}`.trim();
+  const zone = [address.neighborhood, address.city, address.state].map((value) => value?.trim()).filter(Boolean).join(", ");
+  const cp = address.postalCode?.trim() ? `CP ${address.postalCode.trim()}` : "";
+
+  return [line, zone, cp].filter(Boolean).join(", ") || "No disponible";
 }
 
 export default function CheckoutSuccessClient({ externalReference, paymentId }: CheckoutSuccessClientProps) {
@@ -367,6 +396,31 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
             de orden con soporte.
           </p>
         )}
+      </div>
+      <div className="checkout-success-summary">
+        <h3>Dirección de entrega</h3>
+        <ul>
+          <li>
+            <span>Alias</span>
+            <strong>{summary.delivery_address?.label?.trim() || "No disponible"}</strong>
+          </li>
+          <li>
+            <span>Recibe</span>
+            <strong>{summary.delivery_address?.recipientName?.trim() || "No disponible"}</strong>
+          </li>
+          <li>
+            <span>Teléfono</span>
+            <strong>{summary.delivery_address?.phone?.trim() || "No disponible"}</strong>
+          </li>
+          <li>
+            <span>Dirección</span>
+            <strong>{formatDeliveryAddress(summary.delivery_address)}</strong>
+          </li>
+          <li>
+            <span>Referencias</span>
+            <strong>{summary.delivery_address?.references?.trim() || "No disponible"}</strong>
+          </li>
+        </ul>
       </div>
 
       {!isAuthenticated ? (

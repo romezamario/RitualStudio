@@ -33,6 +33,20 @@ export type ValidatedLineItem = {
 
 export type CourseParticipantsBySession = Record<string, string[]>;
 
+export type DeliveryAddressInput = {
+  label?: string;
+  recipientName: string;
+  phone: string;
+  street: string;
+  exteriorNumber: string;
+  interiorNumber?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  references?: string;
+};
+
 export type MpCreateOrderInput = {
   token: string;
   payment_method_id: string;
@@ -45,6 +59,7 @@ export type MpCreateOrderInput = {
   receipt_email?: string;
   items: CheckoutLineItemInput[];
   course_participants?: CourseParticipantsBySession;
+  delivery_address?: DeliveryAddressInput;
 };
 
 type CourseRow = {
