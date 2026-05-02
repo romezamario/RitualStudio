@@ -71,7 +71,8 @@ Respuesta (resumen):
 - Existe fallback de validación por hash de `rawBody` para robustez.
 - En eventos `payment` aprobados, el envío de comprobante reintenta una segunda lectura corta de la orden (250ms) antes de omitir el email para tolerar consistencia eventual entre upserts y lectura. Si aún no existe, se registra como `info` operativo (no `warning`) para reducir ruido en observabilidad.
 - Para el comprobante post-pago por Resend, backend depende de `RESEND_API_KEY` + `RESEND_FROM_EMAIL` (con `EMAIL_FROM` como fallback legacy opcional de compatibilidad).
-- El comprobante incluye CTA opcionales para: revisar compras (`/mi-cuenta/pedidos`), visitar el sitio y links de redes sociales si se configuraron variables `EMAIL_*` correspondientes.
+- El comprobante incluye bloques enriquecidos visibles por defecto (resumen rápido + siguiente paso) y CTA condicionales para: revisar compras (`/mi-cuenta/pedidos`), visitar el sitio y links de redes sociales si se configuraron variables `EMAIL_*` correspondientes.
+- La URL base para CTAs se resuelve priorizando `SITE_URL` (server-side) y como fallback `NEXT_PUBLIC_SITE_URL`, para evitar correos con formato legacy cuando falta configuración pública en runtime backend.
 - Si no valida firma:
   - Se registra auditoría mínima en `payment_events` (`signature`, `webhook_processing` y `audit.ignored_reason="invalid_signature"`).
   - Se responde **HTTP 401** y se corta la ejecución antes de consultar APIs de MP o reconciliar pagos/cupos.
