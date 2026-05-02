@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SiteShell from "@/components/site-shell";
 
 type DeliveryStatus = "por_entregar" | "en_reparto" | "entregado";
@@ -21,6 +21,8 @@ const STATUS_OPTIONS: Array<{ value: DeliveryStatus; label: string }> = [
   { value: "entregado", label: "Entregado" },
 ];
 
+const DELIVERED_PAGE_SIZE = 10;
+
 function money(amount: number) {
   return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(amount);
 }
@@ -28,6 +30,8 @@ function money(amount: number) {
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<DeliveryStatus>("por_entregar");
+  const [deliveredPage, setDeliveredPage] = useState(1);
 
   async function loadOrders() {
     setLoading(true);
@@ -40,6 +44,39 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     void loadOrders();
   }, []);
+
+  const ordersByTab = useMemo(() => {
+    const byStatus: Record<DeliveryStatus, AdminOrder[]> = {
+      por_entregar: [],
+      en_reparto: [],
+      entregado: [],
+    };
+
+    for (const order of orders) {
+      byStatus[order.delivery_status].push(order);
+    }
+
+    return byStatus;
+  }, [orders]);
+
+  const deliveredOrders = ordersByTab.entregado;
+  const deliveredTotalPages = Math.max(1, Math.ceil(deliveredOrders.length / DELIVERED_PAGE_SIZE));
+  const safeDeliveredPage = Math.min(deliveredPage, deliveredTotalPages);
+
+  useEffect(() => {
+    if (safeDeliveredPage !== deliveredPage) {
+      setDeliveredPage(safeDeliveredPage);
+    }
+  }, [deliveredPage, safeDeliveredPage]);
+
+  const visibleOrders = useMemo(() => {
+    if (activeTab !== "entregado") {
+      return ordersByTab[activeTab];
+    }
+
+    const start = (safeDeliveredPage - 1) * DELIVERED_PAGE_SIZE;
+    return deliveredOrders.slice(start, start + DELIVERED_PAGE_SIZE);
+  }, [activeTab, deliveredOrders, ordersByTab, safeDeliveredPage]);
 
   async function updateStatus(orderId: string, status: DeliveryStatus) {
     const response = await fetch("/api/admin/orders", {
@@ -64,6 +101,23 @@ export default function AdminOrdersPage() {
         <p>Estados habilitados: por entregar, en reparto y entregado. Los correos se envían para pedidos con productos.</p>
       </div>
 
+      <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }} role="tablist" aria-label="Estados de pedidos">
+        {STATUS_OPTIONS.map((option) => {
+          const isActive = activeTab === option.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              className={isActive ? "btn btn-primary" : "btn btn-secondary"}
+              onClick={() => setActiveTab(option.value)}
+              aria-pressed={isActive}
+            >
+              {option.label} ({ordersByTab[option.value].length})
+            </button>
+          );
+        })}
+      </div>
+
       <div className="orders-table-card" style={{ marginTop: "1rem" }}>
         <div className="orders-table-head" aria-hidden="true">
           <span>Referencia</span>
@@ -74,9 +128,9 @@ export default function AdminOrdersPage() {
         </div>
         <div className="orders-table-body">
           {loading ? <div className="studio-card">Cargando pedidos…</div> : null}
-          {!loading && orders.length === 0 ? <div className="studio-card">No hay pedidos para mostrar.</div> : null}
+          {!loading && visibleOrders.length === 0 ? <div className="studio-card">No hay pedidos para mostrar en esta pestaña.</div> : null}
           {!loading
-            ? orders.map((order) => (
+            ? visibleOrders.map((order) => (
                 <div className="orders-table-row" key={order.id}>
                   <summary>
                     <span className="order-reference">{order.external_reference}</span>
@@ -104,6 +158,30 @@ export default function AdminOrdersPage() {
             : null}
         </div>
       </div>
+
+      {!loading && activeTab === "entregado" && deliveredOrders.length > DELIVERED_PAGE_SIZE ? (
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "1rem" }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setDeliveredPage((prev) => Math.max(1, prev - 1))}
+            disabled={safeDeliveredPage === 1}
+          >
+            Anterior
+          </button>
+          <span>
+            Página {safeDeliveredPage} de {deliveredTotalPages}
+          </span>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setDeliveredPage((prev) => Math.min(deliveredTotalPages, prev + 1))}
+            disabled={safeDeliveredPage === deliveredTotalPages}
+          >
+            Siguiente
+          </button>
+        </div>
+      ) : null}
     </SiteShell>
   );
 }
