@@ -15,6 +15,40 @@ type FeaturedItem = {
   href: string;
 };
 
+type HomeOption = {
+  titulo: string;
+  descripcion: string;
+  href: string;
+  url: string;
+  span?: "wide" | "tall" | "compact";
+};
+
+const WALLPAPER_IMAGE_SIZES = "(max-width: 900px) 100vw, 33vw";
+
+const opcionesHome: HomeOption[] = [
+  {
+    titulo: "Marketplace",
+    descripcion: "Bouquets premium listos para entregar y regalar hoy.",
+    href: "/marketplace",
+    url: "/images/wallpaper-marketplace.jpg",
+    span: "wide"
+  },
+  {
+    titulo: "Diseño a medida",
+    descripcion: "Creamos una propuesta floral personalizada para tu ocasión.",
+    href: "/custom",
+    url: "/images/wallpaper-custom.jpg",
+    span: "tall"
+  },
+  {
+    titulo: "Eventos",
+    descripcion: "Ambientaciones florales para celebraciones y marcas.",
+    href: "/eventos",
+    url: "/images/wallpaper-eventos.jpg",
+    span: "compact"
+  }
+];
+
 const categoryItems: CategoryItem[] = [
   {
     title: "Cumpleaños",
