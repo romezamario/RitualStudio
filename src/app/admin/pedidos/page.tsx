@@ -10,7 +10,6 @@ type AdminOrder = {
   external_reference: string;
   customer_email: string | null;
   created_at: string;
-  total_amount: number;
   delivery_status: DeliveryStatus;
   has_products: boolean;
 };
@@ -23,9 +22,6 @@ const STATUS_OPTIONS: Array<{ value: DeliveryStatus; label: string }> = [
 
 const DELIVERED_PAGE_SIZE = 10;
 
-function money(amount: number) {
-  return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(amount);
-}
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
@@ -122,7 +118,6 @@ export default function AdminOrdersPage() {
         <div className="orders-table-head" aria-hidden="true">
           <span>Referencia</span>
           <span>Fecha</span>
-          <span>Total</span>
           <span>Cliente</span>
           <span>Estado</span>
         </div>
@@ -135,7 +130,6 @@ export default function AdminOrdersPage() {
                   <summary>
                     <span className="order-reference">{order.external_reference}</span>
                     <span>{new Date(order.created_at).toLocaleString("es-MX")}</span>
-                    <span>{money(order.total_amount)}</span>
                     <span>{order.customer_email ?? "Sin correo"}</span>
                     <span>
                       <select
