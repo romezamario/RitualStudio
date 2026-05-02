@@ -36,6 +36,7 @@ Ritual Studio es una aplicación Next.js (App Router) que actualmente incluye:
 - Checkout con tarjeta (Mercado Pago) y vista de éxito (`/checkout`, `/checkout/exito`).
   - Flujo post-compra para invitados: CTA a registro/login y vinculación automática de compras al historial con correo verificado.
   - En checkout, usuarios autenticados ven su correo prellenado en modo solo lectura antes del formulario embebido.
+  - Checkout solicita dirección de entrega, permite elegir una dirección guardada y ofrece guardar una dirección nueva en "Mis direcciones" al completar el pago.
   - Si hay cursos en carrito, checkout exige nombres de participantes por sesión antes de enviar pago.
   - Backend de pago soporta carrito mixto (productos + cursos), recalcula precios en servidor y reserva/libera cupos de sesión de forma transaccional.
   - Webhook de Mercado Pago registra auditoría operativa en `payment_events.payload`, deduplica notificaciones repetidas y reconcilia cupos por estado final del pago.
