@@ -193,3 +193,6 @@ Para evitar pérdida de confirmación cuando el webhook acredita el pago antes d
 - Backoff: exponencial hasta 6 horas por intento.
 - Máximo: 5 intentos.
 - Al alcanzar el máximo: `status = failed_final` y sin nueva programación.
+
+- Se agrega operación administrativa `GET/PATCH /api/admin/orders` para lectura y actualización manual de estado logístico en pedidos de productos.
+- Notificaciones operativas por email: al transicionar a `en_reparto` se notifica entrega durante el día; al transicionar a `entregado` se confirma entrega final.

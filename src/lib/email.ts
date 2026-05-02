@@ -261,3 +261,69 @@ export async function sendPurchaseConfirmationEmail(
     error: `Proveedor de correo no soportado: ${provider}.`,
   };
 }
+
+
+type DeliveryStatusEmail = "en_reparto" | "entregado";
+
+type SendOrderStatusEmailInput = {
+  to: string;
+  externalReference: string;
+  status: DeliveryStatusEmail;
+};
+
+export async function sendOrderStatusEmail(input: SendOrderStatusEmailInput): Promise<SendPurchaseConfirmationEmailResult> {
+  const provider = getEmailProvider();
+
+  if (provider === "disabled" || provider === "none") {
+    return { ok: true, skipped: true, provider };
+  }
+
+  if (provider !== "resend") {
+    return { ok: false, provider, error: `Proveedor de correo no soportado: ${provider}.` };
+  }
+
+  const apiKey = process.env.RESEND_API_KEY?.trim() || "";
+  const from = getEmailFrom();
+  if (!apiKey || !from) {
+    return {
+      ok: false,
+      provider: "resend",
+      error: "Faltan variables RESEND_API_KEY o RESEND_FROM_EMAIL para enviar correo.",
+    };
+  }
+
+  const isOnDelivery = input.status === "en_reparto";
+  const subject = isOnDelivery
+    ? `Tu pedido ${input.externalReference} ya va en reparto`
+    : `Tu pedido ${input.externalReference} fue entregado`;
+
+  const message = isOnDelivery
+    ? "Tu pedido ya se encuentra en reparto y se entregará durante el día."
+    : "Te confirmamos que tu pedido ya fue entregado. ¡Gracias por elegir Ritual Studio!";
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [input.to],
+      subject,
+      html: `<div style="font-family:Georgia,serif;background:#f6f1ed;padding:24px;color:#2f2925;"><h1 style="margin:0 0 12px;font-size:24px;">Actualización de tu pedido</h1><p style="margin:0 0 12px;"><strong>Referencia:</strong> ${escapeHtml(input.externalReference)}</p><p style="margin:0;line-height:1.5;">${escapeHtml(message)}</p></div>`,
+      text: `Actualización de tu pedido Ritual Studio
+Referencia: ${input.externalReference}
+
+${message}`,
+    }),
+    cache: "no-store",
+  });
+
+  const body = (await response.json().catch(() => null)) as { id?: string; message?: string } | null;
+  if (!response.ok) {
+    return { ok: false, provider: "resend", error: body?.message ?? `Resend respondió con estado ${response.status}.` };
+  }
+
+  return { ok: true, provider: "resend", messageId: body?.id };
+}
