@@ -1002,7 +1002,6 @@ p {
   font-weight: 600;
 }
 
-.delivery-date-picker input,
 .delivery-time-picker select {
   background: color-mix(in srgb, white 70%, var(--rose-mist));
   border: 1px solid color-mix(in srgb, var(--smoke) 40%, white);
@@ -1010,6 +1009,61 @@ p {
   color: var(--ink);
   font: inherit;
   padding: 0.55rem 0.65rem;
+}
+
+.delivery-date-cards {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+}
+
+.delivery-date-card {
+  align-items: center;
+  background: linear-gradient(180deg, color-mix(in srgb, white 75%, var(--rose-mist)) 0%, color-mix(in srgb, white 58%, var(--rose-mist)) 100%);
+  border: 1px solid color-mix(in srgb, var(--smoke) 42%, white);
+  border-radius: 0.8rem;
+  color: color-mix(in srgb, var(--ink) 85%, black);
+  cursor: pointer;
+  display: grid;
+  gap: 0.1rem;
+  justify-items: center;
+  min-height: 84px;
+  padding: 0.5rem 0.4rem;
+  text-transform: capitalize;
+  transition: transform 150ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.delivery-date-card span {
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.delivery-date-card strong {
+  font-size: 1.22rem;
+  line-height: 1.1;
+}
+
+.delivery-date-card small {
+  color: color-mix(in srgb, var(--ink) 62%, white);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+}
+
+.delivery-date-card:hover {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--gold) 16%, transparent);
+  transform: translateY(-1px);
+}
+
+.delivery-date-card:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold) 72%, white);
+  outline-offset: 2px;
+}
+
+.delivery-date-card.is-selected {
+  background: linear-gradient(170deg, color-mix(in srgb, var(--gold) 24%, white) 0%, color-mix(in srgb, var(--rose) 16%, white) 100%);
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--gold) 24%, transparent);
 }
 
 .purchase-actions {
