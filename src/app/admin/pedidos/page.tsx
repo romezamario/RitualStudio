@@ -9,6 +9,7 @@ type AdminOrder = {
   id: string;
   external_reference: string;
   customer_email: string | null;
+  customer_name: string | null;
   created_at: string;
   delivery_status: DeliveryStatus;
   has_products: boolean;
@@ -130,7 +131,7 @@ export default function AdminOrdersPage() {
                   <summary>
                     <span className="order-reference">{order.external_reference}</span>
                     <span>{new Date(order.created_at).toLocaleString("es-MX")}</span>
-                    <span>{order.customer_email ?? "Sin correo"}</span>
+                    <span>{order.customer_name ?? "Sin nombre"}</span>
                     <span>
                       <select
                         className="input"

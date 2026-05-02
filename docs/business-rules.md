@@ -93,4 +93,5 @@ Los cambios en lógica comercial deben reflejarse en este archivo.
 
 - En `/admin/pedidos`, la operación se separa por pestañas de estado logístico: `por_entregar`, `en_reparto`, `entregado`.
 - La pestaña `entregado` pagina en bloques de 10 elementos (últimos entregados); `por_entregar` y `en_reparto` no tienen paginación.
+- En la grilla de `/admin/pedidos`, la columna **Cliente** prioriza `profiles.full_name` vinculado al `user_id` de la orden; si no existe perfil asociado, muestra `Sin nombre`.
 - Cuando un admin cambia a `en_reparto` o `entregado`, el backend envía email transaccional al `customer_email` de la orden (solo si la orden contiene productos).

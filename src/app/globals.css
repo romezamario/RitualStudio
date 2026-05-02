@@ -1718,6 +1718,7 @@ p {
 
 .orders-table-row > summary {
   cursor: pointer;
+  font-size: 0.93rem;
   list-style: none;
 }
 

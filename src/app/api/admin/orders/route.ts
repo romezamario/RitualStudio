@@ -9,6 +9,7 @@ type OrderRow = {
   id: string;
   external_reference: string;
   customer_email: string | null;
+  user_id: string | null;
   created_at: string;
   total_amount: number;
   status: string;
@@ -26,6 +27,13 @@ function hasProducts(order: OrderRow) {
   return (order.metadata?.mixed_items_summary?.products ?? []).length > 0;
 }
 
+
+
+type ProfileRow = {
+  id: string;
+  full_name: string | null;
+};
+
 function normalizeDeliveryStatus(value: string): DeliveryStatus {
   const normalized = value.trim().toLowerCase();
   if (["por_entregar", "en_reparto", "entregado"].includes(normalized)) {
@@ -42,13 +50,31 @@ export async function GET() {
   if (guard) return guard;
 
   const query =
-    "/rest/v1/orders?select=id,external_reference,customer_email,created_at,total_amount,status,metadata&order=created_at.desc&limit=200";
+    "/rest/v1/orders?select=id,external_reference,customer_email,user_id,created_at,total_amount,status,metadata&order=created_at.desc&limit=200";
   const { data, error } = await supabaseAdminRequest<OrderRow[]>(query, { method: "GET" });
 
   if (error) return NextResponse.json({ error }, { status: 500 });
 
+  const userIds = Array.from(new Set((data ?? []).map((order) => order.user_id).filter((value): value is string => Boolean(value))));
+
+  const fullNameByUserId = new Map<string, string>();
+  if (userIds.length > 0) {
+    const { data: profiles, error: profilesError } = await supabaseAdminRequest<ProfileRow[]>(
+      `/rest/v1/profiles?select=id,full_name&id=in.(${encodeURIComponent(userIds.join(","))})`,
+      { method: "GET" },
+    );
+
+    if (profilesError) return NextResponse.json({ error: profilesError }, { status: 500 });
+
+    for (const profile of profiles ?? []) {
+      const fullName = profile.full_name?.trim();
+      if (fullName) fullNameByUserId.set(profile.id, fullName);
+    }
+  }
+
   const orders = (data ?? []).map((order) => ({
     ...order,
+    customer_name: order.user_id ? fullNameByUserId.get(order.user_id) ?? null : null,
     delivery_status: normalizeDeliveryStatus(order.status),
     has_products: hasProducts(order),
   }));
