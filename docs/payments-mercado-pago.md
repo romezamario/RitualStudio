@@ -70,6 +70,7 @@ Respuesta (resumen):
 - En auditoría (`payment_events.payload.signature`) se guardan ambos valores de `data.id`: original y normalizado, para trazabilidad y debugging.
 - Existe fallback de validación por hash de `rawBody` para robustez.
 - En eventos `payment` aprobados, el envío de comprobante reintenta una segunda lectura corta de la orden (250ms) antes de omitir el email para tolerar consistencia eventual entre upserts y lectura. Si aún no existe, se registra como `info` operativo (no `warning`) para reducir ruido en observabilidad.
+- Para el comprobante post-pago por Resend, backend depende de `RESEND_API_KEY` + `RESEND_FROM_EMAIL` (con `EMAIL_FROM` como fallback legacy opcional de compatibilidad).
 - Si no valida firma:
   - Se registra auditoría mínima en `payment_events` (`signature`, `webhook_processing` y `audit.ignored_reason="invalid_signature"`).
   - Se responde **HTTP 401** y se corta la ejecución antes de consultar APIs de MP o reconciliar pagos/cupos.

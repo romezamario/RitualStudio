@@ -124,9 +124,10 @@ SUPERUSER_EMAILS= # correos separados por comas con permiso para cambiar modo de
 
 # Correo transaccional (opcional)
 EMAIL_PROVIDER=
-EMAIL_FROM=
-EMAIL_SUPPORT_CHANNEL=
 RESEND_API_KEY=
+RESEND_FROM_EMAIL= # remitente principal recomendado
+EMAIL_FROM= # fallback legacy opcional de compatibilidad
+EMAIL_SUPPORT_CHANNEL=
 
 # Metadata de integración (opcional)
 NEXT_PUBLIC_GITHUB_REPOSITORY=
