@@ -76,18 +76,6 @@ export default function ProductPurchaseActions({
   );
   const [selectedDateIso, setSelectedDateIso] = useState(deliveryDates[0] ?? "");
   const [selectedWindow, setSelectedWindow] = useState<DeliveryWindow>("morning");
-  const weekdayFormatter = useMemo(
-    () => new Intl.DateTimeFormat("es-MX", { weekday: "short", timeZone: "America/Mexico_City" }),
-    [],
-  );
-  const dayFormatter = useMemo(
-    () => new Intl.DateTimeFormat("es-MX", { day: "numeric", timeZone: "America/Mexico_City" }),
-    [],
-  );
-  const monthFormatter = useMemo(
-    () => new Intl.DateTimeFormat("es-MX", { month: "short", timeZone: "America/Mexico_City" }),
-    [],
-  );
 
   const selectedDate = deliveryDates.find((dateIso) => dateIso === selectedDateIso);
   const selectedDateLabel = selectedDate
