@@ -86,3 +86,6 @@ Los cambios en lógica comercial deben reflejarse en este archivo.
 - Cada imagen subida registra metadatos (`width`, `height`, `size_bytes`, `mime_type`, `original_filename`, `storage_path`) en `public.product_image_uploads`.
 - En navegación normal del catálogo, las miniaturas/listados solicitan variantes ligeras (`thumb`) y la variante grande (`detail`) solo se pide al abrir la vista de detalle del producto/curso.
 - La variante `original` queda reservada para acciones explícitas de descarga/revisión interna y no participa en cards, listados, carrito o PDP estándar.
+
+- En `/admin/pedidos`, administración puede operar estados logísticos de pedidos con productos: `por_entregar`, `en_reparto`, `entregado`.
+- Cuando un admin cambia a `en_reparto` o `entregado`, el backend envía email transaccional al `customer_email` de la orden (solo si la orden contiene productos).
