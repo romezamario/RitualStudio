@@ -12,23 +12,22 @@ type ProductPurchaseActionsProps = {
 
 type DeliveryWindow = "morning" | "afternoon";
 
-type DeliverySlot = {
+type DeliveryDateOption = {
   dateIso: string;
   dateLabel: string;
-  window: DeliveryWindow;
-  label: string;
 };
 
-const SLOT_START_HOURS: Record<DeliveryWindow, number> = { morning: 8, afternoon: 14 };
 const SLOT_LABELS: Record<DeliveryWindow, string> = { morning: "08:00 - 14:00", afternoon: "14:00 - 20:00" };
 const MIN_DELIVERY_LEAD_HOURS = 36;
-const SLOTS_TO_DISPLAY = 10;
+const DATES_TO_DISPLAY = 14;
 
-function buildDeliverySlots(now: Date) {
+function buildDeliveryDates(now: Date) {
   const minimumAllowed = new Date(now.getTime() + MIN_DELIVERY_LEAD_HOURS * 60 * 60 * 1000);
-  const slots: DeliverySlot[] = [];
-  const cursor = new Date(now);
-  cursor.setHours(0, 0, 0, 0);
+  const firstAvailableDate = new Date(minimumAllowed);
+  firstAvailableDate.setHours(0, 0, 0, 0);
+
+  const options: DeliveryDateOption[] = [];
+  const cursor = new Date(firstAvailableDate);
 
   const dateFormatter = new Intl.DateTimeFormat("es-MX", {
     weekday: "long",
@@ -37,46 +36,35 @@ function buildDeliverySlots(now: Date) {
     timeZone: "America/Mexico_City",
   });
 
-  while (slots.length < SLOTS_TO_DISPLAY) {
-    for (const window of ["morning", "afternoon"] as const) {
-      const slotStart = new Date(cursor);
-      slotStart.setHours(SLOT_START_HOURS[window], 0, 0, 0);
+  for (let index = 0; index < DATES_TO_DISPLAY; index += 1) {
+    const dateIso = cursor.toISOString().slice(0, 10);
+    const formattedDate = dateFormatter.format(cursor);
+    const dateLabel = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 
-      if (slotStart >= minimumAllowed) {
-        const dateIso = slotStart.toISOString().slice(0, 10);
-        const formattedDate = dateFormatter.format(slotStart);
-        const dateLabel = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-
-        slots.push({
-          dateIso,
-          dateLabel,
-          window,
-          label: SLOT_LABELS[window],
-        });
-      }
-    }
-
+    options.push({ dateIso, dateLabel });
     cursor.setDate(cursor.getDate() + 1);
   }
 
-  return slots;
+  return options;
 }
 
 export default function ProductPurchaseActions({ product, showDeliveryCalendar = true }: ProductPurchaseActionsProps) {
   const router = useRouter();
   const { addProductToCart } = useCart();
   const [feedback, setFeedback] = useState("");
-  const deliverySlots = useMemo(() => buildDeliverySlots(new Date()), []);
-  const [selectedSlotKey, setSelectedSlotKey] = useState(deliverySlots[0] ? `${deliverySlots[0].dateIso}-${deliverySlots[0].window}` : "");
+  const deliveryDates = useMemo(() => buildDeliveryDates(new Date()), []);
+  const [selectedDateIso, setSelectedDateIso] = useState(deliveryDates[0]?.dateIso ?? "");
+  const [selectedWindow, setSelectedWindow] = useState<DeliveryWindow>("morning");
 
-  const selectedSlot = deliverySlots.find((slot) => `${slot.dateIso}-${slot.window}` === selectedSlotKey);
+  const selectedDate = deliveryDates.find((date) => date.dateIso === selectedDateIso);
+  const selectedWindowLabel = SLOT_LABELS[selectedWindow];
 
   const handleAddToCart = () => {
     addProductToCart({
       product,
-      deliveryDateIso: selectedSlot?.dateIso,
-      deliveryDateLabel: selectedSlot?.dateLabel,
-      deliveryWindowLabel: selectedSlot?.label,
+      deliveryDateIso: selectedDate?.dateIso,
+      deliveryDateLabel: selectedDate?.dateLabel,
+      deliveryWindowLabel: selectedWindowLabel,
     });
     setFeedback("Producto agregado al carrito");
 
@@ -88,9 +76,9 @@ export default function ProductPurchaseActions({ product, showDeliveryCalendar =
   const handleBuyNow = () => {
     addProductToCart({
       product,
-      deliveryDateIso: selectedSlot?.dateIso,
-      deliveryDateLabel: selectedSlot?.dateLabel,
-      deliveryWindowLabel: selectedSlot?.label,
+      deliveryDateIso: selectedDate?.dateIso,
+      deliveryDateLabel: selectedDate?.dateLabel,
+      deliveryWindowLabel: selectedWindowLabel,
     });
     router.push("/checkout");
   };
@@ -103,27 +91,33 @@ export default function ProductPurchaseActions({ product, showDeliveryCalendar =
           <p className="delivery-calendar-note">La entrega mínima se habilita con 36 horas de anticipación.</p>
 
           <div className="delivery-calendar-grid">
-            {deliverySlots.map((slot) => {
-              const key = `${slot.dateIso}-${slot.window}`;
-              const isActive = selectedSlotKey === key;
+            {deliveryDates.map((date) => {
+              const isActive = selectedDateIso === date.dateIso;
 
               return (
                 <button
-                  key={key}
+                  key={date.dateIso}
                   type="button"
                   className={`delivery-slot${isActive ? " is-selected" : ""}`}
-                  onClick={() => setSelectedSlotKey(key)}
+                  onClick={() => setSelectedDateIso(date.dateIso)}
                 >
-                  <span>{slot.dateLabel}</span>
-                  <strong>{slot.label}</strong>
+                  <span>{date.dateLabel}</span>
                 </button>
               );
             })}
           </div>
 
-          {selectedSlot ? (
+          <label className="delivery-time-picker">
+            <span>Selecciona tiempo de entrega</span>
+            <select value={selectedWindow} onChange={(event) => setSelectedWindow(event.target.value as DeliveryWindow)}>
+              <option value="morning">{SLOT_LABELS.morning}</option>
+              <option value="afternoon">{SLOT_LABELS.afternoon}</option>
+            </select>
+          </label>
+
+          {selectedDate ? (
             <p className="delivery-calendar-selection">
-              Entrega estimada: <strong>{selectedSlot.dateLabel}</strong> · <strong>{selectedSlot.label}</strong>
+              Entrega estimada: <strong>{selectedDate.dateLabel}</strong> · <strong>{selectedWindowLabel}</strong>
             </p>
           ) : null}
         </section>
