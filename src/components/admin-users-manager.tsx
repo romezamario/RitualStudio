@@ -105,11 +105,10 @@ export default function AdminUsersManager() {
       <h2>Administradores registrados</h2>
       <p>Total de administradores: <strong>{admins.length}</strong></p>
 
-      <form onSubmit={handleSubmit} className="admin-users-form" style={{ marginTop: 16 }}>
+      <form onSubmit={handleSubmit} className="studio-form admin-users-form">
         <label className="admin-users-label">
           Correo del usuario administrador
           <input
-            className="input"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -122,13 +121,13 @@ export default function AdminUsersManager() {
         </button>
       </form>
 
-      {feedback ? <p style={{ marginTop: 12 }}>{feedback}</p> : null}
+      {feedback ? <p className="admin-users-feedback">{feedback}</p> : null}
 
-      {loading ? <p style={{ marginTop: 16 }}>Cargando administradores...</p> : null}
-      {!loading && admins.length === 0 ? <p style={{ marginTop: 16 }}>No hay administradores registrados.</p> : null}
+      {loading ? <p className="admin-users-status">Cargando administradores...</p> : null}
+      {!loading && admins.length === 0 ? <p className="admin-users-status">No hay administradores registrados.</p> : null}
 
       {!loading && admins.length > 0 ? (
-        <div className="admin-users-table-wrap" style={{ marginTop: 16, overflowX: "auto" }}>
+        <div className="admin-users-table-wrap">
           <table className="admin-users-table">
             <thead>
               <tr>
