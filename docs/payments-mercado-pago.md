@@ -145,6 +145,7 @@ Estados de `webhook_processing` usados por el sistema:
 - `payments_mode=prod` usa `MP_ACCESS_TOKEN_PROD`, `MP_NOTIFICATION_URL_PROD`, `MP_WEBHOOK_SECRET_PROD` y `MP_PUBLIC_KEY_PROD`.
 - Solo superusuario (correo incluido en `SUPERUSER_EMAILS`) puede cambiar modo desde `/admin/pagos`.
 - En `/admin/pagos`, la sección de verificación incluye al final un listado paginado de pagos recientes (bloques de 10) ordenado de más reciente a más antiguo vía `/v1/payments/search` de Mercado Pago.
+- El historial visible en `/admin/pagos` muestra únicamente pagos cuya `external_reference` inicia con `ritual`, ocultando cobros sin referencia de Ritual Studio.
 
 
 ## Guardas de entorno y seguridad

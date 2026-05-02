@@ -22,6 +22,11 @@ type AdminPaymentLookup = {
   error?: string;
 };
 
+function hasRitualStudioReference(externalReference: string | undefined): boolean {
+  if (!externalReference) return false;
+  return externalReference.trim().toLowerCase().startsWith("ritual");
+}
+
 async function updatePaymentMode(formData: FormData) {
   "use server";
 
@@ -140,6 +145,9 @@ export default async function AdminPaymentsPage({
   const safeRecentPaymentsPage = Number.isFinite(recentPaymentsPage) && recentPaymentsPage > 0 ? Math.floor(recentPaymentsPage) : 1;
   const verification = lookupQuery ? await lookupPaymentVerification(currentMode, lookupQuery) : null;
   const recentPayments = await listRecentPayments(currentMode, safeRecentPaymentsPage);
+  const ritualStudioRecentPayments = recentPayments.results.filter((payment) =>
+    hasRitualStudioReference(payment.external_reference),
+  );
 
   return (
     <SiteShell eyebrow="Administrador" title="Modo de pago y verificación" subtitle="Control de modo test/prod y verificación de pagos vía webhook de Mercado Pago.">
@@ -190,11 +198,11 @@ export default async function AdminPaymentsPage({
 
         {recentPayments.error ? <p className="form-hint" style={{ marginTop: 12 }}>{recentPayments.error}</p> : null}
 
-        {!recentPayments.error && recentPayments.results.length === 0 ? (
+        {!recentPayments.error && ritualStudioRecentPayments.length === 0 ? (
           <p style={{ marginTop: 12 }}>No se encontraron pagos en esta página.</p>
         ) : null}
 
-        {recentPayments.results.length > 0 ? (
+        {ritualStudioRecentPayments.length > 0 ? (
           <div style={{ marginTop: 12, overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -207,7 +215,7 @@ export default async function AdminPaymentsPage({
                 </tr>
               </thead>
               <tbody>
-                {recentPayments.results.map((payment, index) => (
+                {ritualStudioRecentPayments.map((payment, index) => (
                   <tr key={`${String(payment.id ?? "payment")}-${index}`}>
                     <td style={{ padding: "8px 4px" }}>{payment.id ? String(payment.id) : "-"}</td>
                     <td style={{ padding: "8px 4px" }}>{payment.status ?? "-"}</td>
