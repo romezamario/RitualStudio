@@ -50,7 +50,7 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    return NextResponse.json({ ok: false, error: "query_failed", details: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "query_failed", details: error }, { status: 500 });
   }
 
   const results: Array<{ orderId: string; outcome: string }> = [];
