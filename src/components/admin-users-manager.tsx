@@ -100,15 +100,16 @@ export default function AdminUsersManager() {
   };
 
   return (
-    <div className="studio-card">
+    <div className="studio-card admin-users-card">
       <p className="card-label">Panel admin</p>
       <h2>Administradores registrados</h2>
       <p>Total de administradores: <strong>{admins.length}</strong></p>
 
-      <form onSubmit={handleSubmit} className="admin-form-grid" style={{ marginTop: 16 }}>
-        <label>
+      <form onSubmit={handleSubmit} className="admin-users-form" style={{ marginTop: 16 }}>
+        <label className="admin-users-label">
           Correo del usuario administrador
           <input
+            className="input"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -116,7 +117,7 @@ export default function AdminUsersManager() {
             required
           />
         </label>
-        <button type="submit" disabled={submitting}>
+        <button type="submit" className="btn btn-primary" disabled={submitting}>
           {submitting ? "Guardando..." : "Dar de alta administrador"}
         </button>
       </form>
@@ -127,22 +128,23 @@ export default function AdminUsersManager() {
       {!loading && admins.length === 0 ? <p style={{ marginTop: 16 }}>No hay administradores registrados.</p> : null}
 
       {!loading && admins.length > 0 ? (
-        <div style={{ marginTop: 16, overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div className="admin-users-table-wrap" style={{ marginTop: 16, overflowX: "auto" }}>
+          <table className="admin-users-table">
             <thead>
               <tr>
-                <th style={{ textAlign: "left", padding: "8px 6px" }}>Nombre</th>
-                <th style={{ textAlign: "left", padding: "8px 6px" }}>Correo</th>
-                <th style={{ textAlign: "left", padding: "8px 6px" }}>Opciones</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Opciones</th>
               </tr>
             </thead>
             <tbody>
               {admins.map((admin) => (
                 <tr key={admin.id}>
-                  <td style={{ padding: "8px 6px" }}>{admin.full_name?.trim() ? admin.full_name : "(sin nombre)"}</td>
-                  <td style={{ padding: "8px 6px" }}>{admin.email ?? "(sin correo)"}</td>
-                  <td style={{ padding: "8px 6px" }}>
+                  <td>{admin.full_name?.trim() ? admin.full_name : "(sin nombre)"}</td>
+                  <td>{admin.email ?? "(sin correo)"}</td>
+                  <td>
                     <button
+                      className="btn btn-ghost"
                       type="button"
                       onClick={() => void handleDeactivateAdmin(admin)}
                       disabled={processingUserId === admin.id}
