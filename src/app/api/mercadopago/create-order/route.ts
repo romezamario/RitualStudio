@@ -224,6 +224,9 @@ export async function POST(request: Request) {
   let createdOrderId: string | null = null;
   let currentPaymentMode: "prod" | "test" | null = null;
   let currentExternalReference: string | null = null;
+  let fallbackLineItems: ValidatedLineItem[] = [];
+  let fallbackTotalAmount = 0;
+  let fallbackOrderMetadata: Record<string, unknown> = {};
 
   try {
     const paymentMode = await getPaymentMode();
@@ -246,6 +249,8 @@ export async function POST(request: Request) {
     const { accessToken } = await getServerSessionTokens();
     const sessionUser = await getUserFromAccessToken(accessToken);
     const { lineItems, totalAmount } = await validateAndPriceLineItems(items);
+    fallbackLineItems = lineItems;
+    fallbackTotalAmount = totalAmount;
     const validatedCourseParticipants = validateCourseParticipantsBySession(body, lineItems);
 
     validateMercadoPagoAmount(totalAmount);
@@ -296,6 +301,7 @@ export async function POST(request: Request) {
         course_participants: Object.fromEntries(validatedCourseParticipants),
       },
     };
+    fallbackOrderMetadata = orderInsert.metadata;
 
     const { data: orderRows, error: orderCreateError } = await supabaseAdminRequest<OrderInsertRow[]>("/rest/v1/orders", {
       method: "POST",
@@ -421,7 +427,7 @@ export async function POST(request: Request) {
       const fallbackPaymentId = `test-bypass-${createdOrderId}`;
       const fallbackEmailTimestamp = new Date().toISOString();
       const fallbackEmail = normalizedReceiptEmail ?? payer.email;
-      const fallbackItems = lineItems.map((item) => ({
+      const fallbackItems = fallbackLineItems.map((item) => ({
         name: item.name,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
@@ -444,7 +450,7 @@ export async function POST(request: Request) {
           externalReference: currentExternalReference,
           paymentId: fallbackPaymentId,
           paidAt: fallbackEmailTimestamp,
-          totalAmount,
+          totalAmount: fallbackTotalAmount,
           items: fallbackItems,
         });
       }
@@ -456,7 +462,7 @@ export async function POST(request: Request) {
           body: JSON.stringify({
             status: "approved",
             metadata: {
-              ...orderInsert.metadata,
+              ...fallbackOrderMetadata,
               items: fallbackItems,
               external_reference: currentExternalReference,
               status_detail: "test_mode_500_bypass",
