@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import SiteShell from "@/components/site-shell";
 import MarketplaceClientEnhancer from "@/components/marketplace-client-enhancer";
 import ProductPurchaseActions from "@/components/product-purchase-actions";
+import ProductDetailImageLightbox from "@/components/product-detail-image-lightbox";
 import {
   getMarketplaceProductBySlugForRender,
   getMarketplaceProductsForRender,
@@ -49,17 +49,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         <MarketplaceClientEnhancer mode="detail" slug={product.slug} initialProducts={products} />
       ) : (
         <article className="product-detail">
-          <div className="product-detail-image-wrap">
-            <Image
-              src={toRenderableProductImageUrl(product.image, "product-detail")}
-              alt={product.name}
-              width={1400}
-              height={1000}
-              className="product-detail-image"
-              sizes={DETAIL_IMAGE_SIZES}
-              priority
-            />
-          </div>
+          <ProductDetailImageLightbox
+            imageSrc={toRenderableProductImageUrl(product.image, "product-detail")}
+            imageAlt={product.name}
+            sizes={DETAIL_IMAGE_SIZES}
+            priority
+          />
 
           <div className="product-detail-content">
             <p className="card-label">{product.category}</p>
