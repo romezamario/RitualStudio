@@ -12,6 +12,9 @@ Este archivo registra los cambios liberados por versión usando SemVer.
 - Creación de bitácora de versiones persistente en CHANGELOG.md
 - Documentación de proceso de release en README
 
+## v0.2.1 - 2026-05-02
+- Ajuste menor en plantillas de correo de confirmación: la etiqueta de fecha en texto plano ahora indica `Fecha (hora de México)` para mantener consistencia con la versión HTML.
+
 ## v0.1.0 - 2026-04-18
 - Base inicial del sitio con Next.js App Router y arquitectura para despliegue en Vercel.
 - Evolución funcional inicial: marketplace, carrito, autenticación, administración y checkout asistido.

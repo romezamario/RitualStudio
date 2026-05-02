@@ -132,7 +132,7 @@ function buildPurchaseConfirmationTemplate(input: SendPurchaseConfirmationEmailI
 Recibimos tu pago con éxito.
 Folio / referencia: ${input.externalReference}
 ID de pago: ${input.paymentId}
-Fecha (UTC): ${formattedDate}
+Fecha (hora de México): ${formattedDate}
 
 Detalle de productos:
 ${itemsRowsText}
@@ -212,4 +212,3 @@ export async function sendPurchaseConfirmationEmail(
     error: `Proveedor de correo no soportado: ${provider}.`,
   };
 }
-
