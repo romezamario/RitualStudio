@@ -84,6 +84,20 @@ Cobertura:
 - actualización restringida a usuarios autenticados con `public.is_admin()`;
 - `anon/authenticated` sin grants directos de escritura (sin `insert/delete`).
 
+
+## Supabase Security Linter Hardening (2026-05-02)
+Migración aplicada:
+- `supabase/migrations/20260502133000_security_linter_hardening.sql`
+
+Cobertura:
+- fija `search_path = public` en funciones trigger `public.set_updated_at()` y `public.set_updated_at_timestamp()`;
+- revoca ejecución expuesta en funciones `SECURITY DEFINER` para `anon/authenticated` cuando no corresponde (`handle_new_user`, funciones de reserva/liberación de cupos);
+- conserva `public.is_admin()` solo para rol `authenticated` (no `anon/public`);
+- elimina policy de listado amplio `"Product images public read"` en `storage.objects` para el bucket público `product-images` (acceso público por URL se mantiene sin listar objetos).
+
+Acción operativa fuera de migraciones:
+- habilitar en Supabase Auth la opción **Leaked password protection** (HaveIBeenPwned) desde dashboard de Auth para cerrar el warning `auth_leaked_password_protection`.
+
 ## Pending / TODO
 - Documentar matriz de permisos por pantalla/endpoint.
 - Definir reglas de auditoría para cambios de rol.

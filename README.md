@@ -212,6 +212,7 @@ Estructura general (resumen):
 
 Documentación detallada del proyecto:
 
+- Hardening de seguridad Supabase aplicado (migración SQL para `search_path`, grants de funciones `SECURITY DEFINER` y policy de listing en bucket público); ver detalles en `docs/supabase-auth-and-roles.md`.
 - [Architecture](./docs/architecture.md)
 - [Business Rules](./docs/business-rules.md)
 - [Payments (Mercado Pago)](./docs/payments-mercado-pago.md)
