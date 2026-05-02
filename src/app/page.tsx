@@ -119,7 +119,7 @@ export default function Home() {
               <p>{item.descripcion}</p>
             </div>
           </Link>
-        </div>
+        ))}
       </section>
 
       <section className="feature-grid" aria-label="Categorías por ocasión">
