@@ -9,6 +9,7 @@ import {
   isLocalMarketplaceFallbackEnabled,
 } from "@/lib/marketplace-catalog";
 import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
+import { getDeliveryCalendarRangeDays } from "@/lib/delivery-calendar-settings";
 
 type ProductDetailPageProps = {
   params: Promise<{
@@ -28,6 +29,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const useClientFallback = isLocalMarketplaceFallbackEnabled();
   const products = await getMarketplaceProductsForRender();
   const product = await getMarketplaceProductBySlugForRender(slug);
+  const deliveryCalendarRangeDays = await getDeliveryCalendarRangeDays();
 
   if (!product) {
     return (
@@ -102,7 +104,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
 
             <div className="cta-row">
-              <ProductPurchaseActions product={product} showMarketplaceLink />
+              <ProductPurchaseActions
+                product={product}
+                showMarketplaceLink
+                deliveryDatesToDisplay={deliveryCalendarRangeDays}
+              />
             </div>
           </div>
         </article>

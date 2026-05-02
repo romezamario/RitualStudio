@@ -24,6 +24,9 @@ type FormState = {
 
 const ADMIN_PREVIEW_IMAGE_SIZES = "(max-width: 900px) 100vw, 50vw";
 
+const DEFAULT_DELIVERY_RANGE_DAYS = 14;
+const MIN_DELIVERY_RANGE_DAYS = 7;
+const MAX_DELIVERY_RANGE_DAYS = 60;
 
 const initialForm: FormState = {
   slug: "",
@@ -42,15 +45,24 @@ export default function AdminProductsManager() {
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(true);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [deliveryRangeDays, setDeliveryRangeDays] = useState(String(DEFAULT_DELIVERY_RANGE_DAYS));
+  const [isSavingDeliveryRange, setIsSavingDeliveryRange] = useState(false);
 
   useEffect(() => {
     let ignore = false;
 
     const loadProducts = async () => {
       try {
-        const response = await fetch("/api/admin/products", { method: "GET" });
+        const [productsResponse, deliverySettingsResponse] = await Promise.all([
+          fetch("/api/admin/products", { method: "GET" }),
+          fetch("/api/admin/products/delivery-settings", { method: "GET" }),
+        ]);
+        const response = productsResponse;
         const body = (await response.json().catch(() => null)) as
           | { data?: MarketplaceProduct[]; error?: string }
+          | null;
+        const deliverySettingsBody = (await deliverySettingsResponse.json().catch(() => null)) as
+          | { days?: number }
           | null;
 
         if (!response.ok) {
@@ -59,6 +71,7 @@ export default function AdminProductsManager() {
 
         if (!ignore) {
           setProducts(body?.data ?? []);
+          setDeliveryRangeDays(String(deliverySettingsBody?.days ?? DEFAULT_DELIVERY_RANGE_DAYS));
           setFeedback("");
         }
       } catch (error) {
@@ -241,6 +254,40 @@ export default function AdminProductsManager() {
     }
   };
 
+
+  const handleSaveDeliveryRange = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const parsed = Number(deliveryRangeDays);
+    if (!Number.isFinite(parsed) || parsed < MIN_DELIVERY_RANGE_DAYS || parsed > MAX_DELIVERY_RANGE_DAYS) {
+      setFeedback(`Define un rango entre ${MIN_DELIVERY_RANGE_DAYS} y ${MAX_DELIVERY_RANGE_DAYS} días.`);
+      return;
+    }
+
+    setIsSavingDeliveryRange(true);
+
+    try {
+      const response = await fetch("/api/admin/products/delivery-settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ days: parsed }),
+      });
+
+      const body = (await response.json().catch(() => null)) as { days?: number; error?: string } | null;
+
+      if (!response.ok || !body?.days) {
+        throw new Error(body?.error ?? "No fue posible guardar el rango del calendario.");
+      }
+
+      setDeliveryRangeDays(String(body.days));
+      setFeedback("Configuración de calendario de entrega actualizada.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "No fue posible guardar la configuración.");
+    } finally {
+      setIsSavingDeliveryRange(false);
+    }
+  };
+
   const startEdit = (product: MarketplaceProduct) => {
     setEditingSlug(product.slug);
     setForm({
@@ -285,6 +332,22 @@ export default function AdminProductsManager() {
       <section className="studio-card">
         <p className="card-label">Alta y edición</p>
         <h2>{editingSlug ? "Editar producto" : "Dar de alta producto"}</h2>
+
+        <form className="studio-form" onSubmit={handleSaveDeliveryRange}>
+          <label>
+            Rango de fechas para calendario de entrega (días)
+            <input
+              type="number"
+              min={MIN_DELIVERY_RANGE_DAYS}
+              max={MAX_DELIVERY_RANGE_DAYS}
+              value={deliveryRangeDays}
+              onChange={(event) => setDeliveryRangeDays(event.target.value)}
+            />
+          </label>
+          <button type="submit" className="btn btn-ghost" disabled={isSavingDeliveryRange}>
+            {isSavingDeliveryRange ? "Guardando..." : "Guardar rango de calendario"}
+          </button>
+        </form>
 
         <form className="studio-form admin-product-form" onSubmit={handleSubmit}>
           <label>

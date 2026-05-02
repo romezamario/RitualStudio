@@ -79,5 +79,6 @@ Si se modifica arquitectura, actualizar este archivo y enlazar el cambio en READ
 
 ## Payment Mode Runtime
 - `public.app_settings` mantiene `payments_mode` (`test`/`prod`) como fuente de verdad runtime.
+- `public.app_settings` también mantiene `delivery_calendar_range_days` para controlar desde admin el horizonte del calendario de entregas en PDP.
 - `/admin/pagos` permite a superusuario conmutar el modo sin redeploy.
 - `create-order` usa el modo activo para elegir token y `notification_url` de Mercado Pago.
