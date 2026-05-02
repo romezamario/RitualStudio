@@ -15,6 +15,7 @@ type OrderClaimCandidate = {
   external_reference: string | null;
   customer_email: string | null;
   created_at: string;
+  user_id?: string | null;
 };
 
 type ClaimOrdersInput = {
@@ -114,6 +115,30 @@ export async function POST(request: Request) {
     );
 
     if (!matchingReferenceOrders.length) {
+      const { data: existingReferenceOrders, error: existingReferenceOrdersError } = await supabaseAdminRequest<
+        OrderClaimCandidate[]
+      >(
+        `/rest/v1/orders?select=id,external_reference,customer_email,created_at,user_id&external_reference=eq.${encodeURIComponent(
+          requestedExternalReference
+        )}&order=created_at.desc&limit=10`
+      );
+
+      if (!existingReferenceOrdersError) {
+        const matchingOwnedOrder = (existingReferenceOrders ?? []).find(
+          (order) => normalizeEmail(order.customer_email) === normalizedEmail && Boolean(order.user_id)
+        );
+
+        if (matchingOwnedOrder) {
+          return NextResponse.json(
+            {
+              linked_orders: 0,
+              message: "Esta compra ya está vinculada a tu cuenta. Puedes verla en tu historial de pedidos.",
+            },
+            { status: 200 }
+          );
+        }
+      }
+
       return NextResponse.json(
         {
           error:
