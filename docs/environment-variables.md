@@ -87,3 +87,13 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - Compatibilidad adicional: `NEXT_PUBLIC_MP_PUBLIC_KEY` y `MP_ACCESS_TOKEN` pueden inyectarse como alias por ambiente (útil en Vercel Preview/Development).
 - Regla de prefijos: `TEST-` (test) y `APP_USR-` (producción). Si se mezclan, el backend bloquea el flujo con error controlado.
 - Logs seguros: solo prefijo parcial (7 chars), longitud y entorno detectado; nunca se imprime token completo.
+
+## Keep-Alive / Health Check
+- `CRON_SECRET` (opcional, server-only): secreto compartido para proteger `GET /api/health/supabase`.
+  - Si está definido, el endpoint exige header `x-cron-secret` con el mismo valor y responde `401` si no coincide.
+  - Si no está definido, el endpoint queda público (útil para pruebas locales/controladas).
+
+### Variables requeridas por el endpoint
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (o fallback `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+- `CRON_SECRET` (recomendado en Preview/Production)

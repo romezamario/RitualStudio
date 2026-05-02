@@ -80,3 +80,9 @@ Si se modifica arquitectura, actualizar este archivo y enlazar el cambio en READ
 - `public.app_settings` mantiene `payments_mode` (`test`/`prod`) como fuente de verdad runtime.
 - `/admin/pagos` permite a superusuario conmutar el modo sin redeploy.
 - `create-order` usa el modo activo para elegir token y `notification_url` de Mercado Pago.
+
+## Supabase Keep-Alive Endpoint
+- Se incorpora endpoint server-side `GET /api/health/supabase` para mantener activo el proyecto Supabase en planes con pausa por inactividad.
+- El handler vive en App Router (`src/app/api/health/supabase/route.ts`) y ejecuta una lectura mínima de metadatos en `rest/v1` (OpenAPI), sin escrituras ni mutaciones de datos.
+- Control de acceso opcional por header `x-cron-secret` cuando `CRON_SECRET` está definido.
+- Uso recomendado con Vercel Cron (`vercel.json`) o scheduler externo compatible con headers.

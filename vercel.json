@@ -1,5 +1,11 @@
 {
   "git": {
     "ignoredCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude)**/*.md' ':(exclude)docs/**' ':(exclude)supabase/**/*.md'"
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/health/supabase",
+      "schedule": "*/30 * * * *"
+    }
+  ]
 }

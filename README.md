@@ -244,3 +244,52 @@ Resumen rápido de alcance comercial actual:
 
 Criterio de done documental:
 - Si un cambio no está documentado, el cambio está incompleto.
+
+---
+
+## Supabase Keep-Alive (evitar pausa por inactividad)
+
+Se agregó el endpoint backend `GET /api/health/supabase` para realizar un ping seguro y de solo lectura a Supabase.
+
+### Qué hace
+- Corre 100% server-side (Route Handler de Next.js).
+- Realiza una consulta mínima de metadatos en `rest/v1`.
+- No modifica tablas ni datos de negocio.
+- Responde:
+  - `200 { "ok": true }` cuando Supabase responde.
+  - `401 { "ok": false, "error": "Unauthorized" }` cuando `CRON_SECRET` existe y el header no coincide.
+  - `503/500 { "ok": false, "error": "..." }` ante fallas del backend/Supabase.
+
+### Variables necesarias
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (o `NEXT_PUBLIC_SUPABASE_ANON_KEY` como fallback)
+- `CRON_SECRET` (**recomendado** en Vercel Preview/Production)
+
+### Cómo probar localmente
+```bash
+# sin CRON_SECRET definido
+curl -i http://localhost:3000/api/health/supabase
+
+# con CRON_SECRET definido
+curl -i http://localhost:3000/api/health/supabase -H "x-cron-secret: $CRON_SECRET"
+
+# header incorrecto (debe responder 401)
+curl -i http://localhost:3000/api/health/supabase -H "x-cron-secret: invalido"
+```
+
+### Configuración en Vercel
+Configura estas variables por ambiente:
+- **Development**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (o anon), `CRON_SECRET` (opcional, recomendado).
+- **Preview**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (o anon), `CRON_SECRET`.
+- **Production**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (o anon), `CRON_SECRET`.
+
+### Cron configurado
+El repositorio incluye Vercel Cron en `vercel.json`:
+- `path`: `/api/health/supabase`
+- `schedule`: `*/30 * * * *` (cada 30 minutos)
+
+Si prefieres cron externo (GitHub Actions/Uptime monitor), usa:
+```bash
+curl -X GET "https://ritualstudio.com.mx/api/health/supabase" \
+  -H "x-cron-secret: <CRON_SECRET>"
+```
