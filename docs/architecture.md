@@ -85,4 +85,4 @@ Si se modifica arquitectura, actualizar este archivo y enlazar el cambio en READ
 - Se incorpora endpoint server-side `GET /api/health/supabase` para mantener activo el proyecto Supabase en planes con pausa por inactividad.
 - El handler vive en App Router (`src/app/api/health/supabase/route.ts`) y ejecuta una lectura mínima de metadatos en `rest/v1` (OpenAPI), sin escrituras ni mutaciones de datos.
 - Control de acceso opcional por header `x-cron-secret` cuando `CRON_SECRET` está definido.
-- Uso recomendado con Vercel Cron (`vercel.json`) o scheduler externo compatible con headers.
+- Uso recomendado con GitHub Actions scheduler (`.github/workflows/supabase-keepalive.yml`) o scheduler externo compatible con headers.

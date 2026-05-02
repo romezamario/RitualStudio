@@ -97,3 +97,8 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (o fallback `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 - `CRON_SECRET` (recomendado en Preview/Production)
+
+
+## GitHub Actions Secrets (Keep-Alive)
+- `KEEPALIVE_URL`: URL completa del endpoint keep-alive (`https://<dominio>/api/health/supabase`).
+- `CRON_SECRET`: mismo secreto configurado en runtime del sitio para validar `x-cron-secret` (recomendado).

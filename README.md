@@ -283,12 +283,18 @@ Configura estas variables por ambiente:
 - **Preview**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (o anon), `CRON_SECRET`.
 - **Production**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (o anon), `CRON_SECRET`.
 
-### Cron configurado
-El repositorio incluye Vercel Cron en `vercel.json`:
-- `path`: `/api/health/supabase`
-- `schedule`: `*/30 * * * *` (cada 30 minutos)
+### Cron configurado (GitHub Actions)
+Para evitar la limitación de Vercel Hobby (máximo 1 ejecución/día), el repositorio usa GitHub Actions con ejecución cada 30 minutos:
+- Workflow: `.github/workflows/supabase-keepalive.yml`
+- Schedule: `*/30 * * * *`
 
-Si prefieres cron externo (GitHub Actions/Uptime monitor), usa:
+Secrets requeridos en GitHub (repo settings → Secrets and variables → Actions):
+- `KEEPALIVE_URL` (ejemplo: `https://ritualstudio.com.mx/api/health/supabase`)
+- `CRON_SECRET` (opcional, pero recomendado si el endpoint está protegido)
+
+El workflow también permite ejecución manual (`workflow_dispatch`) para pruebas operativas.
+
+Si prefieres monitor externo, usa:
 ```bash
 curl -X GET "https://ritualstudio.com.mx/api/health/supabase" \
   -H "x-cron-secret: <CRON_SECRET>"

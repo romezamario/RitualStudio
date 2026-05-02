@@ -1,0 +1,37 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger Supabase health endpoint
+        env:
+          KEEPALIVE_URL: ${{ secrets.KEEPALIVE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$KEEPALIVE_URL" ]; then
+            echo "KEEPALIVE_URL secret is required"
+            exit 1
+          fi
+
+          if [ -n "$CRON_SECRET" ]; then
+            HTTP_STATUS=$(curl -sS -o /tmp/keepalive-response.json -w "%{http_code}" \
+              -H "x-cron-secret: $CRON_SECRET" \
+              "$KEEPALIVE_URL")
+          else
+            HTTP_STATUS=$(curl -sS -o /tmp/keepalive-response.json -w "%{http_code}" \
+              "$KEEPALIVE_URL")
+          fi
+
+          cat /tmp/keepalive-response.json
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "Keep-alive request failed with status $HTTP_STATUS"
+            exit 1
+          fi
