@@ -8,6 +8,8 @@ type CourseRow = {
   title: string;
   description: string | null;
   price: string;
+  original_price: string | null;
+  has_offer: boolean | null;
   is_active: boolean;
   image_url: string | null;
 };
@@ -17,6 +19,8 @@ type CoursePayload = {
   title: string;
   description: string | null;
   price: number;
+  original_price: number | null;
+  has_offer: boolean;
   is_active: boolean;
   image_url: string | null;
 };
@@ -43,8 +47,14 @@ function asCoursePayload(payload: unknown): CoursePayload | null {
   const description = typeof raw.description === "string" ? raw.description.trim() : "";
   const price = typeof raw.price === "number" ? raw.price : Number(raw.price);
   const imageUrl = typeof raw.imageUrl === "string" ? raw.imageUrl.trim() : "";
+  const hasOffer = Boolean(raw.hasOffer);
+  const offerPrice = typeof raw.offerPrice === "number" ? raw.offerPrice : Number(raw.offerPrice);
 
   if (!title || !slug || !Number.isFinite(price) || price <= 0) {
+    return null;
+  }
+
+  if (hasOffer && (!Number.isFinite(offerPrice) || offerPrice <= 0 || offerPrice >= price)) {
     return null;
   }
 
@@ -52,7 +62,9 @@ function asCoursePayload(payload: unknown): CoursePayload | null {
     slug,
     title,
     description: description || null,
-    price,
+    price: hasOffer ? offerPrice : price,
+    original_price: hasOffer ? price : null,
+    has_offer: hasOffer,
     is_active: raw.isActive === undefined ? true : Boolean(raw.isActive),
     image_url: imageUrl || null,
   };
@@ -65,6 +77,8 @@ function toAdminCourse(course: CourseRow) {
     title: course.title,
     description: course.description,
     price: Number(course.price),
+    originalPrice: course.original_price ? Number(course.original_price) : undefined,
+    hasOffer: course.has_offer ?? false,
     isActive: course.is_active,
     imageUrl: course.image_url,
     sessions: [],
@@ -100,7 +114,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   }
 
   const { data, error } = await supabaseAdminRequest<CourseRow[]>(
-    `/rest/v1/courses?id=eq.${encodeURIComponent(id)}&select=id,slug,title,description,price,is_active,image_url`,
+    `/rest/v1/courses?id=eq.${encodeURIComponent(id)}&select=id,slug,title,description,price,original_price,has_offer,is_active,image_url`,
     {
       method: "PATCH",
       body: JSON.stringify(payload),

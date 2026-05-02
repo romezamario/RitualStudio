@@ -12,6 +12,8 @@ type AdminCourse = {
   title: string;
   description: string | null;
   price: number;
+  originalPrice?: number;
+  hasOffer: boolean;
   isActive: boolean;
   imageUrl: string | null;
   sessions: { id: string }[];
@@ -23,6 +25,8 @@ type CourseFormState = {
   description: string;
   price: string;
   imageUrl: string;
+  hasOffer: boolean;
+  offerPrice: string;
   isActive: boolean;
 };
 
@@ -32,6 +36,8 @@ const initialCourseForm: CourseFormState = {
   description: "",
   price: "",
   imageUrl: "",
+  hasOffer: false,
+  offerPrice: "",
   isActive: true,
 };
 
@@ -98,9 +104,15 @@ export default function AdminCoursesManager() {
     }
 
     const parsedPrice = Number(courseForm.price);
+    const offerPrice = Number(courseForm.offerPrice);
 
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
       setFeedback("Ingresa un precio válido mayor a 0.");
+      return;
+    }
+
+    if (courseForm.hasOffer && (!Number.isFinite(offerPrice) || offerPrice <= 0 || offerPrice >= parsedPrice)) {
+      setFeedback("Si activas oferta, ingresa un precio de oferta válido y menor al precio base.");
       return;
     }
 
@@ -113,6 +125,8 @@ export default function AdminCoursesManager() {
           title: courseForm.title,
           description: courseForm.description,
           price: parsedPrice,
+          hasOffer: courseForm.hasOffer,
+          offerPrice: courseForm.hasOffer ? offerPrice : undefined,
           imageUrl: courseForm.imageUrl,
           isActive: courseForm.isActive,
         }),
@@ -194,6 +208,8 @@ export default function AdminCoursesManager() {
       description: course.description ?? "",
       price: String(course.price),
       imageUrl: course.imageUrl ?? "",
+      hasOffer: Boolean(course.hasOffer),
+      offerPrice: course.hasOffer ? String(course.price) : "",
       isActive: course.isActive,
     });
   };
@@ -256,7 +272,7 @@ export default function AdminCoursesManager() {
           </label>
 
           <label>
-            Precio (MXN)
+            Precio base (MXN)
             <input
               required
               type="number"
@@ -266,6 +282,29 @@ export default function AdminCoursesManager() {
               onChange={(event) => setCourseForm((current) => ({ ...current, price: event.target.value }))}
             />
           </label>
+
+          <label>
+            <input
+              type="checkbox"
+              checked={courseForm.hasOffer}
+              onChange={(event) => setCourseForm((current) => ({ ...current, hasOffer: event.target.checked }))}
+            />{" "}
+            Activar oferta
+          </label>
+
+          {courseForm.hasOffer ? (
+            <label>
+              Precio de oferta (MXN)
+              <input
+                required
+                type="number"
+                min="1"
+                step="1"
+                value={courseForm.offerPrice}
+                onChange={(event) => setCourseForm((current) => ({ ...current, offerPrice: event.target.value }))}
+              />
+            </label>
+          ) : null}
 
           <label>
             Imagen del curso
@@ -326,7 +365,7 @@ export default function AdminCoursesManager() {
             <article key={course.id} className="studio-card">
               <p className="card-label">{course.slug}</p>
               <h3>{course.title}</h3>
-              <p>Precio: ${course.price.toLocaleString("es-MX")}</p>
+              <p>Precio: ${course.price.toLocaleString("es-MX")}{course.hasOffer && course.originalPrice ? ` (antes $${course.originalPrice.toLocaleString("es-MX")})` : ""}</p>
               <p>Estatus: {course.isActive ? "Activo" : "Inactivo"}</p>
               <p>Sesiones: {course.sessions.length}</p>
 
