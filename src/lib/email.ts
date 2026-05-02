@@ -55,6 +55,29 @@ function getSupportChannel() {
   return process.env.EMAIL_SUPPORT_CHANNEL?.trim() || "WhatsApp 81 8090 3028";
 }
 
+function getSiteUrl() {
+  return process.env.NEXT_PUBLIC_SITE_URL?.trim() || process.env.SITE_URL?.trim() || "";
+}
+
+function getAccountOrdersUrl() {
+  const explicitUrl = process.env.EMAIL_ACCOUNT_ORDERS_URL?.trim();
+
+  if (explicitUrl) return explicitUrl;
+
+  const siteUrl = getSiteUrl();
+  if (!siteUrl) return "";
+
+  return `${siteUrl.replace(/\/$/, "")}/mi-cuenta/pedidos`;
+}
+
+function getSocialLinks() {
+  return [
+    { label: "Instagram", url: process.env.EMAIL_SOCIAL_INSTAGRAM_URL?.trim() || "" },
+    { label: "Facebook", url: process.env.EMAIL_SOCIAL_FACEBOOK_URL?.trim() || "" },
+    { label: "TikTok", url: process.env.EMAIL_SOCIAL_TIKTOK_URL?.trim() || "" },
+  ].filter((social) => social.url);
+}
+
 function formatPaidAt(rawDate: string) {
   const date = new Date(rawDate);
 
@@ -71,10 +94,16 @@ function formatPaidAt(rawDate: string) {
 function buildPurchaseConfirmationTemplate(input: SendPurchaseConfirmationEmailInput) {
   const formattedDate = formatPaidAt(input.paidAt);
   const supportChannel = getSupportChannel();
+  const siteUrl = getSiteUrl();
+  const ordersUrl = getAccountOrdersUrl();
+  const socialLinks = getSocialLinks();
+
   const safeExternalReference = escapeHtml(input.externalReference);
   const safePaymentId = escapeHtml(input.paymentId);
   const safeSupportChannel = escapeHtml(supportChannel);
   const safeTo = escapeHtml(input.to);
+  const safeSiteUrl = siteUrl ? escapeHtml(siteUrl) : "";
+  const safeOrdersUrl = ordersUrl ? escapeHtml(ordersUrl) : "";
 
   const itemsRowsHtml = input.items
     .map(
@@ -95,6 +124,12 @@ function buildPurchaseConfirmationTemplate(input: SendPurchaseConfirmationEmailI
         `- ${item.name} | Cantidad: ${item.quantity} | Unitario: ${toCurrency(item.unitPrice)} | Subtotal: ${toCurrency(item.subtotal)}`
     )
     .join("\n");
+
+  const socialLinksHtml = socialLinks
+    .map((social) => `<a href="${escapeHtml(social.url)}" style="color:#2f2925;">${escapeHtml(social.label)}</a>`)
+    .join(" · ");
+
+  const socialLinksText = socialLinks.map((social) => `${social.label}: ${social.url}`).join(" | ");
 
   return {
     subject: `Comprobante de compra Ritual Studio · ${input.externalReference}`,
@@ -124,7 +159,10 @@ function buildPurchaseConfirmationTemplate(input: SendPurchaseConfirmationEmailI
 
         <p style="margin:18px 0 8px;font-size:18px;"><strong>Total pagado: ${toCurrency(input.totalAmount)}</strong></p>
         <p style="margin:0 0 8px;">Canal de soporte: ${safeSupportChannel}</p>
-        <p style="margin:0;color:#5f5751;">Comprobante enviado a: ${safeTo}</p>
+        <p style="margin:0 0 8px;color:#5f5751;">Comprobante enviado a: ${safeTo}</p>
+        ${safeOrdersUrl ? `<p style="margin:0 0 8px;"><a href="${safeOrdersUrl}" style="color:#2f2925;">Revisar mis compras</a></p>` : ""}
+        ${safeSiteUrl ? `<p style="margin:0 0 8px;"><a href="${safeSiteUrl}" style="color:#2f2925;">Visitar Ritual Studio</a></p>` : ""}
+        ${socialLinksHtml ? `<p style="margin:0;color:#5f5751;">Síguenos: ${socialLinksHtml}</p>` : ""}
       </div>
     `,
     text: `Gracias por confiar en Ritual Studio.
@@ -139,7 +177,7 @@ ${itemsRowsText}
 
 Total pagado: ${toCurrency(input.totalAmount)}
 Canal de soporte: ${supportChannel}
-Comprobante enviado a: ${input.to}`,
+Comprobante enviado a: ${input.to}${ordersUrl ? `\nRevisar mis compras: ${ordersUrl}` : ""}${siteUrl ? `\nSitio oficial: ${siteUrl}` : ""}${socialLinksText ? `\nRedes sociales: ${socialLinksText}` : ""}`,
   };
 }
 
