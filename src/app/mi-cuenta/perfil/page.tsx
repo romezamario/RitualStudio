@@ -123,7 +123,7 @@ export default function AccountProfilePage() {
           {errorMessage ? <p className="auth-feedback auth-feedback-error" role="alert">{errorMessage}</p> : null}
           {successMessage ? <p className="auth-feedback auth-feedback-success" role="status">{successMessage}</p> : null}
 
-          <div className="button-row">
+          <div className="account-profile-actions">
             <button className="btn btn-primary" type="submit" disabled={!canSubmit}>
               {isSaving ? "Guardando..." : "Guardar cambios"}
             </button>
