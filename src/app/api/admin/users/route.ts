@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   const profile = profiles?.[0];
   if (!profile) {
     return NextResponse.json(
-      { error: "El usuario no existe o no está dado de alta en Supabase. Primero crea el usuario y vuelve a intentarlo." },
+      { error: "El usuario no existe o no está dado de alta. Primero crea el usuario y vuelve a intentarlo." },
       { status: 404 },
     );
   }
