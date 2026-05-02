@@ -3,6 +3,7 @@ import { supabaseAdminRequest } from "@/lib/supabase-admin";
 import { getCurrentUserProfile } from "@/lib/supabase/server";
 
 type ProfileRow = { id: string; email: string | null; full_name: string | null; role: "user" | "admin" };
+type AdminListRow = { id: string; email: string | null; full_name: string | null; is_superuser: boolean };
 
 async function assertAdmin() {
   const { user, isAdmin } = await getCurrentUserProfile();
@@ -25,7 +26,14 @@ export async function GET() {
   );
 
   if (error) return NextResponse.json({ error }, { status: 500 });
-  const admins = (data ?? []).map(({ id, email, full_name }) => ({ id, email, full_name }));
+  const superuserEmails = getSuperuserEmails();
+  const admins: AdminListRow[] = (data ?? []).map(({ id, email, full_name }) => ({
+    id,
+    email,
+    full_name,
+    is_superuser: superuserEmails.has(normalizeEmail(email ?? "")),
+  }));
+
   return NextResponse.json({ data: admins, total: admins.length });
 }
 

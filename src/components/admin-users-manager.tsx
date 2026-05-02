@@ -6,6 +6,7 @@ type AdminUser = {
   id: string;
   email: string | null;
   full_name: string | null;
+  is_superuser: boolean;
 };
 
 export default function AdminUsersManager() {
@@ -146,9 +147,14 @@ export default function AdminUsersManager() {
                       className="btn btn-ghost"
                       type="button"
                       onClick={() => void handleDeactivateAdmin(admin)}
-                      disabled={processingUserId === admin.id}
+                      disabled={processingUserId === admin.id || admin.is_superuser}
+                      title={admin.is_superuser ? "Los superusuarios no pueden darse de baja desde este módulo." : undefined}
                     >
-                      {processingUserId === admin.id ? "Procesando..." : "Dar de baja"}
+                      {processingUserId === admin.id
+                        ? "Procesando..."
+                        : admin.is_superuser
+                          ? "Superusuario protegido"
+                          : "Dar de baja"}
                     </button>
                   </td>
                 </tr>

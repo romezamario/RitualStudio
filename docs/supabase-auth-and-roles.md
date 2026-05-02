@@ -52,6 +52,7 @@ Incluye:
 - También permite **dar de baja administradores** existentes (cambiar `role` a `user`) desde la misma pantalla.
 - La UI muestra una tabla con `full_name`, `email` y acciones operativas (alta/baja) para trazabilidad rápida.
 - Restricción: no puede otorgar ni revocar capacidades de superusuario (`SUPERUSER_EMAILS`) desde este módulo.
+- La acción "Dar de baja" queda bloqueada en UI para filas marcadas como superusuario, con botón deshabilitado y etiqueta de protección; el backend mantiene la misma validación para defensa en profundidad.
 - Si el correo no existe en Supabase (`public.profiles`), la API responde error y se debe crear primero el usuario.
 - Endpoint involucrado: `GET/POST/DELETE /api/admin/users` (server-side, validación de sesión admin).
 
