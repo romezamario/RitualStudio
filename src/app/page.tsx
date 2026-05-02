@@ -64,10 +64,29 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <SiteShell
-      eyebrow="Estudio floral editorial"
-      title="Explora Ritual Studio desde un wallpaper vivo de experiencias"
-      subtitle="Un acceso visual a nuestras principales líneas: tienda floral, experiencias, diseño personalizado, eventos, nosotros y contacto."
+      eyebrow="Ritual Studio"
+      title="Flores premium para regalar, celebrar y transformar espacios"
+      subtitle="Compra online con entrega confiable o solicita un diseño floral personalizado para momentos memorables."
     >
+      <section className="home-hero" aria-labelledby="home-hero-title">
+        <div className="home-hero-content">
+          <p className="home-hero-kicker">Ritual Studio</p>
+          <h2 id="home-hero-title">Flores que elevan cada ocasión.</h2>
+          <p>
+            Diseño floral premium con entrega confiable y propuestas personalizadas para regalos, eventos y
+            espacios con identidad propia.
+          </p>
+          <div className="home-hero-cta">
+            <Link href="/marketplace" className="home-hero-button home-hero-button-primary">
+              Comprar flores
+            </Link>
+            <Link href="/custom" className="home-hero-button home-hero-button-secondary">
+              Solicitar diseño a medida
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="home-wallpaper" aria-label="Navegación principal de Ritual Studio">
         {opcionesHome.map((item) => (
           <Link
