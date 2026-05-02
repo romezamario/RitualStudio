@@ -863,12 +863,53 @@ p {
   overflow: hidden;
 }
 
+.product-detail-image-trigger {
+  background: transparent;
+  border: 0;
+  cursor: zoom-in;
+  padding: 0;
+}
+
 .product-detail-image {
   display: block;
   height: 100%;
   min-height: 460px;
   object-fit: cover;
   width: 100%;
+}
+
+.product-image-lightbox {
+  align-items: center;
+  background: rgb(0 0 0 / 78%);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1.2rem;
+  position: fixed;
+  z-index: 90;
+}
+
+.product-image-lightbox-content {
+  border-radius: 0.8rem;
+  height: auto;
+  max-height: 90vh;
+  object-fit: contain;
+  width: min(1200px, 100%);
+}
+
+.product-image-lightbox-close {
+  background: rgb(255 255 255 / 16%);
+  border: 1px solid rgb(255 255 255 / 38%);
+  border-radius: 999px;
+  color: white;
+  cursor: pointer;
+  font-size: 2rem;
+  height: 2.75rem;
+  line-height: 1;
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  width: 2.75rem;
 }
 
 .product-detail-content {

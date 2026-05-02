@@ -23,6 +23,7 @@ function getCategoryId(category: string) {
 
 export default function MarketplaceClientEnhancer({ mode, initialProducts, slug }: MarketplaceClientEnhancerProps) {
   const [overrideProducts, setOverrideProducts] = useState<MarketplaceProduct[] | null>(null);
+  const [isImageExpanded, setIsImageExpanded] = useState(false);
 
   useEffect(() => {
     const storedProducts = getStoredMarketplaceProducts();
@@ -120,7 +121,12 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
   if (mode === "detail" && detailProduct) {
     return (
       <article className="product-detail marketplace-client-override" aria-label="Detalle con personalizaciones de admin">
-        <div className="product-detail-image-wrap">
+        <button
+          type="button"
+          className="product-detail-image-wrap product-detail-image-trigger"
+          onClick={() => setIsImageExpanded(true)}
+          aria-label={`Abrir imagen completa de ${detailProduct.name}`}
+        >
           <Image
             src={toRenderableProductImageUrl(detailProduct.image, "product-detail")}
             alt={detailProduct.name}
@@ -129,7 +135,7 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
             className="product-detail-image"
             sizes={DETAIL_IMAGE_SIZES}
           />
-        </div>
+        </button>
 
         <div className="product-detail-content">
           <p className="card-label">{detailProduct.category}</p>
@@ -178,6 +184,34 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
             <ProductPurchaseActions product={detailProduct} />
           </div>
         </div>
+
+        {isImageExpanded ? (
+          <div
+            className="product-image-lightbox"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Imagen completa de ${detailProduct.name}`}
+            onClick={() => setIsImageExpanded(false)}
+          >
+            <button
+              type="button"
+              className="product-image-lightbox-close"
+              onClick={() => setIsImageExpanded(false)}
+              aria-label="Cerrar imagen completa"
+            >
+              ×
+            </button>
+            <Image
+              src={toRenderableProductImageUrl(detailProduct.image, "product-detail")}
+              alt={detailProduct.name}
+              width={1600}
+              height={1200}
+              className="product-image-lightbox-content"
+              sizes="100vw"
+              onClick={(event) => event.stopPropagation()}
+            />
+          </div>
+        ) : null}
       </article>
     );
   }
