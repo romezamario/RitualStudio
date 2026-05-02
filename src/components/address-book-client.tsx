@@ -2,92 +2,22 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/auth-context";
-
-type DeliveryAddress = {
-  id: string;
-  label: string;
-  recipientName: string;
-  phone: string;
-  street: string;
-  exteriorNumber: string;
-  interiorNumber?: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  references?: string;
-  isDefault: boolean;
-};
-
-type AddressDraft = {
-  label: string;
-  recipientName: string;
-  phone: string;
-  street: string;
-  exteriorNumber: string;
-  interiorNumber: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  references: string;
-};
-
-const INITIAL_DRAFT: AddressDraft = {
-  label: "",
-  recipientName: "",
-  phone: "",
-  street: "",
-  exteriorNumber: "",
-  interiorNumber: "",
-  neighborhood: "",
-  city: "",
-  state: "",
-  postalCode: "",
-  references: "",
-};
-
-const ADDRESS_BOOK_STORAGE_PREFIX = "ritualstudio.address-book";
-
-function getStorageKey(email?: string) {
-  const safeEmail = email?.trim().toLowerCase();
-  return safeEmail ? `${ADDRESS_BOOK_STORAGE_PREFIX}.${safeEmail}` : null;
-}
-
-function readAddressBook(storageKey: string) {
-  const raw = window.localStorage.getItem(storageKey);
-
-  if (!raw) {
-    return [] as DeliveryAddress[];
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as DeliveryAddress[];
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed.filter((item) => item?.id && item?.recipientName && item?.street);
-  } catch {
-    return [];
-  }
-}
-
-function persistAddressBook(storageKey: string, addresses: DeliveryAddress[]) {
-  window.localStorage.setItem(storageKey, JSON.stringify(addresses));
-}
-
-function formatAddress(address: DeliveryAddress) {
-  const ext = address.exteriorNumber ? ` #${address.exteriorNumber}` : "";
-  const interior = address.interiorNumber ? ` Int ${address.interiorNumber}` : "";
-  return `${address.street}${ext}${interior}, ${address.neighborhood}, ${address.city}, ${address.state}, CP ${address.postalCode}`;
-}
+import {
+  DeliveryAddress,
+  INITIAL_ADDRESS_DRAFT,
+  addressDraftToDeliveryAddress,
+  formatDeliveryAddress,
+  getAddressBookStorageKey,
+  persistAddressBook,
+  readAddressBook,
+  type AddressDraft,
+} from "@/lib/address-book";
 
 export default function AddressBookClient() {
   const { user } = useAuth();
-  const storageKey = useMemo(() => getStorageKey(user?.email), [user?.email]);
+  const storageKey = useMemo(() => getAddressBookStorageKey(user?.email), [user?.email]);
   const [addresses, setAddresses] = useState<DeliveryAddress[]>([]);
-  const [draft, setDraft] = useState<AddressDraft>(INITIAL_DRAFT);
+  const [draft, setDraft] = useState<AddressDraft>(INITIAL_ADDRESS_DRAFT);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
@@ -110,26 +40,13 @@ export default function AddressBookClient() {
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const label = draft.label.trim() || `Dirección ${addresses.length + 1}`;
-
     const nextAddress: DeliveryAddress = {
-      id: crypto.randomUUID(),
-      label,
-      recipientName: draft.recipientName.trim(),
-      phone: draft.phone.trim(),
-      street: draft.street.trim(),
-      exteriorNumber: draft.exteriorNumber.trim(),
-      interiorNumber: draft.interiorNumber.trim(),
-      neighborhood: draft.neighborhood.trim(),
-      city: draft.city.trim(),
-      state: draft.state.trim(),
-      postalCode: draft.postalCode.trim(),
-      references: draft.references.trim(),
+      ...addressDraftToDeliveryAddress(draft, addresses.length + 1),
       isDefault: addresses.length === 0,
     };
 
     setAddresses((current) => [...current, nextAddress]);
-    setDraft(INITIAL_DRAFT);
+    setDraft(INITIAL_ADDRESS_DRAFT);
     setFeedback("Dirección guardada correctamente.");
   };
 
@@ -292,7 +209,7 @@ export default function AddressBookClient() {
                   </p>
                   <p>{address.recipientName}</p>
                   <p>{address.phone}</p>
-                  <p>{formatAddress(address)}</p>
+                  <p>{formatDeliveryAddress(address)}</p>
                   {address.references ? <p>Referencia: {address.references}</p> : null}
                 </div>
                 <div className="address-actions">

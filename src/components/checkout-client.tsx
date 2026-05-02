@@ -9,6 +9,16 @@ import { useAuth } from "@/components/auth-context";
 import { MIN_MX_CARD_PAYMENT_AMOUNT, parseMxPrice } from "@/lib/mercadopago";
 import { formatDateTimeMx } from "@/lib/date-time";
 import { detectPublicKeyEnvironment } from "@/lib/mercadopago-env";
+import {
+  INITIAL_ADDRESS_DRAFT,
+  addressDraftToDeliveryAddress,
+  formatDeliveryAddress,
+  getAddressBookStorageKey,
+  persistAddressBook,
+  readAddressBook,
+  type AddressDraft,
+  type DeliveryAddress,
+} from "@/lib/address-book";
 
 type CheckoutStatus = "idle" | "loading" | "approved" | "pending" | "rejected" | "error";
 
@@ -138,6 +148,21 @@ function getHumanReadableBrickError(error: unknown, isProductionKey: boolean) {
   }
 
   return fallback;
+}
+
+
+
+function validateAddressDraft(address: AddressDraft) {
+  return Boolean(
+    address.recipientName.trim() &&
+      address.phone.trim() &&
+      address.street.trim() &&
+      address.exteriorNumber.trim() &&
+      address.neighborhood.trim() &&
+      address.city.trim() &&
+      address.state.trim() &&
+      address.postalCode.trim(),
+  );
 }
 
 function formatCourseSessionDate(startsAt: string) {
@@ -331,6 +356,33 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
   const isProductionKey = /^APP_USR-/i.test(publicKey ?? "");
   const isBelowMercadoPagoMinAmount = total < MIN_MX_CARD_PAYMENT_AMOUNT;
   const normalizedUserEmail = user?.email.trim().toLowerCase() ?? "";
+  const addressBookStorageKey = useMemo(() => getAddressBookStorageKey(user?.email), [user?.email]);
+  const [savedAddresses, setSavedAddresses] = useState<DeliveryAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState("new");
+  const [saveAddressInBook, setSaveAddressInBook] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState<AddressDraft>(INITIAL_ADDRESS_DRAFT);
+
+  useEffect(() => {
+    if (!addressBookStorageKey) {
+      setSavedAddresses([]);
+      setSelectedAddressId("new");
+      return;
+    }
+
+    const addresses = readAddressBook(addressBookStorageKey);
+    setSavedAddresses(addresses);
+
+    const defaultAddress = addresses.find((address) => address.isDefault);
+    if (defaultAddress) {
+      setSelectedAddressId(defaultAddress.id);
+    }
+  }, [addressBookStorageKey]);
+
+  const selectedSavedAddress = useMemo(
+    () => savedAddresses.find((address) => address.id === selectedAddressId) ?? null,
+    [savedAddresses, selectedAddressId],
+  );
+
 
   const updateCourseParticipant = useCallback((lineKey: string, index: number, value: string) => {
     setCourseParticipantsByLine((current) => {
@@ -406,6 +458,29 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
                 resolve();
                 return;
               }
+              const activeAddress = selectedSavedAddress
+                ? {
+                    recipientName: selectedSavedAddress.recipientName,
+                    phone: selectedSavedAddress.phone,
+                    street: selectedSavedAddress.street,
+                    exteriorNumber: selectedSavedAddress.exteriorNumber,
+                    interiorNumber: selectedSavedAddress.interiorNumber ?? "",
+                    neighborhood: selectedSavedAddress.neighborhood,
+                    city: selectedSavedAddress.city,
+                    state: selectedSavedAddress.state,
+                    postalCode: selectedSavedAddress.postalCode,
+                    references: selectedSavedAddress.references ?? "",
+                    label: selectedSavedAddress.label,
+                  }
+                : deliveryAddress;
+
+              if (!validateAddressDraft(activeAddress)) {
+                setCheckoutStatus("error");
+                setFeedback("Completa la dirección de entrega antes de continuar con el pago.");
+                resolve();
+                return;
+              }
+
               const currentParticipantsByLine = courseParticipantsByLineRef.current;
               const frontendValidationErrors = validateCourseParticipants(currentParticipantsByLine);
               setCourseErrorsByLine(frontendValidationErrors);
@@ -450,6 +525,7 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
                     };
                   }),
                   course_participants: courseParticipantsBySession,
+                  delivery_address: activeAddress,
                 }),
               })
                 .then(async (response) => {
@@ -461,6 +537,16 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
 
                   const normalized = result.normalized_status ?? "error";
                   setCheckoutStatus(normalized);
+
+                  if (normalized === "approved" && saveAddressInBook && !selectedSavedAddress && addressBookStorageKey) {
+                    const nextAddress: DeliveryAddress = {
+                      ...addressDraftToDeliveryAddress(deliveryAddress, savedAddresses.length + 1),
+                      isDefault: savedAddresses.length === 0,
+                    };
+                    const nextAddresses = [...savedAddresses, nextAddress];
+                    setSavedAddresses(nextAddresses);
+                    persistAddressBook(addressBookStorageKey, nextAddresses);
+                  }
 
                   if (normalized === "approved") {
                     const successParams = new URLSearchParams({
@@ -627,6 +713,50 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
           <div className={`checkout-feedback checkout-feedback-${checkoutStatus}`} role="status" aria-live="polite">
             {feedback}
           </div>
+                    <section className="checkout-delivery-address" aria-label="Dirección de entrega">
+            <h3>Dirección de entrega</h3>
+            {savedAddresses.length ? (
+              <label className="checkout-address-select">
+                <span>Usar una dirección guardada</span>
+                <select value={selectedAddressId} onChange={(event) => setSelectedAddressId(event.target.value)}>
+                  {savedAddresses.map((address) => (
+                    <option key={address.id} value={address.id}>
+                      {address.label} · {formatDeliveryAddress(address)}
+                    </option>
+                  ))}
+                  <option value="new">Capturar una nueva dirección</option>
+                </select>
+              </label>
+            ) : null}
+
+            {selectedAddressId === "new" ? (
+              <>
+                <div className="checkout-address-grid">
+                  <label><span>Alias</span><input value={deliveryAddress.label} onChange={(event) => setDeliveryAddress((current) => ({ ...current, label: event.target.value }))} placeholder="Casa" /></label>
+                  <label><span>Nombre de quien recibe</span><input required value={deliveryAddress.recipientName} onChange={(event) => setDeliveryAddress((current) => ({ ...current, recipientName: event.target.value }))} /></label>
+                  <label><span>Teléfono</span><input required value={deliveryAddress.phone} onChange={(event) => setDeliveryAddress((current) => ({ ...current, phone: event.target.value }))} /></label>
+                  <label><span>Calle</span><input required value={deliveryAddress.street} onChange={(event) => setDeliveryAddress((current) => ({ ...current, street: event.target.value }))} /></label>
+                  <label><span>Número exterior</span><input required value={deliveryAddress.exteriorNumber} onChange={(event) => setDeliveryAddress((current) => ({ ...current, exteriorNumber: event.target.value }))} /></label>
+                  <label><span>Número interior</span><input value={deliveryAddress.interiorNumber} onChange={(event) => setDeliveryAddress((current) => ({ ...current, interiorNumber: event.target.value }))} /></label>
+                  <label><span>Colonia</span><input required value={deliveryAddress.neighborhood} onChange={(event) => setDeliveryAddress((current) => ({ ...current, neighborhood: event.target.value }))} /></label>
+                  <label><span>Ciudad / Municipio</span><input required value={deliveryAddress.city} onChange={(event) => setDeliveryAddress((current) => ({ ...current, city: event.target.value }))} /></label>
+                  <label><span>Estado</span><input required value={deliveryAddress.state} onChange={(event) => setDeliveryAddress((current) => ({ ...current, state: event.target.value }))} /></label>
+                  <label><span>Código postal</span><input required value={deliveryAddress.postalCode} onChange={(event) => setDeliveryAddress((current) => ({ ...current, postalCode: event.target.value }))} /></label>
+                </div>
+                <label><span>Referencias</span><input value={deliveryAddress.references} onChange={(event) => setDeliveryAddress((current) => ({ ...current, references: event.target.value }))} placeholder="Entre calles, color de portón, etc." /></label>
+                {normalizedUserEmail ? (
+                  <label className="checkout-save-address-option">
+                    <input
+                      type="checkbox"
+                      checked={saveAddressInBook}
+                      onChange={(event) => setSaveAddressInBook(event.target.checked)}
+                    />
+                    <span>Guardar esta dirección en mis direcciones guardadas</span>
+                  </label>
+                ) : null}
+              </>
+            ) : null}
+          </section>
           {courseLines.length ? (
             <section className="checkout-participants" aria-label="Participantes por sesión">
               <h3>Participantes</h3>
