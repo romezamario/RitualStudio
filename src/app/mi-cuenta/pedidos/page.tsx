@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import SiteShell from "@/components/site-shell";
 import { getSupabaseConfig } from "@/lib/supabase/config";
@@ -356,6 +357,17 @@ export default async function AccountOrdersPage({ searchParams }: OrdersPageProp
                           <strong>{formatPaymentMethod(payment?.payment_method)}</strong>
                         </li>
                       </ul>
+
+                      {order.external_reference ? (
+                        <div className="cta-row" style={{ marginTop: "0.75rem" }}>
+                          <Link
+                            href={`/checkout/exito?external_reference=${encodeURIComponent(order.external_reference)}`}
+                            className="btn btn-secondary"
+                          >
+                            Consultar pago
+                          </Link>
+                        </div>
+                      ) : null}
 
                       {products.length > 0 ? (
                         <div>
