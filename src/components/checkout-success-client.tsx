@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth-context";
+import { formatDateTimeMx } from "@/lib/date-time";
 
 type PurchasedItem = {
   slug?: string;
@@ -83,11 +84,10 @@ function formatDate(rawDate?: string | null) {
     return "No disponible";
   }
 
-  return new Intl.DateTimeFormat("es-MX", {
+  return formatDateTimeMx(date, {
     dateStyle: "full",
     timeStyle: "short",
-    timeZone: "UTC",
-  }).format(date);
+  });
 }
 
 export default function CheckoutSuccessClient({ externalReference, paymentId }: CheckoutSuccessClientProps) {

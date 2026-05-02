@@ -6,11 +6,12 @@ import { useMemo } from "react";
 import { getCartItemLineKey, useCart } from "@/components/cart-context";
 import { getWhatsAppHref } from "@/lib/whatsapp";
 import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
+import { formatDateTimeMx } from "@/lib/date-time";
 
 const CART_IMAGE_SIZES = "(max-width: 900px) 100vw, 180px";
 
 function formatCourseSessionDate(startsAt: string) {
-  return new Date(startsAt).toLocaleString("es-MX", {
+  return formatDateTimeMx(startsAt, {
     dateStyle: "medium",
     timeStyle: "short",
   });

@@ -3,6 +3,7 @@ import SiteShell from "@/components/site-shell";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { getServerSessionTokens, getUserFromAccessToken } from "@/lib/supabase/server";
 import { getSupabaseClientInfoHeader } from "@/lib/integration-metadata";
+import { formatDateTimeMx } from "@/lib/date-time";
 
 type OrdersPageProps = {
   searchParams?: Promise<{
@@ -136,10 +137,10 @@ function formatDateTime(value: string | null | undefined) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
 
-  return new Intl.DateTimeFormat("es-MX", {
+  return formatDateTimeMx(date, {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(date);
+  });
 }
 
 function formatPaymentMethod(rawValue: string | null | undefined) {

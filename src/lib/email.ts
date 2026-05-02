@@ -22,6 +22,8 @@ type SendPurchaseConfirmationEmailResult = {
   error?: string;
 };
 
+import { formatDateTimeMx } from "@/lib/date-time";
+
 const DEFAULT_PROVIDER = "resend";
 
 function toCurrency(amount: number) {
@@ -60,11 +62,10 @@ function formatPaidAt(rawDate: string) {
     return rawDate;
   }
 
-  return new Intl.DateTimeFormat("es-MX", {
+  return formatDateTimeMx(date, {
     dateStyle: "full",
     timeStyle: "short",
-    timeZone: "UTC",
-  }).format(date);
+  });
 }
 
 function buildPurchaseConfirmationTemplate(input: SendPurchaseConfirmationEmailInput) {
@@ -105,7 +106,7 @@ function buildPurchaseConfirmationTemplate(input: SendPurchaseConfirmationEmailI
         </p>
         <p style="margin:0 0 12px;"><strong>Folio / referencia:</strong> ${safeExternalReference}</p>
         <p style="margin:0 0 12px;"><strong>ID de pago:</strong> ${safePaymentId}</p>
-        <p style="margin:0 0 18px;"><strong>Fecha (UTC):</strong> ${escapeHtml(formattedDate)}</p>
+        <p style="margin:0 0 18px;"><strong>Fecha (hora de México):</strong> ${escapeHtml(formattedDate)}</p>
 
         <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e7ded7;">
           <thead>

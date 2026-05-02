@@ -64,6 +64,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - `/mi-cuenta/pedidos` permite filtrar por estado y buscar por `external_reference`.
 - El estado mostrado en `/mi-cuenta/pedidos` se consolida priorizando `payments.status` (último intento) y usando `orders.status` como respaldo para evitar desfases visuales temporales.
 - Cada orden en `/mi-cuenta/pedidos` muestra resumen (referencia, fecha, estado, total, método de pago) y detalle de líneas:
+- Las fechas/horas visibles en la aplicación se renderizan en zona horaria fija de México (`America/Mexico_City`) para consistencia entre dispositivos en historial, checkout, cursos y administración.
   - productos desde `orders.metadata.mixed_items_summary.products`,
   - cursos/sesiones desde `order_course_items`,
   - participantes registrados desde `course_participants`.
