@@ -97,7 +97,6 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
   const [summary, setSummary] = useState<OrderSummaryResponse["receipt"] | null>(null);
   const [claimMessage, setClaimMessage] = useState<string | null>(null);
   const [claimError, setClaimError] = useState<string | null>(null);
-  const [linkedOrdersCount, setLinkedOrdersCount] = useState<number | null>(null);
   const [isClaimingOrders, setIsClaimingOrders] = useState(false);
   const hasAttemptedClaimRef = useRef(false);
 
@@ -196,7 +195,6 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
           throw new Error(result?.error ?? "No fue posible vincular compras con tu cuenta.");
         }
 
-        setLinkedOrdersCount(Number.isFinite(result?.linked_orders) ? Number(result?.linked_orders) : 0);
         setClaimMessage(result?.message ?? "Vinculación de compras completada.");
       } catch (claimOrdersError) {
         setClaimError(claimOrdersError instanceof Error ? claimOrdersError.message : "No fue posible vincular compras.");
@@ -399,7 +397,6 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
                 ? claimError
                 : claimMessage ?? "Tu historial está sincronizado."}
           </p>
-          {linkedOrdersCount !== null ? <p>Compras vinculadas: {linkedOrdersCount}</p> : null}
         </div>
       )}
 
