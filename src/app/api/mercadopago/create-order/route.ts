@@ -14,6 +14,7 @@ import { getPaymentMode } from "@/lib/payment-mode";
 import { getMercadoPagoAccessTokenByEnvironment, getMercadoPagoPublicKey } from "@/lib/mercadopago";
 import { validateMercadoPagoEnv } from "@/lib/mercadopago-env";
 import { getServerSessionTokens, getUserFromAccessToken } from "@/lib/supabase/server";
+import { sendPurchaseConfirmationEmail } from "@/lib/email";
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -418,6 +419,36 @@ export async function POST(request: Request) {
 
     if (currentPaymentMode === "test" && createdOrderId && status >= 500) {
       const fallbackPaymentId = `test-bypass-${createdOrderId}`;
+      const fallbackEmailTimestamp = new Date().toISOString();
+      const fallbackEmail = normalizedReceiptEmail ?? payer.email;
+      const fallbackItems = lineItems.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        subtotal: item.subtotal,
+      }));
+
+      let fallbackEmailResult:
+        | {
+            ok: boolean;
+            provider: string;
+            skipped?: boolean;
+            messageId?: string;
+            error?: string;
+          }
+        | null = null;
+
+      if (currentExternalReference && fallbackItems.length > 0) {
+        fallbackEmailResult = await sendPurchaseConfirmationEmail({
+          to: fallbackEmail,
+          externalReference: currentExternalReference,
+          paymentId: fallbackPaymentId,
+          paidAt: fallbackEmailTimestamp,
+          totalAmount,
+          items: fallbackItems,
+        });
+      }
+
       const { error: testModeOrderUpdateError } = await supabaseAdminRequest<unknown[]>(
         `/rest/v1/orders?id=eq.${encodeURIComponent(createdOrderId)}`,
         {
@@ -425,12 +456,38 @@ export async function POST(request: Request) {
           body: JSON.stringify({
             status: "approved",
             metadata: {
+              ...orderInsert.metadata,
+              items: fallbackItems,
+              external_reference: currentExternalReference,
+              status_detail: "test_mode_500_bypass",
               fallback_reason: "test_mode_500_bypass",
               fallback_error_message: errorMessage,
-              fallback_at: new Date().toISOString(),
+              fallback_at: fallbackEmailTimestamp,
               fallback_simulated_success: true,
               fallback_payment_id: fallbackPaymentId,
+              email_confirmation: fallbackEmailResult
+                ? {
+                    status: fallbackEmailResult.ok ? "sent" : "pending_email_retry",
+                    provider: fallbackEmailResult.provider,
+                    sent_at: fallbackEmailResult.ok ? fallbackEmailTimestamp : null,
+                    message_id: fallbackEmailResult.ok ? fallbackEmailResult.messageId ?? null : null,
+                    skipped: fallbackEmailResult.ok ? Boolean(fallbackEmailResult.skipped) : false,
+                    attempts: 1,
+                    last_attempt_at: fallbackEmailTimestamp,
+                    next_retry_at: fallbackEmailResult.ok
+                      ? null
+                      : new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+                    error: fallbackEmailResult.ok ? null : fallbackEmailResult.error ?? "No fue posible enviar correo en bypass de prueba.",
+                  }
+                : {
+                    status: "pending_email_retry",
+                    attempts: 0,
+                    last_attempt_at: null,
+                    next_retry_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+                    error: "No se pudieron preparar los datos del comprobante en bypass de prueba.",
+                  },
             },
+            payment_confirmation_email_sent_at: fallbackEmailResult?.ok ? fallbackEmailTimestamp : null,
           }),
         },
       );
