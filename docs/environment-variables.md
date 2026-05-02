@@ -80,6 +80,7 @@ Inventario de variables de entorno usadas por el proyecto (sin secretos).
 ## Payment Mode Toggle (Superusuario)
 - `SUPERUSER_EMAILS`: lista separada por comas de correos autorizados para cambiar el modo de pagos desde admin.
 - `payments_mode` (persistido en `public.app_settings`): valor runtime (`test` o `prod`) que define qué credenciales usa backend en checkout.
+- `delivery_calendar_range_days` (persistido en `public.app_settings`): cantidad de días disponibles en el calendario de entrega del PDP, editable por admins en “Administración > Productos” (rango permitido: 7-60, default: 14).
 
 
 ## Validación cruzada de entorno (Mercado Pago)

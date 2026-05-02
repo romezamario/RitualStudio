@@ -10,15 +10,16 @@ type ProductPurchaseActionsProps = {
   product: MarketplaceProduct;
   showDeliveryCalendar?: boolean;
   showMarketplaceLink?: boolean;
+  deliveryDatesToDisplay?: number;
 };
 
 type DeliveryWindow = "morning" | "afternoon";
 
 const SLOT_LABELS: Record<DeliveryWindow, string> = { morning: "08:00 - 14:00", afternoon: "14:00 - 20:00" };
 const MIN_DELIVERY_LEAD_HOURS = 36;
-const DATES_TO_DISPLAY = 14;
+const DEFAULT_DATES_TO_DISPLAY = 14;
 
-function buildDeliveryDates(now: Date) {
+function buildDeliveryDates(now: Date, datesToDisplay: number) {
   const minimumAllowed = new Date(now.getTime() + MIN_DELIVERY_LEAD_HOURS * 60 * 60 * 1000);
   const firstAvailableDate = new Date(minimumAllowed);
   firstAvailableDate.setHours(0, 0, 0, 0);
@@ -33,7 +34,9 @@ function buildDeliveryDates(now: Date) {
     timeZone: "America/Mexico_City",
   });
 
-  for (let index = 0; index < DATES_TO_DISPLAY; index += 1) {
+    const safeDatesToDisplay = Number.isFinite(datesToDisplay) && datesToDisplay > 0 ? Math.trunc(datesToDisplay) : DEFAULT_DATES_TO_DISPLAY;
+
+  for (let index = 0; index < safeDatesToDisplay; index += 1) {
     const dateIso = cursor.toISOString().slice(0, 10);
     options.push(dateIso);
     cursor.setDate(cursor.getDate() + 1);
@@ -49,19 +52,14 @@ export default function ProductPurchaseActions({
   product,
   showDeliveryCalendar = true,
   showMarketplaceLink = false,
+  deliveryDatesToDisplay = DEFAULT_DATES_TO_DISPLAY,
 }: ProductPurchaseActionsProps) {
   const router = useRouter();
   const { addProductToCart } = useCart();
   const [feedback, setFeedback] = useState("");
-  const { options: deliveryDates, dateFormatter } = useMemo(() => buildDeliveryDates(new Date()), []);
-  const weekdayFormatter = useMemo(
-    () => new Intl.DateTimeFormat("es-MX", { weekday: "short", timeZone: "America/Mexico_City" }),
-    [],
-  );
-  const dayFormatter = useMemo(() => new Intl.DateTimeFormat("es-MX", { day: "numeric", timeZone: "America/Mexico_City" }), []);
-  const monthFormatter = useMemo(
-    () => new Intl.DateTimeFormat("es-MX", { month: "short", timeZone: "America/Mexico_City" }),
-    [],
+  const { options: deliveryDates, dateFormatter } = useMemo(
+    () => buildDeliveryDates(new Date(), deliveryDatesToDisplay),
+    [deliveryDatesToDisplay],
   );
   const [selectedDateIso, setSelectedDateIso] = useState(deliveryDates[0] ?? "");
   const [selectedWindow, setSelectedWindow] = useState<DeliveryWindow>("morning");

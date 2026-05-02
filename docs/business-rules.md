@@ -13,6 +13,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 - El checkout no confía en precios enviados por frontend: recalcula usando catálogo backend.
 - En PDP de productos y detalle de cursos, la acción **Comprar ahora** agrega la línea seleccionada al carrito y redirige directo a `/checkout` (sin pasar por WhatsApp).
 - En el detalle de producto (`/marketplace/[slug]`) se muestra un calendario de entrega con fecha + franja horaria.
+- El rango de fechas visibles en ese calendario es configurable desde administración de productos y se persiste en `public.app_settings` (`delivery_calendar_range_days`, entre 7 y 60 días; default 14).
 - Las franjas disponibles son fijas: **08:00-14:00** y **14:00-20:00**.
 - Regla de tolerancia: solo se habilitan slots cuya hora de inicio esté al menos **36 horas** adelante del momento actual.
 - Cada línea de compra debe incluir `slug` válido y `quantity` entera.
