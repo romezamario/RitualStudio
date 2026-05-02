@@ -716,7 +716,15 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
             {savedAddresses.length ? (
               <label className="checkout-address-select">
                 <span>Usar una dirección guardada</span>
-                <select value={selectedAddressId} onChange={(event) => setSelectedAddressId(event.target.value)}>
+                <select
+                  value={selectedAddressId}
+                  onChange={(event) => {
+                    const nextSelectedAddressId = event.target.value;
+                    setSelectedAddressId(nextSelectedAddressId);
+                    selectedSavedAddressRef.current =
+                      savedAddresses.find((address) => address.id === nextSelectedAddressId) ?? null;
+                  }}
+                >
                   {savedAddresses.map((address) => (
                     <option key={address.id} value={address.id}>
                       {address.label} · {formatDeliveryAddress(address)}
