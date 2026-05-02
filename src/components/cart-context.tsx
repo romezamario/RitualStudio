@@ -83,7 +83,7 @@ function sanitizeCartItems(rawItems: unknown): CartItem[] {
   }
 
   return rawItems
-    .map((entry) => {
+    .map((entry): CartItem | null => {
       if (!entry || typeof entry !== "object") {
         return null;
       }
