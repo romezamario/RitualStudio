@@ -57,8 +57,12 @@ function asEditableInput(payload: unknown): EditableMarketplaceProductInput | nu
   const hasOffer = Boolean(raw.hasOffer);
   const offerPrice = typeof raw.offerPrice === "number" ? raw.offerPrice : Number(raw.offerPrice);
   const slug = typeof raw.slug === "string" ? raw.slug : undefined;
+  const size = typeof raw.size === "string" ? raw.size : "";
+  const flowers = Array.isArray(raw.flowers)
+    ? raw.flowers.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean)
+    : [];
 
-  if (!name.trim() || !description.trim() || !image.trim() || !Number.isFinite(price) || price <= 0) {
+  if (!name.trim() || !description.trim() || !image.trim() || !size.trim() || flowers.length === 0 || !Number.isFinite(price) || price <= 0) {
     return null;
   }
 
@@ -75,6 +79,8 @@ function asEditableInput(payload: unknown): EditableMarketplaceProductInput | nu
     name,
     description,
     image,
+    size,
+    flowers,
     hasOffer,
     price,
     offerPrice: hasOffer ? offerPrice : undefined,

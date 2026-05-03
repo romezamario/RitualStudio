@@ -6,7 +6,7 @@ export default function AdminProductsPage() {
     <SiteShell
       eyebrow="Administrador"
       title="Gestión de productos"
-      subtitle="Da de alta y edita productos del marketplace con nombre, descripción, foto, precio y oferta."
+      subtitle="Da de alta y edita productos del marketplace con nombre, descripción, foto, precio, tamaño, flores que habitan esta pieza y oferta."
     >
       <AdminProductsManager />
     </SiteShell>
