@@ -12,6 +12,7 @@ export type MarketplaceProduct = {
   delivery: string;
   originalPrice?: string;
   hasOffer?: boolean;
+  isTestProduct?: boolean;
 };
 
 export const marketplaceProducts: MarketplaceProduct[] = [

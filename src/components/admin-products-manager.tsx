@@ -20,6 +20,7 @@ type FormState = {
   hasOffer: boolean;
   price: string;
   offerPrice: string;
+  isTestProduct: boolean;
 };
 
 const ADMIN_PREVIEW_IMAGE_SIZES = "(max-width: 900px) 100vw, 50vw";
@@ -36,6 +37,7 @@ const initialForm: FormState = {
   hasOffer: false,
   price: "",
   offerPrice: "",
+  isTestProduct: false,
 };
 
 export default function AdminProductsManager() {
@@ -206,6 +208,7 @@ export default function AdminProductsManager() {
           hasOffer: form.hasOffer,
           price: basePrice,
           offerPrice: form.hasOffer ? offerPrice : undefined,
+          isTestProduct: form.isTestProduct,
         }),
       });
 
@@ -237,6 +240,7 @@ export default function AdminProductsManager() {
           hasOffer: form.hasOffer,
           price: basePrice,
           offerPrice: form.hasOffer ? offerPrice : undefined,
+          isTestProduct: form.isTestProduct,
         });
 
         const nextProducts = editingSlug
@@ -298,6 +302,7 @@ export default function AdminProductsManager() {
       hasOffer: Boolean(product.hasOffer),
       price: (product.originalPrice ?? product.price).replace(/[^\d]/g, ""),
       offerPrice: product.hasOffer ? product.price.replace(/[^\d]/g, "") : "",
+      isTestProduct: Boolean(product.isTestProduct),
     });
   };
 
@@ -426,6 +431,15 @@ export default function AdminProductsManager() {
             </label>
           ) : null}
 
+          <label className="admin-checkbox">
+            <input
+              type="checkbox"
+              checked={form.isTestProduct}
+              onChange={(event) => setForm((current) => ({ ...current, isTestProduct: event.target.checked }))}
+            />
+            Marcar como producto de prueba (solo visible para admin)
+          </label>
+
           <div className="cta-row">
             <button type="submit" className="btn btn-primary" disabled={isUploadingImage}>
               {editingSlug ? "Guardar cambios" : "Dar de alta"}
@@ -449,7 +463,7 @@ export default function AdminProductsManager() {
           {sortedProducts.map((product) => (
             <article key={product.slug} className="admin-product-item">
               <div>
-                <p className="card-label">{product.category}</p>
+                <p className="card-label">{product.category}{product.isTestProduct ? " · Prueba" : ""}</p>
                 <h3>{product.name}</h3>
                 <p>{product.shortDescription}</p>
                 {product.originalPrice ? (
