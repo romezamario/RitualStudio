@@ -157,11 +157,27 @@ const featuredItems: FeaturedItem[] = [
   }
 ];
 
-const studioDifferentiators = [
-  "Curaduría editorial con enfoque en armonía, temporada y narrativa visual.",
-  "Calidad floral premium y control de frescura en cada preparación.",
-  "Entregas programadas con seguimiento para fechas clave.",
-  "Diseño personalizado para regalos, eventos y activaciones de marca."
+const valuePillars = [
+  {
+    label: "Temporada",
+    title: "Curaduría floral de temporada",
+    note: "Selecciones frescas listas para comprar con confianza."
+  },
+  {
+    label: "Brief",
+    title: "Diseño personalizado por brief",
+    note: "Convertimos tu idea en una propuesta floral alineada a tu estilo."
+  },
+  {
+    label: "Entrega",
+    title: "Entrega cuidada y puntual",
+    note: "Coordinamos cada envío para que llegue impecable y a tiempo."
+  },
+  {
+    label: "Soporte",
+    title: "Soporte humano para eventos y regalos",
+    note: "Te acompañamos cuando necesitas resolver rápido y con criterio."
+  }
 ];
 
 export const metadata: Metadata = {
@@ -275,24 +291,34 @@ export default function Home() {
               </div>
       </section>
 
-      <section className="story-block" aria-label="Diferenciadores de Ritual Studio">
-        <p className="section-tag">Nuestro enfoque</p>
-        <h2>¿Por qué Ritual Studio?</h2>
-        {studioDifferentiators.map((differentiator) => (
-          <p key={differentiator}>{differentiator}</p>
-        ))}
+      <section className="section-block" aria-label="Pilares de Ritual Studio">
+        <div className="section-intro">
+          <p className="section-tag">Pilares del estudio</p>
+          <p className="section-microcopy">Una experiencia floral clara, elegante y cercana.</p>
+        </div>
+        <div className="value-grid">
+          {valuePillars.map((pillar) => (
+            <article key={pillar.title} className="value-card">
+              <span className="value-icon" aria-hidden="true">
+                {pillar.label.slice(0, 1)}
+              </span>
+              <p className="value-label">{pillar.label}</p>
+              <h2>{pillar.title}</h2>
+              <p>{pillar.note}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="studio-card contact-highlight" aria-label="Asesoría y contacto">
         <p className="card-label">Asesoría floral</p>
         <h2>Conversemos sobre tu idea y armemos una propuesta contigo.</h2>
         <p>
-          Si necesitas recomendaciones para regalar o acompañamiento para un evento, nuestro equipo puede ayudarte a
-          definir la mejor alternativa.
+          Si prefieres asesoría antes de comprar, te guiamos para elegir la mejor opción para regalos y eventos.
         </p>
         <div className="cta-row" style={{ marginTop: "0.35rem" }}>
           <Link href="/contacto" className="btn btn-primary">
-            Contactar al estudio
+            Ir a contacto
           </Link>
           <Link href="/eventos" className="btn btn-ghost">
             Ver soluciones para eventos
