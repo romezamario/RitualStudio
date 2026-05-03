@@ -77,24 +77,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
             <div className="split-panel">
               <div>
-                <h3>Flores incluidas</h3>
+                <h3>Flores que habitan esta pieza</h3>
                 <ul>
                   {product.flowers.map((flower) => (
                     <li key={flower}>{flower}</li>
                   ))}
                 </ul>
-              </div>
-              <div>
-                <h3>Ideal para</h3>
-                <ul>
-                  {product.idealFor.map((scenario) => (
-                    <li key={scenario}>{scenario}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3>Entrega</h3>
-                <p>{product.delivery}</p>
               </div>
             </div>
 
