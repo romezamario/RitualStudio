@@ -4,11 +4,11 @@ import MarketplaceClientEnhancer from "@/components/marketplace-client-enhancer"
 import ProductPurchaseActions from "@/components/product-purchase-actions";
 import ProductDetailImageLightbox from "@/components/product-detail-image-lightbox";
 import {
-  getMarketplaceProductBySlugForRender,
   getMarketplaceProductsForRender,
   isLocalMarketplaceFallbackEnabled,
 } from "@/lib/marketplace-catalog";
 import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
+import { getCurrentUserProfile } from "@/lib/supabase/server";
 import { getDeliveryCalendarRangeDays } from "@/lib/delivery-calendar-settings";
 
 type ProductDetailPageProps = {
@@ -19,7 +19,7 @@ type ProductDetailPageProps = {
 
 export async function generateStaticParams() {
   const products = await getMarketplaceProductsForRender();
-  return products.map((product) => ({ slug: product.slug }));
+  return products.filter((product) => !product.isTestProduct).map((product) => ({ slug: product.slug }));
 }
 
 const DETAIL_IMAGE_SIZES = "(max-width: 900px) 100vw, 48vw";
@@ -27,8 +27,10 @@ const DETAIL_IMAGE_SIZES = "(max-width: 900px) 100vw, 48vw";
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params;
   const useClientFallback = isLocalMarketplaceFallbackEnabled();
-  const products = await getMarketplaceProductsForRender();
-  const product = await getMarketplaceProductBySlugForRender(slug);
+  const allProducts = await getMarketplaceProductsForRender();
+  const { isAdmin } = await getCurrentUserProfile();
+  const products = allProducts.filter((product) => !product.isTestProduct || isAdmin);
+  const product = products.find((entry) => entry.slug === slug) ?? null;
   const deliveryCalendarRangeDays = await getDeliveryCalendarRangeDays();
 
   if (!product) {

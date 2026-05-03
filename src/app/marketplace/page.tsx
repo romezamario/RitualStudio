@@ -5,6 +5,7 @@ import MarketplaceClientEnhancer from "@/components/marketplace-client-enhancer"
 import ProductPurchaseActions from "@/components/product-purchase-actions";
 import { getMarketplaceProductsForRender, isLocalMarketplaceFallbackEnabled } from "@/lib/marketplace-catalog";
 import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
+import { getCurrentUserProfile } from "@/lib/supabase/server";
 
 const CARD_IMAGE_SIZES = "(max-width: 900px) 100vw, (max-width: 1280px) 50vw, 33vw";
 
@@ -14,7 +15,9 @@ function getCategoryId(category: string) {
 
 export default async function MarketplacePage() {
   const useClientFallback = isLocalMarketplaceFallbackEnabled();
-  const products = await getMarketplaceProductsForRender();
+  const allProducts = await getMarketplaceProductsForRender();
+  const { isAdmin } = await getCurrentUserProfile();
+  const products = allProducts.filter((product) => !product.isTestProduct || isAdmin);
   const categories = Array.from(new Set(products.map((product) => product.category)));
 
   return (

@@ -23,6 +23,7 @@ type ProductRow = {
   delivery: string;
   original_price: string | null;
   has_offer: boolean | null;
+  is_test_product: boolean | null;
 };
 
 function toMarketplaceProduct(record: ProductRow): MarketplaceProduct {
@@ -40,6 +41,7 @@ function toMarketplaceProduct(record: ProductRow): MarketplaceProduct {
     delivery: record.delivery,
     originalPrice: record.original_price ?? undefined,
     hasOffer: record.has_offer ?? false,
+    isTestProduct: record.is_test_product ?? false,
   };
 }
 
@@ -56,6 +58,7 @@ function asEditableInput(payload: unknown): EditableMarketplaceProductInput | nu
   const price = typeof raw.price === "number" ? raw.price : Number(raw.price);
   const hasOffer = Boolean(raw.hasOffer);
   const offerPrice = typeof raw.offerPrice === "number" ? raw.offerPrice : Number(raw.offerPrice);
+  const isTestProduct = Boolean(raw.isTestProduct);
   const slug = typeof raw.slug === "string" ? raw.slug : undefined;
   const size = typeof raw.size === "string" ? raw.size : "";
   const flowers = Array.isArray(raw.flowers)
@@ -84,6 +87,7 @@ function asEditableInput(payload: unknown): EditableMarketplaceProductInput | nu
     hasOffer,
     price,
     offerPrice: hasOffer ? offerPrice : undefined,
+    isTestProduct,
   };
 }
 
@@ -109,7 +113,7 @@ export async function GET() {
   }
 
   const { data, error } = await supabaseAdminRequest<ProductRow[]>(
-    "/rest/v1/products?select=slug,name,category,price,image,short_description,description,size,flowers,ideal_for,delivery,original_price,has_offer&order=name.asc",
+    "/rest/v1/products?select=slug,name,category,price,image,short_description,description,size,flowers,ideal_for,delivery,original_price,has_offer,is_test_product&order=name.asc",
     { method: "GET" },
   );
 

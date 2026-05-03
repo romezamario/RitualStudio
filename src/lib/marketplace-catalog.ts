@@ -15,6 +15,7 @@ export type EditableMarketplaceProductInput = {
   hasOffer: boolean;
   price: number;
   offerPrice?: number;
+  isTestProduct?: boolean;
 };
 
 type SupabaseMarketplaceProductRecord = {
@@ -31,6 +32,7 @@ type SupabaseMarketplaceProductRecord = {
   delivery: string;
   original_price: string | null;
   has_offer: boolean | null;
+  is_test_product: boolean | null;
 };
 
 function slugify(value: string) {
@@ -71,6 +73,7 @@ export function buildMarketplaceProduct(input: EditableMarketplaceProductInput):
     delivery: "Coordinar entrega por WhatsApp según cobertura.",
     originalPrice: input.hasOffer ? formatCurrency(input.price) : undefined,
     hasOffer: input.hasOffer,
+    isTestProduct: input.isTestProduct ?? false,
   };
 }
 
@@ -89,6 +92,7 @@ export function toSupabaseMarketplaceProductRecord(product: MarketplaceProduct):
     delivery: product.delivery,
     original_price: product.originalPrice ?? null,
     has_offer: product.hasOffer ?? false,
+    is_test_product: product.isTestProduct ?? false,
   };
 }
 
@@ -107,6 +111,7 @@ function fromSupabaseMarketplaceProductRecord(record: SupabaseMarketplaceProduct
     delivery: record.delivery,
     originalPrice: record.original_price ?? undefined,
     hasOffer: record.has_offer ?? false,
+    isTestProduct: record.is_test_product ?? false,
   };
 }
 
@@ -117,7 +122,7 @@ export async function fetchMarketplaceProductsFromBackend() {
 
   const { supabaseAdminRequest } = await import("@/lib/supabase-admin");
   const { data, error } = await supabaseAdminRequest<SupabaseMarketplaceProductRecord[]>(
-    "/rest/v1/products?select=slug,name,category,price,image,short_description,description,size,flowers,ideal_for,delivery,original_price,has_offer&order=name.asc",
+    "/rest/v1/products?select=slug,name,category,price,image,short_description,description,size,flowers,ideal_for,delivery,original_price,has_offer,is_test_product&order=name.asc",
     { method: "GET" },
   );
 
@@ -139,7 +144,7 @@ export async function fetchPublicMarketplaceProductsFromBackend() {
 
   const { supabasePublicReadRequest } = await import("@/lib/supabase-public");
   const { data, error } = await supabasePublicReadRequest<SupabaseMarketplaceProductRecord[]>(
-    "/rest/v1/products?select=slug,name,category,price,image,short_description,description,size,flowers,ideal_for,delivery,original_price,has_offer&order=name.asc",
+    "/rest/v1/products?select=slug,name,category,price,image,short_description,description,size,flowers,ideal_for,delivery,original_price,has_offer,is_test_product&order=name.asc",
     {
       next: {
         revalidate: MARKETPLACE_PUBLIC_CACHE_REVALIDATE_SECONDS,
