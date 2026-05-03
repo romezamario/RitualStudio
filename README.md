@@ -42,7 +42,7 @@ Ritual Studio es una aplicación Next.js (App Router) que actualmente incluye:
   - Si hay cursos en carrito, checkout exige nombres de participantes por sesión antes de enviar pago.
   - Backend de pago soporta carrito mixto (productos + cursos), recalcula precios en servidor y reserva/libera cupos de sesión de forma transaccional.
   - Webhook de Mercado Pago registra auditoría operativa en `payment_events.payload`, deduplica notificaciones repetidas y reconcilia cupos por estado final del pago.
-- Autenticación base con Supabase (`/login`, `/auth/callback`, `/actualizar-contrasena`).
+- Autenticación base con Supabase (`/login`, `/auth/callback`, `/actualizar-contrasena`) y confirmación de cierre de sesión en `/sesion-cerrada`.
 - Dashboard de cuenta y administración (`/mi-cuenta`, `/mi-cuenta/perfil`, `/admin/*`), incluyendo capability “Mi perfil” para actualizar nombre, teléfono y correo desde una ruta dedicada (vía endpoint seguro `PATCH /api/auth/profile`), además de admin de cursos con navegación dedicada para sesiones por curso (pantalla separada desde "Gestionar sesiones"), cupos por sesión y carga directa de imagen de curso (sin URL manual) usando el mismo pipeline/validaciones de imágenes del módulo de productos.
   - La pantalla `/mi-cuenta/perfil` usa el mismo shell visual de "Mi cuenta" y campos premium (estados hover/focus y layout responsivo) para homologar experiencia con el resto del sitio.
   - El módulo admin de usuarios (`/admin/usuarios`) lista administradores en tabla (nombre/correo) y permite alta y baja de rol admin desde UI con validación backend, bloqueando la baja de cuentas superusuario en la propia pantalla.

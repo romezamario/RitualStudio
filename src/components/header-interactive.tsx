@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-context";
 import { useCart } from "@/components/cart-context";
 
@@ -19,6 +20,7 @@ export function HeaderInteractive({ links }: HeaderInteractiveProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { totalItems } = useCart();
   const { isAuthenticated, user, signOut } = useAuth();
+  const router = useRouter();
   const userDisplayName = user?.email;
   const userInitials = getUserInitials(userDisplayName);
 
@@ -109,6 +111,7 @@ export function HeaderInteractive({ links }: HeaderInteractiveProps) {
                       onClick={async () => {
                         await signOut();
                         closeMenu();
+                        router.push("/sesion-cerrada");
                       }}
                     >
                       Cerrar sesión
