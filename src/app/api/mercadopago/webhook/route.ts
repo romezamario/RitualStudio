@@ -75,6 +75,10 @@ type OrderCourseItemRecord = {
   metadata?: Record<string, unknown> | null;
 };
 
+type PaymentRecord = {
+  order_id?: string | null;
+};
+
 type PaymentEventRow = {
   id?: string;
   event_key?: string;
@@ -331,6 +335,33 @@ async function fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId: string) {
   return data?.[0] ?? null;
 }
 
+async function fetchOrderByPaymentId(paymentId: string) {
+  if (!paymentId) return null;
+
+  const { data: paymentRows, error: paymentError } = await supabaseAdminRequest<PaymentRecord[]>(
+    `/rest/v1/payments?select=order_id&mercado_pago_payment_id=eq.${encodeURIComponent(paymentId)}&limit=1`
+  );
+
+  if (paymentError) {
+    console.error("[MP webhook] Error consultando payment por mercado_pago_payment_id:", paymentError);
+    return null;
+  }
+
+  const orderId = paymentRows?.[0]?.order_id;
+  if (!orderId) return null;
+
+  const { data: orders, error: orderError } = await supabaseAdminRequest<OrderRecord[]>(
+    `/rest/v1/orders?select=id,external_reference,mercado_pago_order_id,customer_email,total_amount,metadata,created_at,payment_confirmation_email_sent_at&id=eq.${encodeURIComponent(orderId)}&limit=1`
+  );
+
+  if (orderError) {
+    console.error("[MP webhook] Error consultando orden por payment.order_id:", orderError);
+    return null;
+  }
+
+  return orders?.[0] ?? null;
+}
+
 async function fetchOrderCourseItems(orderId: string) {
   const { data, error } = await supabaseAdminRequest<OrderCourseItemRecord[]>(
     `/rest/v1/order_course_items?select=id,course_session_id,quantity,metadata&order_id=eq.${encodeURIComponent(orderId)}`
@@ -536,10 +567,15 @@ async function trySendPurchaseEmail({
   const mercadoPagoOrderId = payment.order?.id ? String(payment.order.id) : "";
 
   let order = await fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId);
+  const paymentId = payment.id != null ? String(payment.id) : "";
 
   if (!order?.id) {
     await new Promise((resolve) => setTimeout(resolve, 250));
     order = await fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId);
+  }
+
+  if (!order?.id) {
+    order = await fetchOrderByPaymentId(paymentId);
   }
 
   if (!order?.id) {
@@ -573,7 +609,6 @@ async function trySendPurchaseEmail({
 
   const customerEmail = order.customer_email?.trim();
   const externalReference = order.external_reference?.trim();
-  const paymentId = payment.id != null ? String(payment.id) : "";
   const items = Array.isArray(order.metadata?.items) ? order.metadata.items : [];
   const paidAt = fallbackPaidAt ?? new Date().toISOString();
 
