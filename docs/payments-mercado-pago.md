@@ -196,3 +196,21 @@ Para evitar pérdida de confirmación cuando el webhook acredita el pago antes d
 
 - Se agrega operación administrativa `GET/PATCH /api/admin/orders` para lectura y actualización manual de estado logístico en pedidos de productos.
 - Notificaciones operativas por email: al transicionar a `en_reparto` se notifica entrega durante el día; al transicionar a `entregado` se confirma entrega final.
+
+## Verificación operativa de credenciales de prueba (auditado: 2026-05-03)
+
+Resultado de revisión del código:
+
+- El backend elige credenciales por `payments_mode`: en `test` usa `MP_ACCESS_TOKEN_TEST` y en `prod` usa `MP_ACCESS_TOKEN_PROD`.
+- El frontend de checkout también separa llaves públicas por modo (`MP_PUBLIC_KEY_TEST` / `MP_PUBLIC_KEY_PROD`).
+- Antes de llamar a API de Mercado Pago en `create-order`, se valida que public key y access token pertenezcan al mismo entorno (`TEST-` o `APP_USR-`).
+- Las llamadas a API usan `Authorization: Bearer <token>` por header (no query param).
+- El token se sanea para remover prefijo `Bearer` accidental en variables de entorno, evitando errores de configuración.
+
+Checklist para confirmar uso correcto en pruebas:
+
+1. Configurar `payments_mode=test` en la fuente activa del modo de pago.
+2. Cargar `MP_PUBLIC_KEY_TEST` y `MP_ACCESS_TOKEN_TEST` con prefijo `TEST-`.
+3. Verificar `MP_NOTIFICATION_URL_TEST` apuntando a `/api/mercadopago/webhook/test`.
+4. Confirmar `MP_WEBHOOK_SECRET_TEST` configurado para firma del endpoint de pruebas.
+5. Evitar mezclar variables `*_PROD` con `payments_mode=test` (el backend ya lo bloquea con validación de entorno).
