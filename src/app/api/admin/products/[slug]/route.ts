@@ -23,6 +23,7 @@ type ProductRow = {
   delivery: string;
   original_price: string | null;
   has_offer: boolean | null;
+  is_test_product: boolean | null;
 };
 
 function toMarketplaceProduct(record: ProductRow): MarketplaceProduct {
@@ -40,6 +41,7 @@ function toMarketplaceProduct(record: ProductRow): MarketplaceProduct {
     delivery: record.delivery,
     originalPrice: record.original_price ?? undefined,
     hasOffer: record.has_offer ?? false,
+    isTestProduct: record.is_test_product ?? false,
   };
 }
 
@@ -56,6 +58,7 @@ function asEditableInput(payload: unknown): EditableMarketplaceProductInput | nu
   const price = typeof raw.price === "number" ? raw.price : Number(raw.price);
   const hasOffer = Boolean(raw.hasOffer);
   const offerPrice = typeof raw.offerPrice === "number" ? raw.offerPrice : Number(raw.offerPrice);
+  const isTestProduct = Boolean(raw.isTestProduct);
 
   if (!name.trim() || !description.trim() || !image.trim() || !Number.isFinite(price) || price <= 0) {
     return null;
@@ -76,6 +79,7 @@ function asEditableInput(payload: unknown): EditableMarketplaceProductInput | nu
     hasOffer,
     price,
     offerPrice: hasOffer ? offerPrice : undefined,
+    isTestProduct,
   };
 }
 
@@ -111,7 +115,7 @@ export async function PUT(request: Request, context: { params: Promise<{ slug: s
   const productRow = toSupabaseMarketplaceProductRecord(product);
 
   const { data, error } = await supabaseAdminRequest<ProductRow[]>(
-    `/rest/v1/products?slug=eq.${encodeURIComponent(slug)}&select=slug,name,category,price,image,short_description,description,size,flowers,ideal_for,delivery,original_price,has_offer`,
+    `/rest/v1/products?slug=eq.${encodeURIComponent(slug)}&select=slug,name,category,price,image,short_description,description,size,flowers,ideal_for,delivery,original_price,has_offer,is_test_product`,
     {
       method: "PATCH",
       body: JSON.stringify(productRow),
