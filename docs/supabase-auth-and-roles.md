@@ -8,6 +8,7 @@ Guía de autenticación, sesiones, perfiles y autorización por rol.
 - Registro con email/contraseña y metadata de perfil (username/full_name cuando aplica).
 - Verificación de correo mediante callback con `token_hash`.
 - Recuperación de contraseña con callback hacia `/actualizar-contrasena`.
+- Al cerrar sesión desde el menú de cuenta, la UI redirige a `/sesion-cerrada` para confirmar al usuario que la sesión terminó correctamente.
 
 ## Session Model
 - La app utiliza cookies de sesión para access/refresh token.
