@@ -652,6 +652,52 @@ p {
   line-height: 1.45;
 }
 
+.value-grid {
+  display: grid;
+  gap: 0.95rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1.3rem;
+}
+
+.value-card {
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, white);
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+}
+
+.value-icon {
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--smoke) 45%, white);
+  border-radius: 999px;
+  color: var(--charcoal);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  height: 1.65rem;
+  justify-content: center;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  width: 1.65rem;
+}
+
+.value-label {
+  color: color-mix(in srgb, var(--smoke) 80%, var(--charcoal));
+  font-size: 0.75rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.value-card h2 {
+  font-size: 1.2rem;
+}
+
+.value-card p {
+  color: color-mix(in srgb, var(--ink) 82%, white);
+}
+
 .section-block {
   margin-top: 3.2rem;
 }
@@ -1386,6 +1432,7 @@ p {
 
   .feature-grid,
   .occasion-grid,
+  .value-grid,
   .home-wallpaper,
   .split-panel,
   .contact-grid,
