@@ -17,6 +17,8 @@ type FormState = {
   name: string;
   description: string;
   image: string;
+  size: string;
+  flowers: string;
   hasOffer: boolean;
   price: string;
   offerPrice: string;
@@ -34,6 +36,8 @@ const initialForm: FormState = {
   name: "",
   description: "",
   image: "",
+  size: "",
+  flowers: "",
   hasOffer: false,
   price: "",
   offerPrice: "",
@@ -205,6 +209,8 @@ export default function AdminProductsManager() {
           image:
             form.image ||
             "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80",
+          size: form.size,
+          flowers: form.flowers.split(",").map((flower) => flower.trim()).filter(Boolean),
           hasOffer: form.hasOffer,
           price: basePrice,
           offerPrice: form.hasOffer ? offerPrice : undefined,
@@ -237,6 +243,8 @@ export default function AdminProductsManager() {
           image:
             form.image ||
             "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=1200&q=80",
+          size: form.size,
+          flowers: form.flowers.split(",").map((flower) => flower.trim()).filter(Boolean),
           hasOffer: form.hasOffer,
           price: basePrice,
           offerPrice: form.hasOffer ? offerPrice : undefined,
@@ -299,6 +307,8 @@ export default function AdminProductsManager() {
       name: product.name,
       description: product.description,
       image: product.image,
+      size: product.size,
+      flowers: product.flowers.join(", "),
       hasOffer: Boolean(product.hasOffer),
       price: (product.originalPrice ?? product.price).replace(/[^\d]/g, ""),
       offerPrice: product.hasOffer ? product.price.replace(/[^\d]/g, "") : "",
@@ -371,6 +381,25 @@ export default function AdminProductsManager() {
               rows={4}
               value={form.description}
               onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+            />
+          </label>
+          <label>
+            Tamaño
+            <input
+              type="text"
+              value={form.size}
+              onChange={(event) => setForm((prev) => ({ ...prev, size: event.target.value }))}
+              required
+            />
+          </label>
+          <label>
+            Flores que habitan esta pieza (separadas por coma)
+            <input
+              type="text"
+              value={form.flowers}
+              onChange={(event) => setForm((prev) => ({ ...prev, flowers: event.target.value }))}
+              placeholder="Rosas, Lisianthus, Clavel"
+              required
             />
           </label>
 

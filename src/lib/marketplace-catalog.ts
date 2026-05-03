@@ -10,6 +10,8 @@ export type EditableMarketplaceProductInput = {
   name: string;
   description: string;
   image: string;
+  size: string;
+  flowers: string[];
   hasOffer: boolean;
   price: number;
   offerPrice?: number;
@@ -65,8 +67,8 @@ export function buildMarketplaceProduct(input: EditableMarketplaceProductInput):
     image: normalizeProductImageReference(input.image),
     shortDescription: shortDescription || "Producto floral creado por administración.",
     description: input.description.trim(),
-    size: "Personalizable",
-    flowers: ["Según temporada"],
+    size: input.size.trim(),
+    flowers: input.flowers,
     idealFor: ["Regalo", "Decoración"],
     delivery: "Coordinar entrega por WhatsApp según cobertura.",
     originalPrice: input.hasOffer ? formatCurrency(input.price) : undefined,

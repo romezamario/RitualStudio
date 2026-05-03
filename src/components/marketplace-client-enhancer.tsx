@@ -156,24 +156,12 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
 
           <div className="split-panel">
             <div>
-              <h3>Flores incluidas</h3>
+              <h3>Flores que habitan esta pieza</h3>
               <ul>
                 {detailProduct.flowers.map((flower) => (
                   <li key={flower}>{flower}</li>
                 ))}
               </ul>
-            </div>
-            <div>
-              <h3>Ideal para</h3>
-              <ul>
-                {detailProduct.idealFor.map((scenario) => (
-                  <li key={scenario}>{scenario}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3>Entrega</h3>
-              <p>{detailProduct.delivery}</p>
             </div>
           </div>
 
