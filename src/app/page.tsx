@@ -3,182 +3,81 @@ import Image from "next/image";
 import Link from "next/link";
 import SiteShell from "@/components/site-shell";
 
-type CategoryItem = {
+type EditorialSection = {
+  eyebrow: string;
   title: string;
   description: string;
   href: string;
+  cta: string;
 };
 
-type OccasionItem = {
+type EditorialPick = {
+  label: string;
   title: string;
-  microcopy: string;
-  imageUrl: string;
-  queryTag: string;
-};
-
-type FeaturedItem = {
-  title: string;
-  note: string;
+  description: string;
   href: string;
+  cta: string;
 };
 
-type HomeOption = {
-  titulo: string;
-  descripcion: string;
-  href: string;
-  url: string;
-  span?: "wide" | "tall" | "compact";
-};
-
-const WALLPAPER_IMAGE_SIZES = "(max-width: 900px) 100vw, 33vw";
 const HERO_IMAGE_URL =
   "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1800&q=86";
 
-const opcionesHome: HomeOption[] = [
+const editorialSections: EditorialSection[] = [
   {
-    titulo: "Marketplace",
-    descripcion: "Bouquets premium listos para entregar y regalar hoy.",
+    eyebrow: "Curated Marketplace",
+    title: "Curated Marketplace",
+    description:
+      "Shop ready-to-send floral pieces, premium objects and gifting gestures selected with the studio's seasonal eye.",
     href: "/marketplace",
-    url: "/images/wallpaper-marketplace.jpg",
-    span: "wide"
+    cta: "Explore the marketplace"
   },
   {
-    titulo: "Diseño a medida",
-    descripcion: "Creamos una propuesta floral personalizada para tu ocasión.",
+    eyebrow: "Experiences",
+    title: "Experiences",
+    description:
+      "Join floral workshops and intimate learning formats designed for guests who want to create with intention.",
+    href: "/cursos",
+    cta: "View experiences"
+  },
+  {
+    eyebrow: "Design by Brief",
+    title: "Design by Brief",
+    description:
+      "Share a palette, message, budget or occasion and let the studio translate it into a tailored floral composition.",
     href: "/custom",
-    url: "/images/wallpaper-custom.jpg",
-    span: "tall"
+    cta: "Start a custom brief"
   },
   {
-    titulo: "Eventos",
-    descripcion: "Ambientaciones florales para celebraciones y marcas.",
+    eyebrow: "Events & Spaces",
+    title: "Events & Spaces",
+    description:
+      "Floral direction for celebrations, dinners, launches and interiors that need atmosphere, rhythm and detail.",
     href: "/eventos",
-    url: "/images/wallpaper-eventos.jpg",
-    span: "compact"
+    cta: "Plan an event"
   }
 ];
 
-const categoryItems: CategoryItem[] = [
+const editorialPicks: EditorialPick[] = [
   {
-    title: "Cumpleaños",
-    description: "Bouquets listos para sorprender con entregas coordinadas.",
-    href: "/marketplace"
+    label: "Marketplace",
+    title: "Seasonal stems and ready rituals",
+    description: "Pieces selected for fast decisions without losing an editorial point of view.",
+    href: "/marketplace",
+    cta: "Shop the edit"
   },
   {
-    title: "Amor",
-    description: "Arreglos románticos con selección floral de temporada.",
-    href: "/marketplace"
-  },
-  {
-    title: "Agradecimiento",
-    description: "Detalles elegantes para agradecer con intención.",
-    href: "/marketplace"
-  },
-  {
-    title: "Corporativo",
-    description: "Regalos y ambientaciones para equipos, clientes y marcas.",
-    href: "/eventos"
-  },
-  {
-    title: "Eventos",
-    description: "Diseño floral para bodas, cenas privadas y celebraciones.",
-    href: "/eventos"
-  },
-  {
-    title: "Diseño a medida",
-    description: "Propuestas personalizadas según estilo, presupuesto y ocasión.",
-    href: "/custom"
-  }
-];
-
-const marketplaceFiltersEnabled = false;
-
-const occasionItems: OccasionItem[] = [
-  {
-    title: "Cumpleaños",
-    microcopy: "Sorprende hoy con flores alegres y listas para regalar.",
-    imageUrl: "/images/wallpaper-marketplace.jpg",
-    queryTag: "cumpleanos"
-  },
-  {
-    title: "Amor",
-    microcopy: "Bouquets románticos para celebrar momentos especiales.",
-    imageUrl: "/images/wallpaper-custom.jpg",
-    queryTag: "amor"
-  },
-  {
-    title: "Aniversario",
-    microcopy: "Composiciones elegantes para recordar su historia juntos.",
-    imageUrl: "/images/wallpaper-eventos.jpg",
-    queryTag: "aniversario"
-  },
-  {
-    title: "Agradecimiento",
-    microcopy: "Un detalle floral para agradecer con intención y estilo.",
-    imageUrl: "/images/wallpaper-marketplace.jpg",
-    queryTag: "agradecimiento"
-  },
-  {
-    title: "Condolencias",
-    microcopy: "Arreglos sobrios para acompañar y expresar apoyo.",
-    imageUrl: "/images/wallpaper-custom.jpg",
-    queryTag: "condolencias"
-  },
-  {
-    title: "Corporativo",
-    microcopy: "Regalos florales para clientes, equipos y aliados clave.",
-    imageUrl: "/images/wallpaper-eventos.jpg",
-    queryTag: "corporativo"
-  }
-];
-
-function buildOccasionHref(queryTag: string) {
-  if (!marketplaceFiltersEnabled) {
-    return "/marketplace";
-  }
-
-  const params = new URLSearchParams({ ocasion: queryTag });
-  return `/marketplace?${params.toString()}`;
-}
-
-const featuredItems: FeaturedItem[] = [
-  {
-    title: "Selección semanal del estudio",
-    note: "Curaduría de piezas destacadas para envío inmediato.",
-    href: "/marketplace"
-  },
-  {
-    title: "Más vendidos para regalar",
-    note: "Composiciones favoritas de nuestros clientes.",
-    href: "/marketplace"
-  },
-  {
-    title: "Edición personalizada",
-    note: "Una base lista para adaptar a mensaje, colores y formato.",
-    href: "/custom"
-  }
-];
-
-const valuePillars = [
-  {
-    label: "Temporada",
-    title: "Curaduría floral de temporada",
-    note: "Selecciones frescas listas para comprar con confianza."
+    label: "Experiences",
+    title: "Workshops with a studio pace",
+    description: "Hands-on floral sessions for personal rituals, creative teams and intimate groups.",
+    href: "/cursos",
+    cta: "See dates"
   },
   {
     label: "Brief",
-    title: "Diseño personalizado por brief",
-    note: "Convertimos tu idea en una propuesta floral alineada a tu estilo."
-  },
-  {
-    label: "Entrega",
-    title: "Entrega cuidada y puntual",
-    note: "Coordinamos cada envío para que llegue impecable y a tiempo."
-  },
-  {
-    label: "Soporte",
-    title: "Soporte humano para eventos y regalos",
-    note: "Te acompañamos cuando necesitas resolver rápido y con criterio."
+    title: "A composition shaped around the moment",
+    description: "A bespoke path when the occasion needs a specific gesture, tone or spatial language.",
+    href: "/custom",
+    cta: "Send a brief"
   }
 ];
 
@@ -220,116 +119,78 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="home-wallpaper" aria-label="Navegación principal de Ritual Studio">
+      <section className="section-block" aria-labelledby="the-studio-title">
         <div className="section-intro">
-          <p className="section-tag">Explora</p>
-          <p className="section-microcopy">Elige cómo quieres comenzar tu experiencia floral.</p>
+          <p className="section-tag">The Studio</p>
+          <p className="section-microcopy">A floral studio for gestures, gatherings and spaces.</p>
         </div>
-        {opcionesHome.map((item) => (
-          <Link
-            key={item.titulo}
-            href={item.href}
-            className={`wallpaper-card${item.span ? ` wallpaper-card-${item.span}` : ""}`}
-          >
-            <Image src={item.url} alt={item.titulo} width={1200} height={1400} sizes={WALLPAPER_IMAGE_SIZES} />
-            <div className="wallpaper-overlay">
-              <p className="wallpaper-kicker">Ritual Studio</p>
-              <h2>{item.titulo}</h2>
-              <p>{item.descripcion}</p>
-            </div>
-          </Link>
-        ))}
-      </section>
-
-      <section className="section-block" aria-label="Categorías por ocasión">
-        <div className="section-intro">
-          <p className="section-tag">Categorías clave</p>
-          <p className="section-microcopy">Ideas rápidas para regalar según la ocasión.</p>
-        </div>
-        <div className="feature-grid">
-        {categoryItems.map((item) => (
-          <article key={item.title} className="studio-card">
-            <p className="card-label">Categoría</p>
-            <h2>{item.title}</h2>
-            <p>{item.description}</p>
-            <Link href={item.href} className="text-link">
-              Explorar opción
-            </Link>
-          </article>
-        ))}
-              </div>
-      </section>
-
-      <section className="section-block" aria-label="Compra por ocasión">
-        <div className="section-intro">
-          <p className="section-tag">Compra por ocasión</p>
-          <p className="section-microcopy">
-            Elige una intención de compra y te llevamos al marketplace con opciones sugeridas.
+        <article className="studio-card">
+          <p className="card-label">The Studio</p>
+          <h2 id="the-studio-title">The Studio</h2>
+          <p>
+            Ritual Studio creates premium floral rituals for gifting, learning, events and atmosphere. Each path begins
+            with an editorial point of view and ends with a considered gesture for the moment.
           </p>
-        </div>
-        <div className="occasion-grid">
-          {occasionItems.map((item) => (
-            <Link key={item.title} href={buildOccasionHref(item.queryTag)} className="occasion-card">
-              <Image src={item.imageUrl} alt={item.title} width={800} height={560} />
-              <div className="occasion-card-body">
-                <h3>{item.title}</h3>
-                <p>{item.microcopy}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+          <Link href="/contacto" className="text-link">
+            Contact the studio
+          </Link>
+        </article>
       </section>
 
-      <section className="section-block" aria-label="Más vendidos y selección del estudio">
-        <div className="section-intro">
-          <p className="section-tag">Selección editorial</p>
-          <p className="section-microcopy">Piezas destacadas por el estudio esta semana.</p>
-        </div>
-        <div className="feature-grid">
-        {featuredItems.map((item) => (
-          <article key={item.title} className="studio-card">
-            <p className="card-label">Más vendidos · Selección del estudio</p>
-            <h2>{item.title}</h2>
-            <p>{item.note}</p>
-            <Link href={item.href} className="text-link">
-              Ver productos
+      {editorialSections.map((section) => (
+        <section
+          key={section.title}
+          className="section-block"
+          aria-labelledby={`${section.href.slice(1)}-title`}
+        >
+          <div className="section-intro">
+            <p className="section-tag">{section.eyebrow}</p>
+            <p className="section-microcopy">Ritual Studio · {section.title}</p>
+          </div>
+          <article className="studio-card">
+            <p className="card-label">{section.eyebrow}</p>
+            <h2 id={`${section.href.slice(1)}-title`}>{section.title}</h2>
+            <p>{section.description}</p>
+            <Link href={section.href} className="text-link">
+              {section.cta}
             </Link>
           </article>
-        ))}
-              </div>
-      </section>
+        </section>
+      ))}
 
-      <section className="section-block" aria-label="Pilares de Ritual Studio">
+      <section className="section-block" aria-labelledby="editorial-selection-title">
         <div className="section-intro">
-          <p className="section-tag">Pilares del estudio</p>
-          <p className="section-microcopy">Una experiencia floral clara, elegante y cercana.</p>
+          <p className="section-tag">Editorial Selection</p>
+          <p className="section-microcopy">Three ways to begin, curated by the studio.</p>
         </div>
-        <div className="value-grid">
-          {valuePillars.map((pillar) => (
-            <article key={pillar.title} className="value-card">
-              <span className="value-icon" aria-hidden="true">
-                {pillar.label.slice(0, 1)}
-              </span>
-              <p className="value-label">{pillar.label}</p>
-              <h2>{pillar.title}</h2>
-              <p>{pillar.note}</p>
+        <h2 id="editorial-selection-title">Editorial Selection</h2>
+        <div className="feature-grid">
+          {editorialPicks.map((item) => (
+            <article key={item.title} className="studio-card">
+              <p className="card-label">{item.label}</p>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              <Link href={item.href} className="text-link">
+                {item.cta}
+              </Link>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="studio-card contact-highlight" aria-label="Asesoría y contacto">
-        <p className="card-label">Asesoría floral</p>
-        <h2>Conversemos sobre tu idea y armemos una propuesta contigo.</h2>
+      <section className="studio-card contact-highlight" aria-labelledby="final-cta-title">
+        <p className="card-label">Final CTA</p>
+        <h2 id="final-cta-title">Tell us the moment. We’ll design the ritual.</h2>
         <p>
-          Si prefieres asesoría antes de comprar, te guiamos para elegir la mejor opción para regalos y eventos.
+          Share the occasion, date, location and feeling you want to create. We will guide the next step with a clear,
+          considered floral proposal.
         </p>
         <div className="cta-row" style={{ marginTop: "0.35rem" }}>
           <Link href="/contacto" className="btn btn-primary">
-            Ir a contacto
+            Contact Ritual Studio
           </Link>
           <Link href="/eventos" className="btn btn-ghost">
-            Ver soluciones para eventos
+            Explore events & spaces
           </Link>
         </div>
       </section>
