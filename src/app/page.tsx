@@ -22,6 +22,8 @@ type EditorialPick = {
 const HERO_IMAGE_URL =
   "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1800&q=86";
 
+const OCCASION_IMAGE_SIZES = "(max-width: 900px) 100vw, 33vw";
+
 const editorialSections: EditorialSection[] = [
   {
     eyebrow: "Curated Marketplace",
@@ -101,7 +103,7 @@ export default function Home() {
             alt=""
             fill
             priority
-            sizes="(max-width: 900px) 100vw, 1100px"
+            sizes={OCCASION_IMAGE_SIZES}
             className="home-hero-image"
           />
         </div>
