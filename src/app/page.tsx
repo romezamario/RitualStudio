@@ -31,6 +31,8 @@ type HomeOption = {
 };
 
 const WALLPAPER_IMAGE_SIZES = "(max-width: 900px) 100vw, 33vw";
+const HERO_IMAGE_URL =
+  "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1800&q=86";
 
 const opcionesHome: HomeOption[] = [
   {
@@ -194,19 +196,25 @@ export default function Home() {
       subtitle="Compra online con entrega confiable o solicita un diseño floral personalizado para momentos memorables."
     >
       <section className="home-hero" aria-labelledby="home-hero-title">
+        <div className="home-hero-media" aria-hidden="true">
+          <Image
+            src={HERO_IMAGE_URL}
+            alt=""
+            fill
+            priority
+            sizes="(max-width: 900px) 100vw, 1100px"
+            className="home-hero-image"
+          />
+        </div>
         <div className="home-hero-content">
           <p className="home-hero-kicker">Ritual Studio</p>
-          <h2 id="home-hero-title">Flores que elevan cada ocasión.</h2>
-          <p>
-            Diseño floral premium con entrega confiable y propuestas personalizadas para regalos, eventos y
-            espacios con identidad propia.
-          </p>
-          <div className="home-hero-cta">
+          <h2 id="home-hero-title">Floral experiences, curated objects & moments.</h2>
+          <div className="home-hero-cta" aria-label="Acciones principales">
             <Link href="/marketplace" className="home-hero-button home-hero-button-primary">
-              Comprar flores
+              Explorar colección
             </Link>
             <Link href="/custom" className="home-hero-button home-hero-button-secondary">
-              Solicitar diseño a medida
+              Diseño a medida
             </Link>
           </div>
         </div>
