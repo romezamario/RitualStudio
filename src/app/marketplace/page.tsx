@@ -8,6 +8,7 @@ import { toRenderableProductImageUrl } from "@/lib/product-image-storage";
 import { getCurrentUserProfile } from "@/lib/supabase/server";
 
 const CARD_IMAGE_SIZES = "(max-width: 900px) 100vw, (max-width: 1280px) 50vw, 33vw";
+const FEATURED_IMAGE_SIZES = "(max-width: 900px) 100vw, (max-width: 1280px) 65vw, 720px";
 
 function getCategoryId(category: string) {
   return `categoria-${category.toLowerCase().replace(/\s+/g, "-")}`;
@@ -47,48 +48,86 @@ export default async function MarketplacePage() {
             ))}
           </div>
 
-          <p className="scroll-hint">Scroll down ↓ para seguir explorando el catálogo completo.</p>
+          <p className="scroll-hint">Explora la curaduría completa del estudio.</p>
 
           {categories.map((category) => {
             const categoryProducts = products.filter((product) => product.category === category);
+            const [featuredProduct, ...secondaryProducts] = categoryProducts;
 
             return (
               <section
                 key={category}
                 id={getCategoryId(category)}
-                className="marketplace-section"
+                className="marketplace-section marketplace-editorial-section"
                 aria-label={`Categoría ${category}`}
               >
-                <h2>{category}</h2>
-                <div className="feature-grid">
-                  {categoryProducts.map((product) => (
-                    <article key={product.slug} className="studio-card marketplace-card">
-                      <div className="card-image-wrap">
-                        <Image
-                          className="card-image"
-                          src={toRenderableProductImageUrl(product.image, "marketplace-list")}
-                          alt={product.name}
-                          width={1200}
-                          height={900}
-                          sizes={CARD_IMAGE_SIZES}
-                        />
-                      </div>
-                      <p className="card-label">{product.category}</p>
-                      <h3>{product.name}</h3>
-                      <p>{product.shortDescription}</p>
+                <div className="marketplace-section-heading">
+                  <p className="card-label">Selección por categoría</p>
+                  <h2>{category}</h2>
+                </div>
+
+                {featuredProduct ? (
+                  <article className="studio-card marketplace-featured-card">
+                    <div className="card-image-wrap marketplace-featured-image-wrap">
+                      <Image
+                        className="card-image marketplace-featured-image"
+                        src={toRenderableProductImageUrl(featuredProduct.image, "marketplace-list")}
+                        alt={featuredProduct.name}
+                        width={1400}
+                        height={900}
+                        sizes={FEATURED_IMAGE_SIZES}
+                        priority={category === categories[0]}
+                      />
+                    </div>
+                    <div className="marketplace-featured-copy">
+                      <p className="card-label">Pieza destacada · {featuredProduct.category}</p>
+                      <h3>{featuredProduct.name}</h3>
+                      <p>{featuredProduct.shortDescription}</p>
                       <div className="price-stack">
-                        {product.originalPrice ? <span className="price-old">{product.originalPrice}</span> : null}
-                        <strong className="price-tag">{product.price}</strong>
+                        {featuredProduct.originalPrice ? <span className="price-old">{featuredProduct.originalPrice}</span> : null}
+                        <strong className="price-tag">{featuredProduct.price}</strong>
                       </div>
-                      <div className="marketplace-card-actions">
-                        <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
+                      <div className="marketplace-card-actions marketplace-featured-actions">
+                        <Link href={`/marketplace/${featuredProduct.slug}`} className="btn btn-ghost">
                           Ver detalle
                         </Link>
-                        <ProductPurchaseActions product={product} showDeliveryCalendar={false} />
+                        <ProductPurchaseActions product={featuredProduct} showDeliveryCalendar={false} />
                       </div>
-                    </article>
-                  ))}
-                </div>
+                    </div>
+                  </article>
+                ) : null}
+
+                {secondaryProducts.length > 0 ? (
+                  <div className="marketplace-secondary-grid">
+                    {secondaryProducts.map((product) => (
+                      <article key={product.slug} className="studio-card marketplace-card marketplace-secondary-card">
+                        <div className="card-image-wrap marketplace-secondary-image-wrap">
+                          <Image
+                            className="card-image marketplace-secondary-image"
+                            src={toRenderableProductImageUrl(product.image, "marketplace-list")}
+                            alt={product.name}
+                            width={1200}
+                            height={900}
+                            sizes={CARD_IMAGE_SIZES}
+                          />
+                        </div>
+                        <p className="card-label">{product.category}</p>
+                        <h3>{product.name}</h3>
+                        <p>{product.shortDescription}</p>
+                        <div className="price-stack">
+                          {product.originalPrice ? <span className="price-old">{product.originalPrice}</span> : null}
+                          <strong className="price-tag">{product.price}</strong>
+                        </div>
+                        <div className="marketplace-card-actions">
+                          <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
+                            Ver detalle
+                          </Link>
+                          <ProductPurchaseActions product={product} showDeliveryCalendar={false} />
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : null}
               </section>
             );
           })}
