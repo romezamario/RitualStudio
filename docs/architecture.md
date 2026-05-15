@@ -10,6 +10,10 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 - **Resend (opcional)**: envío de comprobantes de compra.
 - **Vercel**: hosting y despliegues por ambiente.
 
+## Metadata Model
+- `src/app/layout.tsx` define metadata global como fallback general del sitio, incluyendo `metadataBase`, template de títulos, descripción general, Open Graph/Twitter, robots y canonical raíz.
+- La home (`src/app/page.tsx`) declara metadata específica de ruta para reforzar el posicionamiento de `/` como entrada a estudio floral, experiencias, marketplace curado, eventos y diseño a medida, manteniendo `alternates.canonical = "/"`.
+
 ## Runtime Boundaries
 
 ### Frontend (browser/client)
