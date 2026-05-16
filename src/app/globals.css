@@ -1179,7 +1179,7 @@ p {
 }
 
 .marketplace-featured-actions {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .marketplace-secondary-grid {
@@ -1201,6 +1201,24 @@ p {
 
 .marketplace-secondary-image {
   height: 170px;
+}
+
+.marketplace-clickable-card {
+  cursor: pointer;
+  position: relative;
+}
+
+.marketplace-card-link {
+  border-radius: inherit;
+  display: block;
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+.marketplace-card-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--charcoal) 72%, white);
+  outline-offset: 4px;
 }
 
 .marketplace-card h3 {
@@ -1308,6 +1326,8 @@ p {
 .marketplace-card-actions {
   display: grid;
   gap: 0.6rem;
+  position: relative;
+  z-index: 2;
 }
 
 
