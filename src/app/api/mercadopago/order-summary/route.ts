@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { mpApiFetch } from "@/lib/mercadopago";
 import { supabaseAdminRequest } from "@/lib/supabase-admin";
+import { getCurrentUserProfile } from "@/lib/supabase/server";
 
 type PurchasedItem = {
   slug?: string;
@@ -27,12 +28,14 @@ type DeliveryAddress = {
 type OrderRow = {
   external_reference?: string;
   mercado_pago_order_id?: string | null;
+  user_id?: string | null;
   status?: string | null;
   total_amount?: number | string | null;
   customer_email?: string | null;
   metadata?: {
     items?: PurchasedItem[];
     delivery_address?: DeliveryAddress;
+    receipt_lookup_token?: string | null;
   } | null;
   created_at?: string;
   updated_at?: string;
@@ -119,9 +122,36 @@ function toAmount(value?: number | string | null) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function normalizeReceiptToken(value?: string | null) {
+  return value?.trim() ?? "";
+}
+
+function hasReceiptTokenAccess(order: OrderRow | null, receiptToken: string) {
+  const storedToken = normalizeReceiptToken(order?.metadata?.receipt_lookup_token);
+  return Boolean(storedToken && receiptToken && storedToken === receiptToken);
+}
+
+async function canReadSensitiveReceipt(order: OrderRow | null, receiptToken: string) {
+  if (!order) {
+    return false;
+  }
+
+  if (hasReceiptTokenAccess(order, receiptToken)) {
+    return true;
+  }
+
+  const { user, isAdmin } = await getCurrentUserProfile();
+
+  if (isAdmin) {
+    return true;
+  }
+
+  return Boolean(user?.id && order.user_id && user.id === order.user_id);
+}
+
 async function fetchOrderByExternalReference(externalReference: string) {
   const { data, error } = await supabaseAdminRequest<OrderRow[]>(
-    `/rest/v1/orders?select=external_reference,mercado_pago_order_id,status,total_amount,customer_email,metadata,created_at,updated_at&external_reference=eq.${encodeURIComponent(
+    `/rest/v1/orders?select=external_reference,mercado_pago_order_id,user_id,status,total_amount,customer_email,metadata,created_at,updated_at&external_reference=eq.${encodeURIComponent(
       externalReference
     )}&order=created_at.desc&limit=1`
   );
@@ -131,7 +161,7 @@ async function fetchOrderByExternalReference(externalReference: string) {
 
 async function fetchOrderByMercadoPagoOrderId(mercadoPagoOrderId: string) {
   const { data, error } = await supabaseAdminRequest<OrderRow[]>(
-    `/rest/v1/orders?select=external_reference,mercado_pago_order_id,status,total_amount,customer_email,metadata,created_at,updated_at&mercado_pago_order_id=eq.${encodeURIComponent(
+    `/rest/v1/orders?select=external_reference,mercado_pago_order_id,user_id,status,total_amount,customer_email,metadata,created_at,updated_at&mercado_pago_order_id=eq.${encodeURIComponent(
       mercadoPagoOrderId
     )}&order=created_at.desc&limit=1`
   );
@@ -163,6 +193,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const externalReference = normalizeLookupValue(searchParams.get("external_reference"));
   const paymentId = normalizeLookupValue(searchParams.get("payment_id"));
+  const receiptToken = normalizeReceiptToken(searchParams.get("receipt_token"));
 
   if (!externalReference && !paymentId) {
     return NextResponse.json(
@@ -255,7 +286,7 @@ export async function GET(request: Request) {
           payment_status: mpPayment.status ?? null,
           payment_status_detail: mpPayment.status_detail ?? null,
           total: toAmount(mpPayment.transaction_amount),
-          customer_email: mpPayment.payer?.email ?? null,
+          customer_email: null,
           payment_method: mpPayment.payment_method_id ?? null,
           items: [],
           timestamps: {
@@ -280,8 +311,9 @@ export async function GET(request: Request) {
     }
   }
 
-  const items = Array.isArray(order?.metadata?.items) ? order.metadata.items : [];
-  const deliveryAddress = order?.metadata?.delivery_address ?? null;
+  const hasSensitiveAccess = await canReadSensitiveReceipt(order, receiptToken);
+  const items = hasSensitiveAccess && Array.isArray(order?.metadata?.items) ? order.metadata.items : [];
+  const deliveryAddress = hasSensitiveAccess ? order?.metadata?.delivery_address ?? null : null;
   const consolidatedStatus = consolidateStatus(order?.status, payment?.status);
 
   return NextResponse.json({
@@ -294,10 +326,11 @@ export async function GET(request: Request) {
       payment_status: payment?.status ?? null,
       payment_status_detail: payment?.status_detail ?? null,
       total: payment?.amount != null ? toAmount(payment.amount) : toAmount(order?.total_amount),
-      customer_email: order?.customer_email ?? null,
+      customer_email: hasSensitiveAccess ? order?.customer_email ?? null : null,
       payment_method: payment?.payment_method ?? null,
       items,
       delivery_address: deliveryAddress,
+      is_limited: !hasSensitiveAccess,
       timestamps: {
         order_created_at: order?.created_at ?? null,
         order_updated_at: order?.updated_at ?? null,

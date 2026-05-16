@@ -29,6 +29,7 @@ type CreateOrderResponse = {
   status_detail?: string | null;
   total_amount?: number;
   normalized_status?: CheckoutStatus;
+  receipt_token?: string;
   error?: string;
 };
 
@@ -589,6 +590,10 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
                       status: result.status ?? "approved",
                       total_amount: String(result.total_amount ?? total),
                     });
+
+                    if (result.receipt_token) {
+                      successParams.set("receipt_token", result.receipt_token);
+                    }
 
                     if (normalizedPayerEmail) {
                       successParams.set("email", normalizedPayerEmail);
