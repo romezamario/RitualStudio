@@ -12,6 +12,7 @@ Reglas funcionales de negocio actuales del flujo comercial de Ritual Studio.
 
 ## Catalog & Product Rules
 - El catálogo expone productos por `slug` como identificador funcional.
+- En `/marketplace`, la card completa de cada producto funciona como acceso al detalle (`/marketplace/[slug]`); no se muestra un botón independiente de **Ver detalle** para productos, y las acciones de carrito/compra permanecen separadas.
 - Los productos pueden marcarse como `is_test_product`; estos solo son visibles en catálogo/detalle para usuarios con rol `admin` y se ocultan para usuarios normales (incluyendo modo producción y test).
 - El checkout no confía en precios enviados por frontend: recalcula usando catálogo backend.
 - En PDP de productos y detalle de cursos, la acción **Comprar ahora** agrega la línea seleccionada al carrito y redirige directo a `/checkout` (sin pasar por WhatsApp).

@@ -67,7 +67,14 @@ export default async function MarketplacePage() {
                 </div>
 
                 {featuredProduct ? (
-                  <article className="studio-card marketplace-featured-card">
+                  <article className="studio-card marketplace-featured-card marketplace-clickable-card">
+                    <Link
+                      href={`/marketplace/${featuredProduct.slug}`}
+                      className="marketplace-card-link"
+                      aria-label={`Ver detalle de ${featuredProduct.name}`}
+                    >
+                      <span className="sr-only">Ver detalle de {featuredProduct.name}</span>
+                    </Link>
                     <div className="card-image-wrap marketplace-featured-image-wrap">
                       <Image
                         className="card-image marketplace-featured-image"
@@ -88,9 +95,6 @@ export default async function MarketplacePage() {
                         <strong className="price-tag">{featuredProduct.price}</strong>
                       </div>
                       <div className="marketplace-card-actions marketplace-featured-actions">
-                        <Link href={`/marketplace/${featuredProduct.slug}`} className="btn btn-ghost">
-                          Ver detalle
-                        </Link>
                         <ProductPurchaseActions product={featuredProduct} showDeliveryCalendar={false} />
                       </div>
                     </div>
@@ -100,7 +104,14 @@ export default async function MarketplacePage() {
                 {secondaryProducts.length > 0 ? (
                   <div className="marketplace-secondary-grid">
                     {secondaryProducts.map((product) => (
-                      <article key={product.slug} className="studio-card marketplace-card marketplace-secondary-card">
+                      <article key={product.slug} className="studio-card marketplace-card marketplace-secondary-card marketplace-clickable-card">
+                        <Link
+                          href={`/marketplace/${product.slug}`}
+                          className="marketplace-card-link"
+                          aria-label={`Ver detalle de ${product.name}`}
+                        >
+                          <span className="sr-only">Ver detalle de {product.name}</span>
+                        </Link>
                         <div className="card-image-wrap marketplace-secondary-image-wrap">
                           <Image
                             className="card-image marketplace-secondary-image"
@@ -119,9 +130,6 @@ export default async function MarketplacePage() {
                           <strong className="price-tag">{product.price}</strong>
                         </div>
                         <div className="marketplace-card-actions">
-                          <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
-                            Ver detalle
-                          </Link>
                           <ProductPurchaseActions product={product} showDeliveryCalendar={false} />
                         </div>
                       </article>
