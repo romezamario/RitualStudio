@@ -14,6 +14,13 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 - `src/app/layout.tsx` define metadata global como fallback general del sitio, incluyendo `metadataBase`, template de títulos, descripción general, Open Graph/Twitter, robots y canonical raíz.
 - La home (`src/app/page.tsx`) declara metadata específica de ruta para reforzar el posicionamiento de `/` como entrada a estudio floral, experiencias, marketplace curado, eventos y diseño a medida, manteniendo `alternates.canonical = "/"`.
 
+
+## Public UI Design System
+- La experiencia pública usa `SiteShell` como envoltorio común para navegación, hero SEO y footer.
+- La home (`src/app/page.tsx`) adopta un layout editorial inspirado en estudios creativos tipo Yonobi: hero visual inmersivo, secciones amplias con tipografía display, tarjetas fotográficas para rutas principales y CTAs redondeados.
+- La dirección visual vive en `src/app/globals.css` mediante tokens globales cálidos (`--bg`, `--panel`, `--ink`, `--accent`) y clases `yonobi-*` acotadas a la home para evitar cambios funcionales en checkout, auth, pagos o administración.
+- El rediseño es únicamente presentacional; no altera contratos API, flujos de Mercado Pago, Supabase Auth/RLS ni persistencia.
+
 ## Runtime Boundaries
 
 ### Frontend (browser/client)
