@@ -84,6 +84,7 @@ export function buildSupabaseStorageRenderUrl(path: string, usage: ProductImageR
     width: String(variant.width),
     height: String(variant.height),
     quality: String(variant.quality),
+    format: "webp",
   });
 
   return `${supabaseUrl}/storage/v1/render/image/public/${getProductImagesBucket()}/${normalizedPath}?${searchParams.toString()}`;

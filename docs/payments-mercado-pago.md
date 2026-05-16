@@ -8,7 +8,7 @@ Documentar integración de pagos con tarjeta y sincronización vía webhook.
 - `POST /api/mercadopago/webhook`
 - `POST /api/mercadopago/webhook/prod`
 - `POST /api/mercadopago/webhook/test`
-- `GET /api/mercadopago/order-summary` (lectura de resumen)
+- `GET /api/mercadopago/order-summary` (lectura de resumen; requiere `receipt_token` o sesión propietaria/admin para campos sensibles)
 - Endpoint complementario de autenticación: `POST /api/auth/claim-orders` para asociar compras de invitado al usuario autenticado con correo confirmado y auditoría de claim.
 
 ## `create-order` Contract (Current)
@@ -28,6 +28,7 @@ Respuesta (resumen):
 - `external_reference` de la orden local.
 - `order_id` interno.
 - `payment_status` normalizado (`approved`, `pending`, `rejected`, `error`).
+- `receipt_token`: token de capacidad para consultar el comprobante completo en `/checkout/exito` sin exponer datos personales solo por conocer `external_reference` o `payment_id`.
 - `redirect`/metadata operativa para UI de éxito.
 
 ## Create Order Flow
@@ -52,6 +53,7 @@ Respuesta (resumen):
    - En esa llamada se envía `notification_url` para que Mercado Pago publique eventos de pago al webhook del proyecto.
    - También se envía `additional_info.items[]` con `id`, `title`, `description`, `category_id`, `quantity` y `unit_price` por línea para mejorar score de aprobación y detalle antifraude.
 6. Backend actualiza orden/pago en Supabase con respuesta de Mercado Pago.
+7. El frontend conserva `receipt_token` en la URL de éxito para consultar el comprobante completo; sin ese token (o sin sesión autenticada propietaria/admin), `order-summary` devuelve vista limitada sin email, dirección ni líneas.
 
 ## Checkout Embebido (Card Payment Brick)
 - El script `https://sdk.mercadopago.com/js/v2` se carga una sola vez por sesión en el cliente.
@@ -79,6 +81,7 @@ Respuesta (resumen):
 
 ## Persistence Strategy
 - Tabla `orders`: referencia externa, estado, total, metadata y raw response.
+- `orders.metadata.receipt_lookup_token` guarda el token de comprobante generado server-side; se usa como capacidad de lectura para que el endpoint público de resumen no revele PII por enumeración de identificadores.
 - `orders.payment_confirmation_email_sent_at` (nullable) funciona como marca principal anti-duplicado para confirmación por email; si ya tiene valor, el webhook omite el envío y solo actualiza bitácora en metadata.
 - `orders.metadata.email_confirmation` se mantiene como bitácora extendida (attempts, last_attempt_at, errores/proveedor), pero la decisión idempotente de envío se basa primero en la columna persistente.
 - Cuando el envío resulta `ok` (incluye `skipped` controlado del proveedor), se persisten en la misma actualización tanto `metadata.email_confirmation` como `payment_confirmation_email_sent_at=now()`.

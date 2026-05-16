@@ -224,6 +224,7 @@ export async function POST(request: Request) {
   let createdOrderId: string | null = null;
   let currentPaymentMode: "prod" | "test" | null = null;
   let currentExternalReference: string | null = null;
+  let currentReceiptLookupToken: string | null = null;
   let fallbackLineItems: ValidatedLineItem[] = [];
   let fallbackTotalAmount = 0;
   let fallbackOrderMetadata: Record<string, unknown> = {};
@@ -261,6 +262,8 @@ export async function POST(request: Request) {
       : `ritual-${Date.now()}-${randomUUID().slice(0, 8)}`;
     currentExternalReference = externalReference;
     const idempotencyKey = randomUUID();
+    const receiptLookupToken = randomUUID();
+    currentReceiptLookupToken = receiptLookupToken;
 
     const orderInsert = {
       user_id: sessionUser?.id ?? null,
@@ -297,6 +300,7 @@ export async function POST(request: Request) {
         payer_email: payer.email,
         receipt_email: normalizedReceiptEmail ?? payer.email,
         idempotency_key: idempotencyKey,
+        receipt_lookup_token: receiptLookupToken,
         payment_mode: paymentMode,
         delivery_address: body.delivery_address ?? null,
         course_participants: Object.fromEntries(validatedCourseParticipants),
@@ -418,6 +422,7 @@ export async function POST(request: Request) {
       external_reference: externalReference,
       normalized_status: normalizedStatus,
       total_amount: payment.transaction_amount ?? totalAmount,
+      receipt_token: receiptLookupToken,
     });
   } catch (error) {
     const errorMessage =
@@ -515,6 +520,7 @@ export async function POST(request: Request) {
         status_detail: "test_mode_500_bypass",
         external_reference: currentExternalReference,
         normalized_status: "approved",
+        receipt_token: currentReceiptLookupToken,
       });
     }
 
