@@ -18,6 +18,7 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 
 ### Frontend (browser/client)
 - Render de páginas y UX.
+- La home pública usa un rediseño puramente visual de florería editorial en `src/app/page.tsx` y estilos globales en `src/app/globals.css`; conserva las rutas, CTAs y flujos de marketplace/brief/eventos existentes sin modificar lógica de negocio.
 - Inicialización de checkout client-side con public key de Mercado Pago resuelta por `payments_mode` (`MP_PUBLIC_KEY_PROD` o `MP_PUBLIC_KEY_TEST`).
 - Captura de dirección de entrega en checkout con persistencia client-side (localStorage) por correo autenticado, reutilizando la misma libreta de `Mi cuenta > Mis direcciones`.
 - Gestión de estado UI (ej. carrito, navegación, formularios).

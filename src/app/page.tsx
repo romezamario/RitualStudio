@@ -3,90 +3,75 @@ import Image from "next/image";
 import Link from "next/link";
 import SiteShell from "@/components/site-shell";
 
-type EditorialSection = {
+type SignatureService = {
   eyebrow: string;
   title: string;
   description: string;
   href: string;
   cta: string;
+  image: string;
 };
 
-type EditorialPick = {
-  label: string;
+type RitualStep = {
+  step: string;
   title: string;
   description: string;
-  href: string;
-  cta: string;
 };
 
-const HERO_IMAGE_URL =
-  "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1800&q=86";
+const heroImage = "https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?auto=format&fit=crop&w=1600&q=88";
+const heroAccentImage = "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=900&q=84";
 
-const HERO_IMAGE_SIZES = "100vw";
-
-const editorialSections: EditorialSection[] = [
+const signatureServices: SignatureService[] = [
   {
-    eyebrow: "Curated Marketplace",
-    title: "Curated Marketplace",
-    description:
-      "Shop ready-to-send floral pieces, premium objects and gifting gestures selected with the studio's seasonal eye.",
+    eyebrow: "Colección online",
+    title: "Arreglos listos para regalar",
+    description: "Ramos y piezas de temporada con una estética suave, femenina y editorial para resolver un detalle especial sin perder intención.",
     href: "/marketplace",
-    cta: "Explore the marketplace"
+    cta: "Comprar flores",
+    image: "https://images.unsplash.com/photo-1470509037663-253afd7f0f51?auto=format&fit=crop&w=900&q=84"
   },
   {
-    eyebrow: "Experiences",
-    title: "Experiences",
-    description:
-      "Join floral workshops and intimate learning formats designed for guests who want to create with intention.",
-    href: "/cursos",
-    cta: "View experiences"
-  },
-  {
-    eyebrow: "Design by Brief",
-    title: "Design by Brief",
-    description:
-      "Share a palette, message, budget or occasion and let the studio translate it into a tailored floral composition.",
+    eyebrow: "Momentos privados",
+    title: "Diseño floral a medida",
+    description: "Traducimos ocasión, paleta y mensaje en una composición personalizada para cumpleaños, aniversarios o gestos íntimos.",
     href: "/custom",
-    cta: "Start a custom brief"
+    cta: "Solicitar diseño",
+    image: "https://images.unsplash.com/photo-1468327768560-75b778cbb551?auto=format&fit=crop&w=900&q=84"
   },
   {
-    eyebrow: "Events & Spaces",
-    title: "Events & Spaces",
-    description:
-      "Floral direction for celebrations, dinners, launches and interiors that need atmosphere, rhythm and detail.",
+    eyebrow: "Celebraciones",
+    title: "Eventos con atmósfera floral",
+    description: "Dirección floral para cenas, lanzamientos, bodas pequeñas y espacios que necesitan textura, ritmo y una experiencia memorable.",
     href: "/eventos",
-    cta: "Plan an event"
+    cta: "Planear evento",
+    image: "https://images.unsplash.com/photo-1526394931762-36a3e30d4e41?auto=format&fit=crop&w=900&q=84"
   }
 ];
 
-const editorialPicks: EditorialPick[] = [
+const ritualSteps: RitualStep[] = [
   {
-    label: "Marketplace",
-    title: "Seasonal stems and ready rituals",
-    description: "Pieces selected for fast decisions without losing an editorial point of view.",
-    href: "/marketplace",
-    cta: "Shop the edit"
+    step: "01",
+    title: "Elige el ritual",
+    description: "Compra una pieza curada, reserva una experiencia o comparte el brief de tu ocasión."
   },
   {
-    label: "Experiences",
-    title: "Workshops with a studio pace",
-    description: "Hands-on floral sessions for personal rituals, creative teams and intimate groups.",
-    href: "/cursos",
-    cta: "See dates"
+    step: "02",
+    title: "Cuidamos el detalle",
+    description: "Validamos flores, timing, mensaje y entrega para mantener una experiencia clara."
   },
   {
-    label: "Brief",
-    title: "A composition shaped around the moment",
-    description: "A bespoke path when the occasion needs a specific gesture, tone or spatial language.",
-    href: "/custom",
-    cta: "Send a brief"
+    step: "03",
+    title: "Recibe o celebra",
+    description: "El arreglo llega con una composición intencional, lista para regalar o transformar el espacio."
   }
 ];
+
+const occasions = ["Cumpleaños", "Aniversarios", "Agradecimientos", "Eventos", "Mesas", "Workshops"];
 
 export const metadata: Metadata = {
   title: "Home | Ritual Studio",
   description:
-    "Ritual Studio es un estudio floral de experiencias, marketplace curado, eventos y diseño a medida para regalos, espacios y momentos memorables.",
+    "Ritual Studio es un estudio floral premium para arreglos a domicilio, regalos personalizados, experiencias y eventos con dirección floral editorial.",
   alternates: {
     canonical: "/"
   }
@@ -95,110 +80,139 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <SiteShell
-      eyebrow="Ritual Studio"
-      title="Flores premium para regalar, celebrar y transformar espacios"
-      subtitle="Compra online con entrega confiable o solicita un diseño floral personalizado para momentos memorables."
+      eyebrow="Florería premium · Ritual Studio"
+      title="Flores frescas para celebrar cada momento especial"
+      subtitle="Arreglos florales, regalos a domicilio, experiencias y eventos diseñados con una mirada editorial, cálida y profundamente intencional."
     >
-      <section className="home-hero" aria-labelledby="home-hero-title">
-        <div className="home-hero-media" aria-hidden="true">
-          <Image
-            src={HERO_IMAGE_URL}
-            alt=""
-            fill
-            priority
-            sizes={HERO_IMAGE_SIZES}
-            className="home-hero-image"
-          />
-        </div>
-        <div className="home-hero-content">
-          <p className="home-hero-kicker">Ritual Studio</p>
-          <h2 id="home-hero-title">Floral experiences, curated objects & moments.</h2>
-          <div className="home-hero-cta" aria-label="Acciones principales">
-            <Link href="/marketplace" className="home-hero-button home-hero-button-primary">
-              Explorar colección
-            </Link>
-            <Link href="/custom" className="home-hero-button home-hero-button-secondary">
-              Diseño a medida
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="section-block" aria-labelledby="the-studio-title">
-        <div className="section-intro">
-          <p className="section-tag">The Studio</p>
-          <p className="section-microcopy">A floral studio for gestures, gatherings and spaces.</p>
-        </div>
-        <article className="studio-card">
-          <p className="card-label">The Studio</p>
-          <h2 id="the-studio-title">The Studio</h2>
-          <p>
-            Ritual Studio creates premium floral rituals for gifting, learning, events and atmosphere. Each path begins
-            with an editorial point of view and ends with a considered gesture for the moment.
-          </p>
-          <Link href="/contacto" className="text-link">
-            Contact the studio
-          </Link>
-        </article>
-      </section>
-
-      {editorialSections.map((section) => (
-        <section
-          key={section.title}
-          className="section-block"
-          aria-labelledby={`${section.href.slice(1)}-title`}
-        >
-          <div className="section-intro">
-            <p className="section-tag">{section.eyebrow}</p>
-            <p className="section-microcopy">Ritual Studio · {section.title}</p>
-          </div>
-          <article className="studio-card">
-            <p className="card-label">{section.eyebrow}</p>
-            <h2 id={`${section.href.slice(1)}-title`}>{section.title}</h2>
-            <p>{section.description}</p>
-            <Link href={section.href} className="text-link">
-              {section.cta}
-            </Link>
-          </article>
-        </section>
-      ))}
-
-      <section className="section-block" aria-labelledby="editorial-selection-title">
-        <div className="section-intro">
-          <p className="section-tag">Editorial Selection</p>
-          <p className="section-microcopy">Three ways to begin, curated by the studio.</p>
-        </div>
-        <h2 id="editorial-selection-title">Editorial Selection</h2>
-        <div className="feature-grid">
-          {editorialPicks.map((item) => (
-            <article key={item.title} className="studio-card">
-              <p className="card-label">{item.label}</p>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-              <Link href={item.href} className="text-link">
-                {item.cta}
+      <div className="home-landing" aria-label="Rediseño visual principal de Ritual Studio">
+        <section className="florist-hero" aria-labelledby="florist-hero-title">
+          <div className="florist-hero-copy">
+            <p className="florist-pill">Entrega premium · Diseño personalizado · Flores de temporada</p>
+            <h2 id="florist-hero-title">Un gesto floral para decirlo todo.</h2>
+            <p>
+              Inspirado en una florería contemporánea: tonos crema, acentos rosados, imágenes suaves y una experiencia
+              simple para descubrir, elegir y regalar flores con intención.
+            </p>
+            <div className="florist-hero-actions" aria-label="Acciones principales">
+              <Link href="/marketplace" className="btn btn-primary florist-hero-primary">
+                Ver colección
               </Link>
-            </article>
-          ))}
-        </div>
-      </section>
+              <Link href="/contacto" className="btn btn-ghost florist-hero-secondary">
+                Hablar con el estudio
+              </Link>
+            </div>
+          </div>
 
-      <section className="studio-card contact-highlight" aria-labelledby="final-cta-title">
-        <p className="card-label">Final CTA</p>
-        <h2 id="final-cta-title">Tell us the moment. We’ll design the ritual.</h2>
-        <p>
-          Share the occasion, date, location and feeling you want to create. We will guide the next step with a clear,
-          considered floral proposal.
-        </p>
-        <div className="cta-row" style={{ marginTop: "0.35rem" }}>
-          <Link href="/contacto" className="btn btn-primary">
-            Contact Ritual Studio
-          </Link>
-          <Link href="/eventos" className="btn btn-ghost">
-            Explore events & spaces
-          </Link>
-        </div>
-      </section>
+          <div className="florist-hero-gallery" aria-hidden="true">
+            <div className="florist-hero-image-wrap florist-hero-image-main">
+              <Image src={heroImage} alt="" fill priority sizes="(min-width: 900px) 48vw, 100vw" className="florist-image" />
+            </div>
+            <div className="florist-hero-image-wrap florist-hero-image-accent">
+              <Image src={heroAccentImage} alt="" fill sizes="(min-width: 900px) 18vw, 45vw" className="florist-image" />
+            </div>
+            <div className="florist-floating-card">
+              <span>Desde</span>
+              <strong>flores frescas</strong>
+              <span>hasta eventos completos</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="florist-marquee" aria-label="Ocasiones disponibles">
+          {occasions.map((occasion) => (
+            <span key={occasion}>{occasion}</span>
+          ))}
+        </section>
+
+        <section className="florist-section florist-services" aria-labelledby="services-title">
+          <div className="florist-section-heading">
+            <p className="section-tag">Servicios</p>
+            <h2 id="services-title">Diseñamos flores para regalos, espacios y celebraciones.</h2>
+            <p>
+              El rediseño prioriza una lectura visual más limpia: tarjetas grandes, fotografía protagonista y llamadas a
+              la acción directas hacia las rutas existentes.
+            </p>
+          </div>
+
+          <div className="florist-service-grid">
+            {signatureServices.map((service) => (
+              <article key={service.title} className="florist-service-card">
+                <div className="florist-service-image">
+                  <Image src={service.image} alt="" fill sizes="(min-width: 900px) 30vw, 100vw" className="florist-image" />
+                </div>
+                <div className="florist-service-copy">
+                  <p className="card-label">{service.eyebrow}</p>
+                  <h3>{service.title}</h3>
+                  <p>{service.description}</p>
+                  <Link href={service.href} className="text-link">
+                    {service.cta}
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="florist-split" aria-labelledby="atelier-title">
+          <div className="florist-split-media">
+            <Image
+              src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=84"
+              alt=""
+              fill
+              sizes="(min-width: 900px) 42vw, 100vw"
+              className="florist-image"
+            />
+          </div>
+          <div className="florist-split-copy">
+            <p className="section-tag">El atelier</p>
+            <h2 id="atelier-title">Flores con sensibilidad, detalle y timing.</h2>
+            <p>
+              Ritual Studio combina la calidez de una florería local con una dirección visual premium. Cada pieza se
+              construye alrededor de la ocasión, la temporada y el mensaje que quieres entregar.
+            </p>
+            <div className="florist-note-grid">
+              <span>Selección de temporada</span>
+              <span>Composición editorial</span>
+              <span>Experiencia cuidada</span>
+            </div>
+            <Link href="/nosotros" className="btn btn-ghost">
+              Conocer el estudio
+            </Link>
+          </div>
+        </section>
+
+        <section className="florist-section" aria-labelledby="process-title">
+          <div className="florist-section-heading florist-section-heading-compact">
+            <p className="section-tag">Proceso</p>
+            <h2 id="process-title">Un flujo simple, sin cambiar la lógica existente.</h2>
+          </div>
+          <div className="florist-process-grid">
+            {ritualSteps.map((item) => (
+              <article key={item.step} className="florist-process-card">
+                <span>{item.step}</span>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="florist-final-cta" aria-labelledby="final-cta-title">
+          <p className="section-tag">Ritual Studio</p>
+          <h2 id="final-cta-title">¿Qué momento quieres convertir en flores?</h2>
+          <p>
+            Compra una pieza disponible o cuéntanos el brief para crear un arreglo con intención, paleta y presencia.
+          </p>
+          <div className="florist-hero-actions">
+            <Link href="/marketplace" className="btn btn-primary">
+              Comprar ahora
+            </Link>
+            <Link href="/custom" className="btn btn-ghost">
+              Pedir diseño a medida
+            </Link>
+          </div>
+        </section>
+      </div>
     </SiteShell>
   );
 }
