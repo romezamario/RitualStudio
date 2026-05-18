@@ -18,7 +18,6 @@ type RitualCard = {
   description: string;
   href: string;
   cta: string;
-  image: string;
 };
 
 const HERO_IMAGE_URL =
