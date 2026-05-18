@@ -2355,3 +2355,638 @@ p {
     justify-content: center;
   }
 }
+
+/* Visual refresh inspired by the referenced florist concept. Keeps routes and commerce logic intact. */
+:root {
+  --cream: #fff8ef;
+  --petal: #f8dfe3;
+  --blush: #e8a6af;
+  --rosewood: #8c4b55;
+  --leaf: #526748;
+  --deep-leaf: #243121;
+  --warm-ink: #332720;
+  --soft-line: rgba(140, 75, 85, 0.18);
+
+  --bg: #fff8ef;
+  --bg-soft: #fffdf8;
+  --panel: rgba(255, 253, 248, 0.78);
+  --ink: #332720;
+  --muted: #7d6d62;
+  --line: rgba(140, 75, 85, 0.2);
+  --accent: #8c4b55;
+}
+
+body {
+  background:
+    radial-gradient(circle at 8% 12%, rgba(248, 223, 227, 0.95), transparent 29rem),
+    radial-gradient(circle at 92% 4%, rgba(232, 166, 175, 0.34), transparent 25rem),
+    linear-gradient(180deg, #fff8ef 0%, #fffaf5 42%, #f9eee6 100%);
+  color: var(--warm-ink);
+}
+
+.site-root::before {
+  background-image:
+    linear-gradient(rgba(140, 75, 85, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(140, 75, 85, 0.045) 1px, transparent 1px);
+  background-size: 4.5rem 4.5rem;
+  content: "";
+  inset: 0;
+  mask-image: linear-gradient(180deg, black, transparent 68%);
+  opacity: 0.42;
+  pointer-events: none;
+  position: absolute;
+}
+
+.ambient-orb-left {
+  background: radial-gradient(circle, rgba(248, 223, 227, 0.92) 0%, transparent 70%);
+  height: 520px;
+  left: -180px;
+  top: -180px;
+  width: 520px;
+}
+
+.ambient-orb-right {
+  background: radial-gradient(circle, rgba(232, 166, 175, 0.32) 0%, transparent 72%);
+  height: 460px;
+  right: -160px;
+  top: 90px;
+  width: 460px;
+}
+
+.container {
+  width: min(1180px, calc(100% - 2rem));
+}
+
+.site-header {
+  padding: 1rem 0 0;
+}
+
+.nav-wrap {
+  backdrop-filter: blur(18px);
+  background: rgba(255, 253, 248, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 999px;
+  box-shadow: 0 20px 60px rgba(140, 75, 85, 0.12);
+  gap: 0.85rem;
+  padding: 0.65rem 0.7rem 0.65rem 1.35rem;
+}
+
+.brand-main {
+  color: var(--rosewood);
+  font-size: 1.08rem;
+  letter-spacing: 0.16em;
+}
+
+.brand-sub {
+  color: var(--leaf);
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+}
+
+.cart-access,
+.user-access-trigger,
+.menu-toggle,
+.whatsapp-floating {
+  background: #fffaf5;
+  border-color: var(--soft-line);
+  box-shadow: 0 8px 22px rgba(140, 75, 85, 0.1);
+  color: var(--rosewood);
+}
+
+.cart-access:hover,
+.user-access-trigger:hover,
+.menu-toggle:hover,
+.whatsapp-floating:hover {
+  background: white;
+  border-color: rgba(140, 75, 85, 0.3);
+}
+
+.cart-access-badge {
+  background: var(--rosewood);
+  border-color: #fff8ef;
+}
+
+.nav-links {
+  background: rgba(255, 250, 245, 0.9);
+  border-color: var(--soft-line);
+}
+
+.nav-links a {
+  color: color-mix(in srgb, var(--warm-ink) 76%, white);
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-links a:hover {
+  color: var(--rosewood);
+}
+
+.user-menu-panel {
+  background: rgba(255, 253, 248, 0.96);
+  border-color: var(--soft-line);
+  box-shadow: 0 22px 50px rgba(140, 75, 85, 0.16);
+}
+
+.hero-block {
+  padding: clamp(3rem, 7vw, 6.6rem) 0 clamp(3.8rem, 7vw, 6.2rem);
+}
+
+.eyebrow,
+.section-tag,
+.card-label {
+  color: var(--rosewood);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.hero-block > h1 {
+  color: var(--warm-ink);
+  font-size: clamp(3rem, 7.6vw, 6.9rem);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+  max-width: 12ch;
+  text-wrap: balance;
+}
+
+.lead {
+  color: color-mix(in srgb, var(--warm-ink) 72%, white);
+  font-size: clamp(1rem, 1.6vw, 1.22rem);
+  line-height: 1.75;
+  max-width: 58ch;
+}
+
+.home-landing {
+  display: grid;
+  gap: clamp(3.8rem, 8vw, 7rem);
+  margin-top: clamp(2.5rem, 5vw, 5rem);
+}
+
+.florist-hero {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.88) 0%, rgba(255, 248, 239, 0.64) 100%),
+    radial-gradient(circle at 5% 5%, rgba(232, 166, 175, 0.24), transparent 28rem);
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  border-radius: clamp(1.75rem, 4vw, 3.5rem);
+  box-shadow: 0 36px 90px rgba(140, 75, 85, 0.14);
+  display: grid;
+  gap: clamp(2rem, 4vw, 4rem);
+  grid-template-columns: minmax(0, 0.88fr) minmax(320px, 1fr);
+  overflow: hidden;
+  padding: clamp(1rem, 2.2vw, 1.5rem);
+  position: relative;
+}
+
+.florist-hero::before {
+  border: 1px solid rgba(140, 75, 85, 0.16);
+  border-radius: inherit;
+  content: "";
+  inset: clamp(0.55rem, 1.5vw, 1rem);
+  pointer-events: none;
+  position: absolute;
+}
+
+.florist-hero-copy {
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.2rem, 4vw, 3.7rem);
+  position: relative;
+  z-index: 1;
+}
+
+.florist-pill {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--soft-line);
+  border-radius: 999px;
+  color: var(--rosewood);
+  display: inline-flex;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  padding: 0.62rem 0.92rem;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.florist-hero-copy h2,
+.florist-section-heading h2,
+.florist-split-copy h2,
+.florist-final-cta h2 {
+  color: var(--warm-ink);
+  font-size: clamp(2.25rem, 5vw, 4.9rem);
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+  text-wrap: balance;
+}
+
+.florist-hero-copy p:not(.florist-pill),
+.florist-section-heading p:not(.section-tag),
+.florist-split-copy p,
+.florist-final-cta p,
+.florist-service-copy p,
+.florist-process-card p {
+  color: color-mix(in srgb, var(--warm-ink) 70%, white);
+}
+
+.florist-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.4rem;
+}
+
+.btn,
+.home-hero-button {
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.btn-primary,
+.florist-hero-primary {
+  background: var(--rosewood);
+  border-color: var(--rosewood);
+  color: #fffaf5;
+  box-shadow: 0 16px 34px rgba(140, 75, 85, 0.22);
+}
+
+.btn-primary:hover,
+.florist-hero-primary:hover {
+  background: color-mix(in srgb, var(--rosewood) 84%, black);
+  border-color: color-mix(in srgb, var(--rosewood) 84%, black);
+}
+
+.btn-ghost,
+.florist-hero-secondary {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: var(--soft-line);
+  color: var(--rosewood);
+}
+
+.btn-ghost:hover,
+.florist-hero-secondary:hover {
+  background: #fff;
+  border-color: rgba(140, 75, 85, 0.34);
+}
+
+.florist-hero-gallery {
+  display: grid;
+  min-height: clamp(440px, 52vw, 670px);
+  position: relative;
+}
+
+.florist-hero-image-wrap,
+.florist-service-image,
+.florist-split-media {
+  background: #f4dfd8;
+  overflow: hidden;
+  position: relative;
+}
+
+.florist-hero-image-main {
+  border-radius: clamp(1.35rem, 3vw, 2.8rem);
+  inset: 0;
+  position: absolute;
+}
+
+.florist-hero-image-accent {
+  border: 0.6rem solid #fff8ef;
+  border-radius: 999px 999px 1.75rem 1.75rem;
+  bottom: clamp(1rem, 3vw, 2rem);
+  box-shadow: 0 24px 54px rgba(51, 39, 32, 0.22);
+  height: clamp(170px, 20vw, 260px);
+  left: clamp(-1rem, -2vw, -1.8rem);
+  position: absolute;
+  width: clamp(135px, 16vw, 210px);
+  z-index: 2;
+}
+
+.florist-image {
+  filter: saturate(0.92) contrast(1.02) brightness(1.02);
+  object-fit: cover;
+}
+
+.florist-floating-card {
+  background: rgba(255, 253, 248, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.84);
+  border-radius: 1.35rem;
+  box-shadow: 0 18px 44px rgba(51, 39, 32, 0.16);
+  color: var(--muted);
+  display: grid;
+  gap: 0.2rem;
+  padding: 1rem 1.1rem;
+  position: absolute;
+  right: clamp(1rem, 2.4vw, 1.8rem);
+  top: clamp(1rem, 2.4vw, 1.8rem);
+  z-index: 2;
+}
+
+.florist-floating-card strong {
+  color: var(--rosewood);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.florist-marquee {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: center;
+}
+
+.florist-marquee span {
+  background: rgba(255, 253, 248, 0.72);
+  border: 1px solid var(--soft-line);
+  border-radius: 999px;
+  color: var(--rosewood);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  padding: 0.72rem 1rem;
+  text-transform: uppercase;
+}
+
+.florist-section,
+.florist-split,
+.florist-final-cta {
+  position: relative;
+}
+
+.florist-section-heading {
+  align-items: end;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 0.75fr) minmax(320px, 1fr);
+  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.florist-section-heading .section-tag {
+  grid-column: 1 / -1;
+}
+
+.florist-section-heading p:not(.section-tag) {
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.florist-section-heading-compact {
+  align-items: start;
+  grid-template-columns: 1fr;
+  max-width: 720px;
+}
+
+.florist-service-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.florist-service-card,
+.florist-process-card,
+.florist-final-cta {
+  background: rgba(255, 253, 248, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.84);
+  box-shadow: 0 20px 54px rgba(140, 75, 85, 0.1);
+}
+
+.florist-service-card {
+  border-radius: 2rem;
+  display: grid;
+  overflow: hidden;
+}
+
+.florist-service-image {
+  aspect-ratio: 4 / 4.25;
+}
+
+.florist-service-copy {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1.35rem;
+}
+
+.florist-service-copy h3,
+.florist-process-card h3 {
+  color: var(--warm-ink);
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.text-link {
+  color: var(--rosewood);
+  font-weight: 800;
+  text-decoration-color: rgba(140, 75, 85, 0.36);
+  text-decoration-thickness: 2px;
+}
+
+.florist-split {
+  align-items: stretch;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 0.92fr) minmax(320px, 0.78fr);
+}
+
+.florist-split-media {
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 2.5rem;
+  min-height: 540px;
+}
+
+.florist-split-copy {
+  align-content: center;
+  background: linear-gradient(145deg, rgba(82, 103, 72, 0.12), rgba(255, 253, 248, 0.82));
+  border: 1px solid rgba(255, 255, 255, 0.84);
+  border-radius: 2.5rem;
+  display: grid;
+  gap: 1.1rem;
+  padding: clamp(1.35rem, 4vw, 3rem);
+}
+
+.florist-note-grid {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0.5rem 0;
+}
+
+.florist-note-grid span {
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid var(--soft-line);
+  border-radius: 1rem;
+  color: var(--leaf);
+  font-weight: 800;
+  padding: 0.85rem 1rem;
+}
+
+.florist-process-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.florist-process-card {
+  border-radius: 1.5rem;
+  display: grid;
+  gap: 0.8rem;
+  padding: clamp(1rem, 2.5vw, 1.6rem);
+}
+
+.florist-process-card span {
+  align-items: center;
+  background: var(--petal);
+  border-radius: 999px;
+  color: var(--rosewood);
+  display: inline-flex;
+  font-weight: 900;
+  height: 2.6rem;
+  justify-content: center;
+  width: 2.6rem;
+}
+
+.florist-final-cta {
+  background:
+    radial-gradient(circle at 12% 14%, rgba(248, 223, 227, 0.9), transparent 22rem),
+    linear-gradient(135deg, rgba(255, 253, 248, 0.92), rgba(247, 226, 215, 0.72));
+  border-radius: clamp(1.75rem, 4vw, 3.2rem);
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+  overflow: hidden;
+  padding: clamp(2.2rem, 7vw, 5.5rem) clamp(1rem, 4vw, 3rem);
+  text-align: center;
+}
+
+.florist-final-cta p {
+  max-width: 58ch;
+}
+
+.site-footer {
+  border-top-color: var(--soft-line);
+}
+
+@media (min-width: 901px) {
+  .nav-wrap {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .header-primary-row {
+    display: contents;
+  }
+
+  .header-actions-cluster {
+    order: 3;
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+
+  .nav-links,
+  .nav-links.is-open {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    display: flex;
+    flex-direction: row;
+    gap: clamp(0.85rem, 1.7vw, 1.45rem);
+    padding: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .nav-wrap {
+    border-radius: 1.35rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .hero-block > h1 {
+    max-width: 10.5ch;
+  }
+
+  .florist-hero,
+  .florist-section-heading,
+  .florist-service-grid,
+  .florist-split,
+  .florist-process-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .florist-hero-gallery {
+    min-height: 430px;
+  }
+
+  .florist-split-media {
+    min-height: 380px;
+  }
+
+  .florist-section-heading {
+    align-items: start;
+  }
+}
+
+@media (max-width: 620px) {
+  .container {
+    width: min(100% - 1rem, 1180px);
+  }
+
+  .hero-block {
+    padding-top: 2.4rem;
+  }
+
+  .florist-hero {
+    border-radius: 1.6rem;
+    padding: 0.65rem;
+  }
+
+  .florist-hero-copy {
+    padding: 1rem;
+  }
+
+  .florist-pill {
+    border-radius: 1rem;
+    width: auto;
+  }
+
+  .florist-hero-actions,
+  .florist-final-cta .florist-hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .florist-hero-actions .btn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .florist-hero-gallery {
+    min-height: 360px;
+  }
+
+  .florist-floating-card {
+    bottom: 1rem;
+    left: 1rem;
+    right: auto;
+    top: auto;
+  }
+
+  .florist-hero-image-accent {
+    display: none;
+  }
+
+  .florist-service-card,
+  .florist-split-media,
+  .florist-split-copy,
+  .florist-final-cta {
+    border-radius: 1.5rem;
+  }
+}
