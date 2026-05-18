@@ -14,6 +14,10 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 - `src/app/layout.tsx` define metadata global como fallback general del sitio, incluyendo `metadataBase`, template de títulos, descripción general, Open Graph/Twitter, robots y canonical raíz.
 - La home (`src/app/page.tsx`) declara metadata específica de ruta para reforzar el posicionamiento de `/` como entrada a estudio floral, experiencias, marketplace curado, eventos y diseño a medida, manteniendo `alternates.canonical = "/"`.
 
+## UI Composition
+- La home (`src/app/page.tsx`) es una composición estética/editorial sin estado de negocio: reutiliza `SiteShell`, `Link` de Next.js y datos locales para presentar rutas hacia marketplace, cursos, custom briefs, eventos y contacto.
+- El refresh visual vive en `src/app/globals.css` como estilos globales compartidos: paleta botánica/crema, navegación tipo glass, hero fotográfico, tarjetas editoriales y layouts responsivos, sin cambiar contratos de API, auth, pagos ni carrito.
+
 ## Runtime Boundaries
 
 ### Frontend (browser/client)
