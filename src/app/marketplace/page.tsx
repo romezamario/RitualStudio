@@ -23,24 +23,24 @@ export default async function MarketplacePage() {
 
   return (
     <SiteShell
-      eyebrow="Marketplace Ritual Studio"
-      title="Explora productos con scroll y categorías"
-      subtitle="Desliza hacia abajo para descubrir ramos, centros de mesa, eventos y regalos. Cada producto tiene su ficha de detalle con información ampliada."
+      eyebrow="Tienda floral"
+      title="Ramos, centros y regalos listos para enviar"
+      subtitle="Explora la seleccion por categoria. Cada pieza conserva su ficha de detalle, calendario de entrega y flujo de compra actual."
     >
       {useClientFallback ? (
         <MarketplaceClientEnhancer mode="list" initialProducts={products} />
       ) : (
         <div>
           <article className="studio-card" style={{ marginBottom: "1.2rem" }}>
-            <p className="card-label">También disponible</p>
-            <h2 style={{ marginTop: "0.2rem" }}>Cursos presenciales de diseño floral</h2>
-            <p>Si prefieres aprender paso a paso, revisa las experiencias activas y compra tu lugar por sesión.</p>
+            <p className="card-label">Tambien disponible</p>
+            <h2 style={{ marginTop: "0.2rem" }}>Talleres presenciales de diseno floral</h2>
+            <p>Si prefieres aprender paso a paso, revisa las experiencias activas y compra tu lugar por sesion.</p>
             <Link href="/cursos" className="btn btn-ghost">
-              Ver experiencias
+              Ver talleres
             </Link>
           </article>
 
-          <div className="marketplace-topbar" aria-label="Categorías de productos">
+          <div className="marketplace-topbar" aria-label="Categorias de productos">
             {categories.map((category) => (
               <a key={category} href={`#${getCategoryId(category)}`} className="chip-link">
                 {category}
@@ -48,7 +48,7 @@ export default async function MarketplacePage() {
             ))}
           </div>
 
-          <p className="scroll-hint">Explora la curaduría completa del estudio.</p>
+          <p className="scroll-hint">Explora la curaduria completa del estudio.</p>
 
           {categories.map((category) => {
             const categoryProducts = products.filter((product) => product.category === category);
@@ -59,10 +59,10 @@ export default async function MarketplacePage() {
                 key={category}
                 id={getCategoryId(category)}
                 className="marketplace-section marketplace-editorial-section"
-                aria-label={`Categoría ${category}`}
+                aria-label={`Categoria ${category}`}
               >
                 <div className="marketplace-section-heading">
-                  <p className="card-label">Selección por categoría</p>
+                  <p className="card-label">Seleccion por categoria</p>
                   <h2>{category}</h2>
                 </div>
 
@@ -80,7 +80,7 @@ export default async function MarketplacePage() {
                       />
                     </div>
                     <div className="marketplace-featured-copy">
-                      <p className="card-label">Pieza destacada · {featuredProduct.category}</p>
+                      <p className="card-label">Pieza destacada / {featuredProduct.category}</p>
                       <h3>{featuredProduct.name}</h3>
                       <p>{featuredProduct.shortDescription}</p>
                       <div className="price-stack">

@@ -6,10 +6,10 @@ import packageJson from "../../package.json";
 
 const links = [
   { href: "/marketplace", label: "Tienda" },
-  { href: "/cursos", label: "Experiencias" },
-  { href: "/custom", label: "Diseño a medida" },
+  { href: "/cursos", label: "Talleres" },
+  { href: "/custom", label: "A medida" },
   { href: "/eventos", label: "Eventos" },
-  { href: "/nosotros", label: "Nosotros" },
+  { href: "/nosotros", label: "Estudio" },
   { href: "/contacto", label: "Contacto" },
 ];
 
@@ -27,9 +27,6 @@ type SiteShellProps = {
 export default function SiteShell({ title, subtitle, eyebrow, children }: SiteShellProps) {
   return (
     <main className="site-root">
-      <div className="ambient-orb ambient-orb-left" aria-hidden />
-      <div className="ambient-orb ambient-orb-right" aria-hidden />
-
       <header className="site-header">
         <HeaderInteractive links={links} />
       </header>
