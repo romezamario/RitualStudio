@@ -2355,3 +2355,385 @@ p {
     justify-content: center;
   }
 }
+
+/* Florist look & feel refresh: visual-only skin inspired by soft atelier storefronts. */
+:root {
+  --rose-mist: #f7dfe2;
+  --sandstone: #dbc7a5;
+  --smoke: #8b8277;
+  --charcoal: #24372b;
+  --sage: #506b54;
+  --sage-deep: #1f3427;
+  --clay: #b76f5f;
+  --petal: #ead0d5;
+  --cream: #fff9ef;
+
+  --bg: #fbf4ea;
+  --bg-soft: #fffaf2;
+  --panel: rgba(255, 250, 242, 0.78);
+  --ink: #24372b;
+  --muted: #766f64;
+  --line: rgba(80, 107, 84, 0.18);
+  --accent: #506b54;
+}
+
+body {
+  background:
+    radial-gradient(circle at 9% 12%, rgba(247, 223, 226, 0.92) 0 11rem, transparent 22rem),
+    radial-gradient(circle at 88% 4%, rgba(219, 199, 165, 0.7) 0 9rem, transparent 20rem),
+    linear-gradient(135deg, #fffaf2 0%, #fbf4ea 46%, #f4e9df 100%);
+  color: var(--ink);
+}
+
+body::before {
+  background-image:
+    linear-gradient(rgba(80, 107, 84, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(80, 107, 84, 0.035) 1px, transparent 1px);
+  background-size: 42px 42px;
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
+.site-root::before,
+.site-root::after {
+  border: 1px solid rgba(80, 107, 84, 0.16);
+  border-radius: 999px 999px 999px 0;
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  transform: rotate(-22deg);
+  z-index: 0;
+}
+
+.site-root::before {
+  height: 15rem;
+  right: min(4vw, 3rem);
+  top: 8.5rem;
+  width: 10rem;
+}
+
+.site-root::after {
+  border-color: rgba(183, 111, 95, 0.14);
+  bottom: 16rem;
+  height: 12rem;
+  left: -4rem;
+  width: 8rem;
+}
+
+.ambient-orb {
+  filter: blur(24px);
+  opacity: 0.72;
+}
+
+.ambient-orb-left {
+  background: radial-gradient(circle, rgba(247, 223, 226, 0.9) 0%, transparent 70%);
+}
+
+.ambient-orb-right {
+  background: radial-gradient(circle, rgba(80, 107, 84, 0.18) 0%, transparent 72%);
+}
+
+.nav-wrap {
+  backdrop-filter: blur(18px);
+  background: rgba(255, 250, 242, 0.78);
+  border-color: rgba(80, 107, 84, 0.2);
+  border-radius: 999px;
+  box-shadow: 0 18px 60px rgba(31, 52, 39, 0.11);
+  padding: 0.72rem 0.9rem 0.72rem 1.15rem;
+}
+
+.brand-main {
+  color: var(--sage-deep);
+  font-size: 1.08rem;
+  letter-spacing: 0.18em;
+}
+
+.brand-sub,
+.eyebrow,
+.section-tag,
+.card-label {
+  color: var(--clay);
+  font-weight: 700;
+}
+
+.menu-toggle,
+.cart-access,
+.user-access-trigger,
+.whatsapp-floating {
+  background: rgba(255, 250, 242, 0.86);
+  border-color: rgba(80, 107, 84, 0.24);
+  color: var(--sage-deep);
+  box-shadow: 0 8px 18px rgba(31, 52, 39, 0.08);
+}
+
+.cart-access:hover,
+.user-access-trigger:hover,
+.menu-toggle:hover,
+.whatsapp-floating:hover {
+  background: #ffffff;
+  border-color: rgba(80, 107, 84, 0.42);
+}
+
+.nav-links {
+  background: rgba(255, 250, 242, 0.94);
+  border-color: rgba(80, 107, 84, 0.16);
+  border-radius: 1.1rem;
+}
+
+.nav-links a {
+  color: color-mix(in srgb, var(--sage-deep) 72%, var(--muted));
+  font-weight: 600;
+}
+
+.hero-block {
+  padding-top: clamp(2.7rem, 6vw, 5rem);
+}
+
+.hero-block h1 {
+  color: var(--sage-deep);
+  font-size: clamp(2.55rem, 7vw, 6.1rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  max-width: 12ch;
+  text-wrap: balance;
+}
+
+.lead {
+  color: color-mix(in srgb, var(--sage-deep) 70%, var(--muted));
+  font-size: clamp(1rem, 1.5vw, 1.18rem);
+  max-width: 54ch;
+}
+
+.home-hero {
+  --hero-bone: #fff9ef;
+  --hero-beige: #dbc7a5;
+  --hero-ink: #1f3427;
+  --hero-green: #1f3427;
+  border-color: rgba(255, 250, 242, 0.72);
+  border-radius: clamp(1.6rem, 4vw, 3.4rem);
+  box-shadow: 0 40px 90px rgba(31, 52, 39, 0.22);
+  margin-top: clamp(2rem, 5vw, 4.4rem);
+  min-height: min(760px, calc(100vh - 8rem));
+  place-items: center start;
+}
+
+.home-hero::before {
+  background:
+    linear-gradient(90deg, rgba(31, 52, 39, 0.9) 0%, rgba(31, 52, 39, 0.64) 39%, rgba(31, 52, 39, 0.1) 100%),
+    radial-gradient(circle at 20% 74%, rgba(247, 223, 226, 0.3), transparent 28%),
+    radial-gradient(circle at 64% 16%, rgba(219, 199, 165, 0.24), transparent 26%);
+}
+
+.home-hero::after {
+  border-color: rgba(255, 250, 242, 0.48);
+  border-radius: clamp(1.15rem, 3vw, 2.45rem);
+  box-shadow: inset 0 0 0 1px rgba(80, 107, 84, 0.1);
+}
+
+.home-hero-image {
+  filter: saturate(0.96) contrast(1.02) brightness(0.98);
+  object-position: 58% center;
+}
+
+.home-hero-content {
+  max-width: min(100%, 48rem);
+}
+
+.home-hero-kicker {
+  color: var(--petal);
+  font-weight: 700;
+}
+
+.home-hero-content h2 {
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  letter-spacing: -0.07em;
+  line-height: 0.82;
+  max-width: 9ch;
+}
+
+.home-hero-button,
+.btn {
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(31, 52, 39, 0.1);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.home-hero-button-primary,
+.btn-primary {
+  background: var(--sage-deep);
+  border-color: var(--sage-deep);
+  color: var(--cream);
+}
+
+.home-hero-button-primary:hover,
+.btn-primary:hover {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+
+.home-hero-button-secondary,
+.btn-ghost {
+  background: rgba(255, 250, 242, 0.82);
+  border-color: rgba(255, 250, 242, 0.72);
+  color: var(--sage-deep);
+}
+
+.section-block {
+  margin-top: clamp(3.4rem, 7vw, 6rem);
+}
+
+.section-intro {
+  border-bottom-color: rgba(80, 107, 84, 0.18);
+}
+
+.section-microcopy,
+.studio-card p,
+.value-card p,
+.occasion-card p {
+  color: color-mix(in srgb, var(--sage-deep) 70%, var(--muted));
+}
+
+.studio-card,
+.value-card,
+.occasion-card,
+.reference-item,
+.studio-form,
+.split-panel > div,
+.marketplace-featured-card,
+.marketplace-secondary-card {
+  background: linear-gradient(145deg, rgba(255, 250, 242, 0.9), rgba(247, 223, 226, 0.32));
+  border-color: rgba(80, 107, 84, 0.16);
+  box-shadow: 0 22px 54px rgba(31, 52, 39, 0.09);
+}
+
+.studio-card {
+  border-radius: 1.6rem;
+  padding: clamp(1.2rem, 2.8vw, 2rem);
+}
+
+.feature-grid .studio-card,
+.contact-grid .studio-card {
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.feature-grid .studio-card:hover,
+.contact-grid .studio-card:hover,
+.occasion-card:hover {
+  border-color: rgba(183, 111, 95, 0.32);
+  box-shadow: 0 30px 68px rgba(31, 52, 39, 0.14);
+  transform: translateY(-4px);
+}
+
+.studio-card h2,
+.studio-card h3,
+.marketplace-section h2,
+.reference-gallery h2 {
+  color: var(--sage-deep);
+  font-weight: 500;
+}
+
+.text-link,
+.btn-link {
+  color: var(--sage);
+  font-weight: 800;
+  text-decoration-color: rgba(183, 111, 95, 0.45);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+}
+
+.card-image-wrap,
+.marketplace-featured-image-wrap,
+.marketplace-secondary-image-wrap,
+.product-detail-image-wrap,
+.reference-item,
+.occasion-card {
+  border-radius: 1.4rem;
+}
+
+.card-image,
+.reference-item img,
+.occasion-card img,
+.marketplace-featured-image,
+.marketplace-secondary-image {
+  filter: saturate(0.92) contrast(1.02);
+}
+
+.input,
+.studio-form input,
+.studio-form textarea,
+.studio-form select,
+.course-session-select,
+.checkout-address-select select,
+.checkout-delivery-address input,
+.account-profile-form input {
+  background: rgba(255, 250, 242, 0.88);
+  border-color: rgba(80, 107, 84, 0.22);
+}
+
+.site-footer {
+  background: linear-gradient(180deg, transparent, rgba(255, 250, 242, 0.74));
+  border-top-color: rgba(80, 107, 84, 0.16);
+}
+
+@media (min-width: 860px) {
+  .nav-wrap {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .header-primary-row {
+    display: contents;
+  }
+
+  .header-actions-cluster {
+    order: 3;
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+
+  .nav-links,
+  .nav-links.is-open {
+    background: transparent;
+    border: 0;
+    display: flex;
+    flex-direction: row;
+    gap: clamp(0.7rem, 1.4vw, 1.25rem);
+    padding: 0;
+  }
+
+  .nav-links a {
+    font-size: 0.84rem;
+  }
+
+  .home-hero-cta {
+    display: flex;
+    width: fit-content;
+  }
+}
+
+@media (max-width: 760px) {
+  .nav-wrap {
+    border-radius: 1.35rem;
+  }
+
+  .home-hero {
+    min-height: 620px;
+  }
+
+  .home-hero-content h2 {
+    max-width: 8.6ch;
+  }
+
+  .site-root::before,
+  .site-root::after {
+    display: none;
+  }
+}
