@@ -85,7 +85,14 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
             <h2>{section.category}</h2>
             <div className="feature-grid">
               {section.products.map((product) => (
-                <article key={product.slug} className="studio-card marketplace-card">
+                <article key={product.slug} className="studio-card marketplace-card clickable-card">
+                  <Link
+                    href={`/marketplace/${product.slug}`}
+                    className="card-detail-overlay"
+                    aria-label={`Ver detalle de ${product.name}`}
+                  >
+                    <span className="sr-only">Ver detalle de {product.name}</span>
+                  </Link>
                   <div className="card-image-wrap">
                     <Image
                       className="card-image"
@@ -104,9 +111,6 @@ export default function MarketplaceClientEnhancer({ mode, initialProducts, slug 
                     <strong className="price-tag">{product.price}</strong>
                   </div>
                   <div className="marketplace-card-actions">
-                    <Link href={`/marketplace/${product.slug}`} className="btn btn-ghost">
-                      Ver detalle
-                    </Link>
                     <ProductPurchaseActions product={product} />
                   </div>
                 </article>

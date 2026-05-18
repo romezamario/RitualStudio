@@ -29,7 +29,14 @@ export default async function CoursesPage() {
               : "/images/logo.png";
 
             return (
-              <article key={course.id} className="studio-card marketplace-card">
+              <article key={course.id} className="studio-card marketplace-card clickable-card">
+                <Link
+                  href={`/cursos/${course.slug}`}
+                  className="card-detail-overlay"
+                  aria-label={`Ver detalle de ${course.title}`}
+                >
+                  <span className="sr-only">Ver detalle de {course.title}</span>
+                </Link>
                 <div className="card-image-wrap">
                   <Image
                     className="card-image"
@@ -49,9 +56,6 @@ export default async function CoursesPage() {
                   <span>{course.sessionsCount} sesiones publicadas</span>
                 </div>
                 <div className="marketplace-card-actions">
-                  <Link href={`/cursos/${course.slug}`} className="btn btn-ghost">
-                    Ver detalle
-                  </Link>
                   <Link href={`/cursos/${course.slug}`} className="btn btn-primary">
                     Ver sesiones y comprar
                   </Link>

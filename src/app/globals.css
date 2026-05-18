@@ -1179,7 +1179,7 @@ p {
 }
 
 .marketplace-featured-actions {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .marketplace-secondary-grid {
@@ -1207,6 +1207,35 @@ p {
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.3rem;
   margin: 0;
+}
+
+.clickable-card {
+  cursor: pointer;
+  position: relative;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.clickable-card:hover,
+.clickable-card:focus-within {
+  box-shadow: 0 16px 34px rgba(74, 74, 74, 0.12);
+  transform: translateY(-2px);
+}
+
+.card-detail-overlay {
+  border-radius: inherit;
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+.card-detail-overlay:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--charcoal) 62%, white);
+  outline-offset: 4px;
+}
+
+.clickable-card .marketplace-card-actions {
+  position: relative;
+  z-index: 2;
 }
 
 .product-detail {
