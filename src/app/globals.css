@@ -2356,514 +2356,578 @@ p {
   }
 }
 
-/* Floreria redesign */
+/* Yonobi-inspired editorial refresh for Ritual Studio */
 :root {
-  --rose-mist: #f7e8e3;
-  --sandstone: #d7c4a7;
-  --smoke: #817d74;
-  --charcoal: #20251f;
-  --leaf: #31513d;
-  --leaf-deep: #17261d;
-  --petal: #d96f71;
-  --butter: #f0c86a;
-  --clay: #b95d4b;
-
-  --bg: #fbf7ef;
-  --bg-soft: #fffdf8;
-  --panel: rgba(255, 252, 246, 0.86);
-  --ink: #20251f;
-  --muted: #6f6a60;
-  --line: rgba(49, 81, 61, 0.18);
-  --accent: #31513d;
-  --gold: #d4a646;
-  --rose: #d96f71;
-  --sand: #f3ead8;
-}
-
-html {
-  font-size: 100%;
+  --bg: #f3eadf;
+  --bg-soft: #fff8ef;
+  --panel: rgba(255, 248, 239, 0.78);
+  --ink: #231f1a;
+  --muted: #766f64;
+  --line: rgba(91, 78, 61, 0.18);
+  --accent: #5b3b27;
+  --rose-mist: #f3eadf;
+  --sandstone: #c9a77f;
+  --smoke: #8d8477;
+  --charcoal: #231f1a;
 }
 
 body {
   background:
-    linear-gradient(180deg, rgba(251, 247, 239, 0.94), rgba(246, 238, 225, 0.98)),
-    url("https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&fit=crop&w=1800&q=70");
-  background-attachment: fixed;
-  background-position: center top;
-  background-size: cover;
-  color: var(--ink);
-}
-
-h1,
-h2,
-h3 {
-  letter-spacing: 0;
+    linear-gradient(180deg, rgba(255, 248, 239, 0.72) 0%, rgba(243, 234, 223, 0.96) 38%, #eadbc8 100%),
+    radial-gradient(circle at 12% 0%, rgba(189, 139, 93, 0.28), transparent 32%),
+    radial-gradient(circle at 90% 8%, rgba(92, 54, 35, 0.14), transparent 34%);
 }
 
 .site-root {
-  background:
-    linear-gradient(90deg, rgba(255, 253, 248, 0.86), rgba(255, 253, 248, 0.7)),
-    repeating-linear-gradient(90deg, rgba(49, 81, 61, 0.05) 0 1px, transparent 1px 92px);
+  overflow: clip;
+}
+
+.ambient-orb {
+  display: none;
 }
 
 .container {
-  width: min(1180px, calc(100% - 2rem));
+  width: min(1320px, calc(100% - clamp(1.5rem, 4vw, 4.5rem)));
 }
 
 .site-header {
   padding: 1rem 0 0;
-  position: sticky;
-  top: 0;
 }
 
 .nav-wrap {
   backdrop-filter: blur(18px);
-  background: rgba(255, 253, 248, 0.9);
-  border: 1px solid rgba(49, 81, 61, 0.18);
-  border-radius: 8px;
-  box-shadow: 0 18px 50px rgba(23, 38, 29, 0.08);
-  grid-template-columns: auto 1fr;
-  padding: 0.75rem 0.85rem;
+  background: rgba(255, 248, 239, 0.72);
+  border-color: rgba(65, 50, 34, 0.16);
+  border-radius: 999px;
+  box-shadow: 0 18px 48px rgba(48, 35, 22, 0.08);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.58rem 0.68rem 0.58rem 1.1rem;
 }
 
 .header-primary-row {
-  display: contents;
-}
-
-.brand {
-  align-items: center;
-  display: flex;
-  gap: 0.7rem;
-}
-
-.brand::before {
-  background:
-    linear-gradient(135deg, var(--petal), var(--butter) 52%, var(--leaf));
-  border-radius: 999px;
-  content: "";
-  display: inline-block;
-  height: 2.35rem;
-  width: 2.35rem;
+  flex: 1;
 }
 
 .brand-main {
-  color: var(--leaf-deep);
-  font-size: 1rem;
-  letter-spacing: 0.08em;
+  font-size: clamp(1rem, 1.55vw, 1.55rem);
+  letter-spacing: 0.03em;
+  text-transform: none;
 }
 
 .brand-sub {
-  color: var(--muted);
-  font-size: 0.66rem;
+  color: rgba(35, 31, 26, 0.56);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
 }
 
 .header-actions-cluster {
-  justify-self: end;
-  order: 3;
-}
-
-.nav-links {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  display: flex;
-  flex-direction: row;
-  gap: clamp(0.5rem, 1.7vw, 1.35rem);
-  justify-content: center;
-  padding: 0;
-}
-
-.nav-links a {
-  color: color-mix(in srgb, var(--leaf-deep) 78%, white);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.nav-links a:hover {
-  color: var(--clay);
-}
-
-.menu-toggle {
-  display: none;
+  gap: 0.4rem;
 }
 
 .cart-access,
 .user-access-trigger,
-.whatsapp-floating {
-  background: #fffdf8;
-  border-color: rgba(49, 81, 61, 0.2);
-  color: var(--leaf-deep);
+.menu-toggle {
+  background: rgba(255, 252, 246, 0.72);
+  border-color: rgba(65, 50, 34, 0.18);
+  color: var(--ink);
 }
 
-.user-access-trigger.is-authenticated,
-.btn-primary {
-  background: var(--leaf);
-  border-color: var(--leaf);
-  color: #fffdf8;
+.cart-access:hover,
+.user-access-trigger:hover,
+.menu-toggle:hover {
+  background: #fffaf2;
 }
 
-.cart-access-badge {
-  background: var(--clay);
-  border-color: var(--clay);
+.user-access-trigger.is-authenticated {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff8ef;
+}
+
+.nav-links {
+  background: rgba(255, 248, 239, 0.96);
+  border-color: rgba(65, 50, 34, 0.14);
+  border-radius: 1.4rem;
+  box-shadow: 0 20px 55px rgba(48, 35, 22, 0.1);
+}
+
+.nav-links a {
+  color: rgba(35, 31, 26, 0.72);
+  font-size: 0.83rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .hero-block {
-  padding: clamp(2rem, 4vw, 3.7rem) 0 clamp(4rem, 6vw, 6rem);
+  padding: clamp(2rem, 5vw, 4.8rem) 0 clamp(4rem, 8vw, 7rem);
 }
 
-.eyebrow {
-  color: var(--clay);
-  font-weight: 800;
-  letter-spacing: 0.16em;
+.eyebrow,
+.yonobi-kicker {
+  color: rgba(35, 31, 26, 0.58);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 650;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
-.hero-block h1 {
-  color: var(--leaf-deep);
-  font-size: clamp(2.45rem, 7vw, 5.9rem);
-  font-weight: 600;
-  line-height: 0.95;
-  max-width: 12ch;
+.hero-block > h1 {
+  font-size: clamp(3.25rem, 10.8vw, 10rem);
+  font-weight: 500;
+  letter-spacing: -0.075em;
+  line-height: 0.86;
+  margin-top: clamp(0.8rem, 2vw, 1.5rem);
+  max-width: 10.4ch;
 }
 
 .lead {
-  color: color-mix(in srgb, var(--ink) 72%, white);
-  font-size: clamp(1rem, 1.7vw, 1.18rem);
-  max-width: 56ch;
+  color: rgba(35, 31, 26, 0.72);
+  font-size: clamp(1rem, 1.7vw, 1.35rem);
+  line-height: 1.55;
+  margin-top: 1.35rem;
+  max-width: 54rem;
 }
 
-.home-hero {
-  border: 0;
-  border-radius: 8px;
-  box-shadow: 0 28px 80px rgba(23, 38, 29, 0.2);
-  margin-top: clamp(2rem, 5vw, 4rem);
-  min-height: min(760px, calc(100vh - 6rem));
-  place-items: center start;
+.yonobi-hero {
+  border-radius: clamp(1.6rem, 4vw, 3.4rem);
+  display: grid;
+  min-height: min(820px, 78vh);
+  overflow: hidden;
+  place-items: end start;
+  position: relative;
+  margin-top: clamp(2rem, 4vw, 4rem);
+  box-shadow: 0 36px 90px rgba(48, 35, 22, 0.2);
 }
 
-.home-hero::before {
+.yonobi-hero::after {
   background:
-    linear-gradient(90deg, rgba(23, 38, 29, 0.88) 0%, rgba(23, 38, 29, 0.56) 42%, rgba(23, 38, 29, 0.14) 100%),
-    linear-gradient(0deg, rgba(217, 111, 113, 0.16), rgba(240, 200, 106, 0.08));
+    linear-gradient(90deg, rgba(35, 31, 26, 0.72) 0%, rgba(35, 31, 26, 0.34) 44%, rgba(35, 31, 26, 0.04) 100%),
+    linear-gradient(180deg, rgba(35, 31, 26, 0.02) 35%, rgba(35, 31, 26, 0.5) 100%);
+  content: "";
+  inset: 0;
+  position: absolute;
 }
 
-.home-hero::after {
-  border-color: rgba(255, 253, 248, 0.38);
-  border-radius: 8px;
+.yonobi-hero-media,
+.yonobi-split-image-wrap,
+.yonobi-product-image-wrap {
+  inset: 0;
+  position: absolute;
 }
 
-.home-hero-image {
-  filter: saturate(1.03) contrast(1.02);
-  object-position: 62% center;
+.yonobi-hero-image,
+.yonobi-split-image,
+.yonobi-studio-image,
+.yonobi-product-image {
+  object-fit: cover;
 }
 
-.home-hero-content {
-  max-width: min(100%, 44rem);
-  padding: clamp(2rem, 8vw, 6rem);
+.yonobi-hero-image {
+  filter: saturate(0.9) contrast(1.02);
 }
 
-.home-hero-kicker {
-  color: #f7d0c7;
-  font-weight: 800;
-  letter-spacing: 0.2em;
+.yonobi-hero-panel {
+  color: #fff8ef;
+  display: grid;
+  gap: 1rem;
+  max-width: 46rem;
+  padding: clamp(1.35rem, 5vw, 5.5rem);
+  position: relative;
+  z-index: 2;
 }
 
-.home-hero-content h2 {
-  color: #fffdf8;
-  font-size: clamp(3rem, 10vw, 7rem);
-  font-weight: 600;
-  letter-spacing: 0;
-  line-height: 0.9;
-  max-width: 8.8ch;
+.yonobi-hero-panel .yonobi-kicker {
+  color: rgba(255, 248, 239, 0.76);
 }
 
-.home-hero-copy {
-  color: color-mix(in srgb, #fffdf8 84%, var(--sandstone));
-  font-size: clamp(1rem, 1.7vw, 1.2rem);
-  max-width: 34rem;
+.yonobi-hero-panel h2,
+.yonobi-manifesto h2,
+.yonobi-split-copy h2,
+.yonobi-rhythm h2,
+.yonobi-section-heading h2,
+.yonobi-workshops h2,
+.yonobi-community h2 {
+  font-size: clamp(2.25rem, 6vw, 5.7rem);
+  font-weight: 500;
+  letter-spacing: -0.065em;
+  line-height: 0.92;
 }
 
-.home-hero-button,
-.btn {
+.yonobi-hero-panel p:not(.yonobi-kicker) {
+  color: rgba(255, 248, 239, 0.82);
+  font-size: clamp(1rem, 1.55vw, 1.22rem);
+  max-width: 38rem;
+}
+
+.yonobi-hero-actions,
+.yonobi-ritual-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.yonobi-button {
+  align-items: center;
+  border: 1px solid rgba(35, 31, 26, 0.2);
   border-radius: 999px;
-  min-height: 2.9rem;
+  display: inline-flex;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 750;
+  justify-content: center;
+  letter-spacing: 0.13em;
+  min-height: 3rem;
+  padding: 0.85rem 1.35rem;
+  text-transform: uppercase;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.home-hero-button-primary {
-  background: #fffdf8;
-  color: var(--leaf-deep);
+.yonobi-button:hover {
+  transform: translateY(-2px);
 }
 
-.home-hero-button-secondary {
-  background: rgba(255, 253, 248, 0.1);
-  border-color: rgba(255, 253, 248, 0.7);
-  color: #fffdf8;
+.yonobi-button-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff8ef;
 }
 
-.section-block {
-  margin-top: clamp(3rem, 6vw, 5rem);
+.yonobi-hero-panel .yonobi-button-primary {
+  background: #fff8ef;
+  border-color: #fff8ef;
+  color: var(--ink);
 }
 
-.section-intro {
-  border-bottom-color: rgba(49, 81, 61, 0.18);
+.yonobi-button-secondary {
+  background: rgba(255, 248, 239, 0.28);
+  border-color: rgba(35, 31, 26, 0.22);
+  color: var(--ink);
 }
 
-.section-tag,
-.card-label {
-  color: var(--clay);
-  font-weight: 800;
-  letter-spacing: 0.14em;
+.yonobi-hero-panel .yonobi-button-secondary {
+  border-color: rgba(255, 248, 239, 0.58);
+  color: #fff8ef;
 }
 
-.section-microcopy,
-.studio-card p {
-  color: color-mix(in srgb, var(--ink) 72%, white);
+.yonobi-manifesto,
+.yonobi-rhythm,
+.yonobi-community {
+  display: grid;
+  gap: 1.2rem;
+  margin: clamp(4.5rem, 9vw, 9rem) auto 0;
+  text-align: center;
 }
 
-.section-title-large {
-  color: var(--leaf-deep);
-  font-size: clamp(2rem, 4.4vw, 4.4rem);
-  line-height: 1;
-  margin-top: 1.4rem;
+.yonobi-manifesto {
+  max-width: 78rem;
+}
+
+.yonobi-manifesto p:not(.yonobi-kicker),
+.yonobi-rhythm p,
+.yonobi-workshops-copy p,
+.yonobi-split-copy p,
+.yonobi-product-body p,
+.yonobi-ritual-card span {
+  color: rgba(35, 31, 26, 0.68);
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.yonobi-manifesto p:not(.yonobi-kicker),
+.yonobi-rhythm p {
+  margin: 0 auto;
+  max-width: 54rem;
+}
+
+.yonobi-split,
+.yonobi-workshops {
+  align-items: stretch;
+  display: grid;
+  gap: clamp(1rem, 2.6vw, 2rem);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  margin-top: clamp(4rem, 8vw, 8rem);
+}
+
+.yonobi-split-copy,
+.yonobi-workshops-copy,
+.yonobi-product-body {
+  align-content: center;
+  background: rgba(255, 248, 239, 0.58);
+  border: 1px solid rgba(65, 50, 34, 0.14);
+  border-radius: clamp(1.35rem, 3vw, 2.4rem);
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.3rem, 4.8vw, 4.5rem);
+}
+
+.yonobi-split-image-wrap,
+.yonobi-product-image-wrap {
+  border-radius: clamp(1.35rem, 3vw, 2.4rem);
+  min-height: 560px;
+  overflow: hidden;
+  position: relative;
+}
+
+.yonobi-text-link {
+  color: var(--ink);
+  font-weight: 700;
+  justify-self: start;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
+}
+
+.yonobi-rhythm {
+  background: #d9bea0;
+  border-radius: clamp(1.35rem, 3vw, 2.8rem);
+  padding: clamp(2rem, 6vw, 5.5rem);
+}
+
+.yonobi-rhythm .yonobi-button,
+.yonobi-community .yonobi-button {
+  justify-self: center;
+}
+
+.yonobi-studios,
+.yonobi-ritual-grid {
+  margin-top: clamp(4.5rem, 8vw, 8rem);
+}
+
+.yonobi-section-heading {
+  align-items: end;
+  border-bottom: 1px solid rgba(65, 50, 34, 0.16);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding-bottom: 1.1rem;
+}
+
+.yonobi-section-heading h2 {
   max-width: 10ch;
+  text-align: right;
 }
 
-.studio-card {
-  background: rgba(255, 253, 248, 0.88);
-  border: 1px solid rgba(49, 81, 61, 0.16);
-  border-radius: 8px;
-  box-shadow: 0 18px 48px rgba(23, 38, 29, 0.08);
-  gap: 0.85rem;
-  padding: clamp(1rem, 2vw, 1.45rem);
-}
-
-.studio-card h2,
-.studio-card h3 {
-  color: var(--leaf-deep);
-  font-size: clamp(1.35rem, 2.6vw, 2rem);
-  line-height: 1.08;
-}
-
-.ritual-process-grid .studio-card {
-  min-height: 210px;
-}
-
-.floral-service-card {
-  align-items: start;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.4fr) auto;
+.yonobi-studio-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 1.2rem;
 }
 
-.floral-service-card .card-label {
-  align-self: center;
+.yonobi-studio-card {
+  border-radius: clamp(1.15rem, 2.3vw, 2rem);
+  color: #fff8ef;
+  display: grid;
+  min-height: 520px;
+  overflow: hidden;
+  position: relative;
 }
 
-.floral-service-card p:not(.card-label) {
-  max-width: 48ch;
+.yonobi-studio-card > img {
+  transition: transform 0.5s ease;
 }
 
-.text-link {
-  color: var(--leaf);
-  font-weight: 800;
+.yonobi-studio-card:hover > img {
+  transform: scale(1.04);
 }
 
-.text-link:hover {
-  color: var(--clay);
+.yonobi-studio-overlay {
+  background: linear-gradient(180deg, rgba(35, 31, 26, 0.04) 0%, rgba(35, 31, 26, 0.8) 100%);
+  inset: 0;
+  position: absolute;
 }
 
-.card-image-wrap,
-.marketplace-featured-image-wrap,
-.marketplace-secondary-image-wrap,
-.product-detail-image-wrap {
-  border-radius: 8px;
+.yonobi-studio-content {
+  align-self: end;
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.4rem;
+  position: relative;
+  z-index: 1;
 }
 
-.card-image {
-  height: 260px;
+.yonobi-card-location,
+.yonobi-card-cta {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
-.floral-pick-card {
-  padding: 0.7rem;
+.yonobi-card-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.9rem, 3vw, 3.1rem);
+  letter-spacing: -0.05em;
+  line-height: 0.95;
 }
 
-.floral-pick-card .card-label,
-.floral-pick-card h3,
-.floral-pick-card p,
-.floral-pick-card .text-link {
-  margin-left: 0.35rem;
-  margin-right: 0.35rem;
+.yonobi-card-description {
+  color: rgba(255, 248, 239, 0.78);
+  line-height: 1.5;
+  max-width: 28rem;
 }
 
-.contact-highlight {
-  background:
-    linear-gradient(135deg, rgba(49, 81, 61, 0.95), rgba(23, 38, 29, 0.95)),
-    url("https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1400&q=80");
-  background-position: center;
-  background-size: cover;
-  color: #fffdf8;
-  margin-top: clamp(3rem, 6vw, 5rem);
-  padding: clamp(1.4rem, 4vw, 3rem);
+.yonobi-workshops {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
 }
 
-.contact-highlight h2,
-.contact-highlight p,
-.contact-highlight .card-label {
-  color: #fffdf8;
+.yonobi-product-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 0.72fr);
 }
 
-.contact-highlight .btn-primary {
-  background: #fffdf8;
-  border-color: #fffdf8;
-  color: var(--leaf-deep);
+.yonobi-product-image-wrap {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
 }
 
-.btn-ghost {
-  background: #fffdf8;
-  border-color: rgba(49, 81, 61, 0.2);
-  color: var(--leaf-deep);
+.yonobi-product-body {
+  border-bottom-left-radius: 0;
+  border-left: 0;
+  border-top-left-radius: 0;
 }
 
-.btn-ghost:hover,
-.cart-access:hover,
-.user-access-trigger:hover {
-  background: #f7e8e3;
+.yonobi-product-body h3,
+.yonobi-ritual-card h3 {
+  font-size: clamp(1.65rem, 3vw, 2.6rem);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1;
 }
 
-.studio-form,
-.split-panel > div,
-.story-block,
-.orders-table-card {
-  background: rgba(255, 253, 248, 0.88);
-  border-color: rgba(49, 81, 61, 0.16);
-  border-radius: 8px;
+.yonobi-ritual-cards {
+  margin-top: 1.2rem;
 }
 
-.studio-form input,
-.studio-form textarea,
-.studio-form select,
-.input,
-.course-session-select,
-.checkout-participant-input input,
-.checkout-receipt-email input,
-.checkout-delivery-address input,
-.checkout-address-select select {
-  background: #fffdf8;
-  border-color: rgba(49, 81, 61, 0.22);
-  border-radius: 8px;
+.yonobi-ritual-card {
+  background: rgba(255, 248, 239, 0.58);
+  border: 1px solid rgba(65, 50, 34, 0.14);
+  border-radius: 1.45rem;
+  display: grid;
+  flex: 1 1 260px;
+  gap: 0.85rem;
+  padding: clamp(1.2rem, 2.8vw, 2rem);
 }
 
-.marketplace-topbar {
-  background: rgba(255, 253, 248, 0.88);
-  border-color: rgba(49, 81, 61, 0.16);
-  border-radius: 8px;
+.yonobi-ritual-card p {
+  color: rgba(35, 31, 26, 0.5);
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
-.chip-link {
-  background: var(--leaf);
-  border-color: var(--leaf);
-  color: #fffdf8;
+.yonobi-community {
+  align-items: center;
+  background: #241f1a;
+  border-radius: clamp(1.35rem, 3vw, 2.8rem);
+  color: #fff8ef;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: clamp(1.6rem, 4vw, 3.2rem);
+  text-align: left;
 }
 
-.marketplace-section-heading h2,
-.marketplace-featured-copy h3,
-.marketplace-card h3,
-.product-detail-content h2 {
-  color: var(--leaf-deep);
+.yonobi-community .yonobi-kicker,
+.yonobi-community h2 {
+  color: #fff8ef;
 }
 
-.marketplace-featured-card {
-  background: rgba(255, 253, 248, 0.9);
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+.yonobi-community h2 {
+  font-size: clamp(2rem, 4.8vw, 4.3rem);
+  max-width: 13ch;
 }
 
-.marketplace-featured-image,
-.marketplace-featured-image-wrap {
-  min-height: 540px;
-}
-
-.marketplace-secondary-grid {
-  gap: 1rem;
-}
-
-.marketplace-secondary-card {
-  padding: 0.7rem;
-}
-
-.marketplace-secondary-image {
-  height: 260px;
-}
-
-.price-tag {
-  color: var(--leaf);
-  font-size: 1.05rem;
+.yonobi-community .yonobi-button-primary {
+  background: #fff8ef;
+  border-color: #fff8ef;
+  color: var(--ink);
 }
 
 .site-footer {
-  background: var(--leaf-deep);
-  border-top: 0;
-  color: #fffdf8;
-  margin-top: 0;
-  padding: 1.4rem 0 1.8rem;
+  border-top-color: rgba(65, 50, 34, 0.16);
+  margin-top: clamp(3rem, 6vw, 5rem);
 }
 
-.site-footer-inner,
-.site-footer-inner a {
-  color: color-mix(in srgb, #fffdf8 82%, var(--sandstone));
-}
-
-@media (max-width: 900px) {
-  .site-header {
-    position: relative;
+@media (min-width: 980px) {
+  .menu-toggle {
+    display: none;
   }
 
   .nav-wrap {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .header-primary-row {
-    display: flex;
-  }
-
-  .menu-toggle {
-    display: inline-flex;
+    align-items: center;
   }
 
   .nav-links {
-    background: rgba(255, 253, 248, 0.94);
-    border: 1px solid rgba(49, 81, 61, 0.16);
-    border-radius: 8px;
-    display: none;
-    flex-direction: column;
-    margin-top: 0.8rem;
-    padding: 0.75rem 0.9rem;
-  }
-
-  .nav-links.is-open {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
     display: flex;
+    flex: 0 1 auto;
+    flex-direction: row;
+    gap: 1.1rem;
+    padding: 0;
   }
 
-  .home-hero {
-    min-height: min(680px, calc(100vh - 4rem));
+  .nav-links a {
+    font-size: 0.73rem;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 979px) {
+  .nav-wrap {
+    border-radius: 1.35rem;
+    display: grid;
+  }
+}
+
+@media (max-width: 860px) {
+  .hero-block > h1 {
+    font-size: clamp(3rem, 17vw, 5.5rem);
   }
 
-  .home-hero::before {
-    background: linear-gradient(180deg, rgba(23, 38, 29, 0.26) 0%, rgba(23, 38, 29, 0.82) 60%, rgba(23, 38, 29, 0.95) 100%);
-  }
-
-  .home-hero-content h2 {
-    font-size: clamp(2.65rem, 14vw, 4.8rem);
-    max-width: 8.4ch;
-  }
-
-  .floral-service-card {
+  .yonobi-split,
+  .yonobi-workshops,
+  .yonobi-product-card,
+  .yonobi-community {
     grid-template-columns: 1fr;
   }
 
-  .marketplace-featured-image,
-  .marketplace-featured-image-wrap {
-    min-height: 320px;
+  .yonobi-split-image-wrap,
+  .yonobi-product-image-wrap,
+  .yonobi-studio-card {
+    min-height: 380px;
+  }
+
+  .yonobi-product-image-wrap,
+  .yonobi-product-body {
+    border-radius: 1.35rem;
+  }
+
+  .yonobi-product-body {
+    border-left: 1px solid rgba(65, 50, 34, 0.14);
+    margin-top: 1rem;
+  }
+
+  .yonobi-studio-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .yonobi-section-heading {
+    align-items: start;
+    display: grid;
+  }
+
+  .yonobi-section-heading h2 {
+    max-width: 12ch;
+    text-align: left;
+  }
+
+  .yonobi-community .yonobi-button {
+    justify-self: start;
   }
 }

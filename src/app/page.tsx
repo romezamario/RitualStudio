@@ -3,16 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 import SiteShell from "@/components/site-shell";
 
-type EditorialSection = {
-  eyebrow: string;
+type StudioPath = {
   title: string;
+  location: string;
   description: string;
   href: string;
   cta: string;
+  image: string;
 };
 
-type EditorialPick = {
-  label: string;
+type RitualCard = {
+  eyebrow: string;
   title: string;
   description: string;
   href: string;
@@ -21,69 +22,64 @@ type EditorialPick = {
 };
 
 const HERO_IMAGE_URL =
-  "https://images.unsplash.com/photo-1558898479-33c0057a5d12?auto=format&fit=crop&w=1900&q=86";
+  "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1800&q=86";
 
-const HERO_IMAGE_SIZES = "100vw";
+const PROCESS_IMAGE_URL =
+  "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=1200&q=84";
 
-const editorialSections: EditorialSection[] = [
+const WORKSHOP_IMAGE_URL =
+  "https://images.unsplash.com/photo-1496062031456-07b8f162a322?auto=format&fit=crop&w=1200&q=84";
+
+const IMAGE_SIZES = "(max-width: 900px) 100vw, 50vw";
+
+const studioPaths: StudioPath[] = [
   {
-    eyebrow: "Tienda floral",
-    title: "Ramos listos para enviar hoy",
-    description:
-      "Una seleccion de flores frescas, bases y regalos pensada para resolver fechas importantes con entrega cuidada.",
+    title: "Tienda floral",
+    location: "Marketplace curado",
+    description: "Piezas listas para enviar, seleccionadas por temporada y pensadas como gestos cotidianos.",
+    href: "/marketplace",
+    cta: "Descubrir",
+    image: "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=900&q=82"
+  },
+  {
+    title: "Experiencias",
+    location: "Talleres y sesiones",
+    description: "Encuentros pausados para aprender composición floral, crear con las manos y compartir mesa.",
+    href: "/cursos",
+    cta: "Ver fechas",
+    image: "https://images.unsplash.com/photo-1455656678494-4d1b5f3e7ad4?auto=format&fit=crop&w=900&q=82"
+  },
+  {
+    title: "Eventos",
+    location: "Celebraciones y espacios",
+    description: "Dirección floral para cenas, lanzamientos, bodas íntimas e interiores con atmósfera.",
+    href: "/eventos",
+    cta: "Planear",
+    image: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=900&q=82"
+  }
+];
+
+const rituals: RitualCard[] = [
+  {
+    eyebrow: "01 · Regalo",
+    title: "Un arreglo listo para sorprender",
+    description: "Elige una pieza editorial, agrega mensaje y coordina entrega desde el checkout.",
     href: "/marketplace",
     cta: "Comprar flores"
   },
   {
-    eyebrow: "Talleres",
-    title: "Aprende diseno floral en estudio",
-    description:
-      "Sesiones presenciales para crear con flor de temporada, tecnicas claras y acompanamiento cercano del equipo.",
-    href: "/cursos",
-    cta: "Ver talleres"
-  },
-  {
-    eyebrow: "Pedidos especiales",
-    title: "Composiciones hechas a medida",
-    description:
-      "Comparte ocasion, paleta, presupuesto y mensaje. Traducimos el brief en una pieza floral con intencion.",
+    eyebrow: "02 · Brief",
+    title: "Una composición hecha a la medida",
+    description: "Comparte paleta, ocasión, presupuesto y fecha para traducir la intención en flores.",
     href: "/custom",
     cta: "Enviar brief"
   },
   {
-    eyebrow: "Eventos",
-    title: "Flores para mesas, bodas y marcas",
-    description:
-      "Direccion floral para celebraciones, cenas, lanzamientos y espacios que necesitan atmosfera memorable.",
-    href: "/eventos",
-    cta: "Cotizar evento"
-  }
-];
-
-const editorialPicks: EditorialPick[] = [
-  {
-    label: "Regalo",
-    title: "Bouquet Aurora",
-    description: "Rosas suaves, follaje aireado y una envoltura limpia para entregar un gesto luminoso.",
-    href: "/marketplace",
-    cta: "Ver tienda",
-    image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=900&q=82"
-  },
-  {
-    label: "Mesa",
-    title: "Centro de temporada",
-    description: "Volumen bajo, textura botanica y color medido para cenas, reuniones y recepciones.",
-    href: "/eventos",
-    cta: "Planear evento",
-    image: "https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=900&q=82"
-  },
-  {
-    label: "A medida",
-    title: "Ritual personalizado",
-    description: "Una pieza creada desde tu mensaje, fecha, destinatario y presupuesto.",
-    href: "/custom",
-    cta: "Crear pedido",
-    image: "https://images.unsplash.com/photo-1567696153798-9111f9cd3d0d?auto=format&fit=crop&w=900&q=82"
+    eyebrow: "03 · Comunidad",
+    title: "Un taller para crear con calma",
+    description: "Sesiones íntimas para explorar formas, texturas y pequeños rituales de temporada.",
+    href: "/cursos",
+    cta: "Reservar experiencia"
   }
 ];
 
@@ -99,129 +95,145 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <SiteShell
-      eyebrow="Floreria de autor"
-      title="Flores frescas con entrega, detalle y direccion de diseno"
-      subtitle="Ramos, arreglos personalizados, talleres y produccion floral para eventos. Todo desde una mirada botanica elegante y cercana."
+      eyebrow="Floral studio · MX"
+      title="Flores, talleres y rituales para crear conexión"
+      subtitle="Un universo floral inspirado en la calma de los talleres creativos: arreglos premium, experiencias guiadas y dirección para espacios memorables."
     >
-      <section className="home-hero" aria-labelledby="home-hero-title">
-        <div className="home-hero-media" aria-hidden="true">
-          <Image
-            src={HERO_IMAGE_URL}
-            alt=""
-            fill
-            priority
-            sizes={HERO_IMAGE_SIZES}
-            className="home-hero-image"
-          />
+      <section className="yonobi-hero" aria-labelledby="home-hero-title">
+        <div className="yonobi-hero-media" aria-hidden="true">
+          <Image src={HERO_IMAGE_URL} alt="" fill priority sizes="100vw" className="yonobi-hero-image" />
         </div>
-        <div className="home-hero-content">
-          <p className="home-hero-kicker">Ritual Studio Floreria</p>
-          <h2 id="home-hero-title">Flores para regalar bonito.</h2>
-          <p className="home-hero-copy">
-            Elige una pieza lista, pide un arreglo especial o agenda decoracion floral para tu proximo momento.
+        <div className="yonobi-hero-panel">
+          <p className="yonobi-kicker">Ritual Studio</p>
+          <h2 id="home-hero-title">The beauty of flowers, process and gathering.</h2>
+          <p>
+            Diseñamos piezas florales y experiencias con una estética serena, artesanal y editorial: de la compra
+            inmediata al gesto completamente personalizado.
           </p>
-          <div className="home-hero-cta" aria-label="Acciones principales">
-            <Link href="/marketplace" className="home-hero-button home-hero-button-primary">
-              Comprar ahora
+          <div className="yonobi-hero-actions" aria-label="Acciones principales">
+            <Link href="/marketplace" className="yonobi-button yonobi-button-primary">
+              Explorar colección
             </Link>
-            <Link href="/custom" className="home-hero-button home-hero-button-secondary">
-              Pedido a medida
+            <Link href="/cursos" className="yonobi-button yonobi-button-secondary">
+              Ver talleres
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="section-block" aria-labelledby="studio-flow-title">
-        <div className="section-intro">
-          <p className="section-tag">Como funciona</p>
-          <p className="section-microcopy">Compra facil, produccion fresca y entrega coordinada.</p>
+      <section className="yonobi-manifesto" aria-labelledby="manifesto-title">
+        <p className="yonobi-kicker">A place to create and connect</p>
+        <h2 id="manifesto-title">Un estudio floral para momentos que piden intención.</h2>
+        <p>
+          Tomamos la calidez visual de un café-estudio —materiales naturales, ritmo lento y comunidad— y la llevamos a
+          flores premium para regalar, aprender, celebrar y transformar espacios.
+        </p>
+      </section>
+
+      <section className="yonobi-split" aria-labelledby="process-title">
+        <div className="yonobi-split-copy">
+          <p className="yonobi-kicker">The beauty of process</p>
+          <h2 id="process-title">Cada arreglo nace de observar temporada, textura y gesto.</h2>
+          <p>
+            Como en un taller abierto, el proceso importa: elegimos flores, follajes y objetos con una mirada tranquila
+            para que cada compra se sienta personal, incluso cuando está lista para enviar.
+          </p>
+          <Link href="/nosotros" className="yonobi-text-link">
+            Conoce el estudio
+          </Link>
         </div>
-        <div className="feature-grid ritual-process-grid">
-          <article className="studio-card">
-            <p className="card-label">01</p>
-            <h3>Elige o envia tu idea</h3>
-            <p>Compra una pieza de la tienda o manda un brief si necesitas algo especifico.</p>
-          </article>
-          <article className="studio-card">
-            <p className="card-label">02</p>
-            <h3>Preparamos con flor fresca</h3>
-            <p>Trabajamos la composicion, el empaque y los detalles finales desde el estudio.</p>
-          </article>
-          <article className="studio-card">
-            <p className="card-label">03</p>
-            <h3>Coordinamos entrega</h3>
-            <p>Confirmamos tiempos, direccion y mensaje para que el gesto llegue completo.</p>
-          </article>
+        <div className="yonobi-split-image-wrap">
+          <Image src={PROCESS_IMAGE_URL} alt="Flores en proceso de composición" fill sizes={IMAGE_SIZES} className="yonobi-split-image" />
         </div>
       </section>
 
-      {editorialSections.map((section) => (
-        <section
-          key={section.title}
-          className="section-block floral-service-row"
-          aria-labelledby={`${section.href.slice(1)}-title`}
-        >
-          <div className="section-intro">
-            <p className="section-tag">{section.eyebrow}</p>
-            <p className="section-microcopy">Ritual Studio / {section.title}</p>
-          </div>
-          <article className="studio-card floral-service-card">
-            <p className="card-label">{section.eyebrow}</p>
-            <h2 id={`${section.href.slice(1)}-title`}>{section.title}</h2>
-            <p>{section.description}</p>
-            <Link href={section.href} className="text-link">
-              {section.cta}
-            </Link>
-          </article>
-        </section>
-      ))}
+      <section className="yonobi-rhythm" aria-labelledby="rhythm-title">
+        <p className="yonobi-kicker">A new rhythm</p>
+        <h2 id="rhythm-title">Haz espacio para un ritual más lento.</h2>
+        <p>
+          Compra una pieza de temporada, agenda un taller o envíanos un brief. Ritual Studio acompaña el momento con una
+          experiencia clara: selección cuidada, checkout confiable y seguimiento humano.
+        </p>
+        <Link href="/custom" className="yonobi-button yonobi-button-primary">
+          Iniciar diseño a medida
+        </Link>
+      </section>
 
-      <section className="section-block" aria-labelledby="editorial-selection-title">
-        <div className="section-intro">
-          <p className="section-tag">Seleccion floral</p>
-          <p className="section-microcopy">Tres formas de empezar con el estudio.</p>
+      <section className="yonobi-studios" aria-labelledby="studios-title">
+        <div className="yonobi-section-heading">
+          <p className="yonobi-kicker">Ritual Studio paths</p>
+          <h2 id="studios-title">Tres formas de entrar al estudio.</h2>
         </div>
-        <h2 id="editorial-selection-title" className="section-title-large">
-          Favoritos de temporada
-        </h2>
-        <div className="feature-grid floral-picks-grid">
-          {editorialPicks.map((item) => (
-            <article key={item.title} className="studio-card floral-pick-card">
-              <div className="card-image-wrap">
-                <Image
-                  className="card-image"
-                  src={item.image}
-                  alt={item.title}
-                  width={900}
-                  height={720}
-                  sizes="(max-width: 900px) 100vw, 33vw"
-                />
-              </div>
-              <p className="card-label">{item.label}</p>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-              <Link href={item.href} className="text-link">
-                {item.cta}
+        <div className="yonobi-studio-grid">
+          {studioPaths.map((path) => (
+            <Link key={path.title} href={path.href} className="yonobi-studio-card">
+              <Image src={path.image} alt="" fill sizes="(max-width: 900px) 100vw, 33vw" className="yonobi-studio-image" />
+              <span className="yonobi-studio-overlay" aria-hidden="true" />
+              <span className="yonobi-studio-content">
+                <span className="yonobi-card-location">{path.location}</span>
+                <span className="yonobi-card-title">{path.title}</span>
+                <span className="yonobi-card-description">{path.description}</span>
+                <span className="yonobi-card-cta">{path.cta}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="yonobi-workshops" aria-labelledby="workshops-title">
+        <div className="yonobi-workshops-copy">
+          <p className="yonobi-kicker">Floral workshops</p>
+          <h2 id="workshops-title">Experiencias que reúnen manos, flores y conversación.</h2>
+          <p>
+            Talleres y formatos privados para equipos, grupos íntimos y personas que quieren explorar composición floral
+            en un ambiente cálido y guiado.
+          </p>
+          <Link href="/cursos" className="yonobi-text-link">
+            Ver todas las experiencias
+          </Link>
+        </div>
+        <article className="yonobi-product-card">
+          <div className="yonobi-product-image-wrap">
+            <Image src={WORKSHOP_IMAGE_URL} alt="Mesa de taller floral" fill sizes={IMAGE_SIZES} className="yonobi-product-image" />
+          </div>
+          <div className="yonobi-product-body">
+            <p className="yonobi-kicker">Featured experience</p>
+            <h3>Workshop floral de temporada</h3>
+            <p>Una sesión para crear una pieza con flores seleccionadas por color, aroma y movimiento.</p>
+            <Link href="/cursos" className="yonobi-button yonobi-button-secondary">
+              Reservar lugar
+            </Link>
+          </div>
+        </article>
+      </section>
+
+      <section className="yonobi-ritual-grid" aria-labelledby="selection-title">
+        <div className="yonobi-section-heading">
+          <p className="yonobi-kicker">Editorial selection</p>
+          <h2 id="selection-title">Elige el ritual que necesitas hoy.</h2>
+        </div>
+        <div className="yonobi-ritual-cards">
+          {rituals.map((ritual) => (
+            <article key={ritual.title} className="yonobi-ritual-card">
+              <p>{ritual.eyebrow}</p>
+              <h3>{ritual.title}</h3>
+              <span>{ritual.description}</span>
+              <Link href={ritual.href} className="yonobi-text-link">
+                {ritual.cta}
               </Link>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="studio-card contact-highlight" aria-labelledby="final-cta-title">
-        <p className="card-label">Atencion por WhatsApp</p>
-        <h2 id="final-cta-title">Cuentalo como lo imaginas. Lo convertimos en flores.</h2>
-        <p>
-          Comparte fecha, direccion, presupuesto y el mensaje que quieres enviar. Te guiamos con una propuesta clara.
-        </p>
-        <div className="cta-row" style={{ marginTop: "0.35rem" }}>
-          <Link href="/contacto" className="btn btn-primary">
-            Contactar estudio
-          </Link>
-          <Link href="/marketplace" className="btn btn-ghost">
-            Ver tienda
-          </Link>
+      <section className="yonobi-community" aria-labelledby="community-title">
+        <div>
+          <p className="yonobi-kicker">Join the Ritual community</p>
+          <h2 id="community-title">Recibe inspiración, nuevos rituales y actualizaciones del estudio.</h2>
         </div>
+        <Link href="/contacto" className="yonobi-button yonobi-button-primary">
+          Contactar al estudio
+        </Link>
       </section>
     </SiteShell>
   );
