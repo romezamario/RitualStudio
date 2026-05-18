@@ -42,6 +42,7 @@ type OrderSummaryResponse = {
     payment_method?: string | null;
     items?: PurchasedItem[];
     delivery_address?: DeliveryAddress | null;
+    is_limited?: boolean;
     timestamps?: {
       order_created_at?: string | null;
       order_updated_at?: string | null;
@@ -60,6 +61,7 @@ type ClaimOrdersResponse = {
 type CheckoutSuccessClientProps = {
   externalReference?: string;
   paymentId?: string;
+  receiptToken?: string;
 };
 
 function toCurrency(amount: number) {
@@ -119,7 +121,7 @@ function formatDeliveryAddress(address?: DeliveryAddress | null) {
   return [line, zone, cp].filter(Boolean).join(", ") || "No disponible";
 }
 
-export default function CheckoutSuccessClient({ externalReference, paymentId }: CheckoutSuccessClientProps) {
+export default function CheckoutSuccessClient({ externalReference, paymentId, receiptToken }: CheckoutSuccessClientProps) {
   const { isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -141,6 +143,10 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
 
     if (paymentId?.trim()) {
       query.set("payment_id", paymentId.trim());
+    }
+
+    if (receiptToken?.trim()) {
+      query.set("receipt_token", receiptToken.trim());
     }
 
     if (!query.toString()) {
@@ -191,7 +197,7 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
     return () => {
       isMounted = false;
     };
-  }, [externalReference, paymentId]);
+  }, [externalReference, paymentId, receiptToken]);
 
   useEffect(() => {
     if (!summary || !isAuthenticated || hasAttemptedClaimRef.current) {
@@ -274,6 +280,10 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
     loginRedirectQuery.set("payment_id", summaryPaymentId);
   }
 
+  if (receiptToken?.trim()) {
+    loginRedirectQuery.set("receipt_token", receiptToken.trim());
+  }
+
   const loginRedirectPath = `/checkout/exito${loginRedirectQuery.toString() ? `?${loginRedirectQuery.toString()}` : ""}`;
 
   if (isLoading) {
@@ -316,9 +326,16 @@ export default function CheckoutSuccessClient({ externalReference, paymentId }: 
 
       <div className="checkout-success-summary" role="status">
         <h3>Resumen canónico de tu compra</h3>
-        <p>
-          Te enviamos el comprobante a <strong>{customerEmail}</strong>.
-        </p>
+        {summary.is_limited ? (
+          <p>
+            Por seguridad, ocultamos email, dirección e ítems porque el enlace no incluye el token de comprobante y no
+            pertenece a una sesión autenticada con acceso.
+          </p>
+        ) : (
+          <p>
+            Te enviamos el comprobante a <strong>{customerEmail}</strong>.
+          </p>
+        )}
         <ul>
           <li>
             <span>ID de pago</span>

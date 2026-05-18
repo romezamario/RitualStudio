@@ -18,6 +18,7 @@ type RitualCard = {
   description: string;
   href: string;
   cta: string;
+  image: string;
 };
 
 const HERO_IMAGE_URL =
@@ -85,7 +86,7 @@ const rituals: RitualCard[] = [
 export const metadata: Metadata = {
   title: "Home | Ritual Studio",
   description:
-    "Ritual Studio es un estudio floral de experiencias, marketplace curado, eventos y diseño a medida para regalos, espacios y momentos memorables.",
+    "Ritual Studio es una floreria de diseno con ramos, arreglos personalizados, talleres y decoracion floral para eventos.",
   alternates: {
     canonical: "/"
   }

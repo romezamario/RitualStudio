@@ -43,7 +43,8 @@ Descripción de arquitectura de alto nivel para Ritual Studio.
 4. Backend persiste `orders` y `payments` en Supabase.
 5. Webhook (`/api/mercadopago/webhook`) actualiza estado real de pago y refuerza consistencia.
 6. (Opcional) se envía comprobante por email mediante proveedor configurado.
-7. Idempotencia de comprobante: `orders.payment_confirmation_email_sent_at` actúa como marca de columna para evitar reenvíos entre reintentos/duplicados de webhook; `orders.metadata.email_confirmation` conserva trazabilidad extendida.
+7. La página de éxito consulta `/api/mercadopago/order-summary` con `receipt_token`; si falta token y no hay sesión propietaria/admin, el endpoint limita el payload para no exponer email, dirección ni líneas de compra.
+8. Idempotencia de comprobante: `orders.payment_confirmation_email_sent_at` actúa como marca de columna para evitar reenvíos entre reintentos/duplicados de webhook; `orders.metadata.email_confirmation` conserva trazabilidad extendida.
 
 ## Data & Access Model
 - Roles base: `user`, `admin`.
@@ -79,6 +80,7 @@ Relación funcional:
 - Operaciones de escritura al storage solo por backend autenticado.
 - Contrato de variantes de imagen activo: `thumb` (320x240), `card` (720x540), `detail` (1440x1080) y `original` (solo acciones explícitas fuera del flujo normal).
 - Mapeo por pantalla: listados usan `thumb`, cards/admin preview usan `card`, PDP usa `detail`; `original` no se solicita durante navegación estándar.
+- Las URLs renderizadas de Supabase Storage fuerzan `format=webp` además de dimensiones/calidad para reducir payload de imágenes en navegación pública y admin.
 
 ## Deployment Model
 - Rama principal para producción (`main`, salvo configuración contraria).

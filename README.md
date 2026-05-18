@@ -226,6 +226,7 @@ Regla de gobernanza: cualquier cambio funcional/estructural/integración debe re
 
 Resumen rápido de alcance comercial actual:
 - El checkout soporta venta mixta de productos y cursos.
+- El comprobante de éxito usa un `receipt_token` generado por backend; sin token o sesión autorizada, el resumen público oculta datos personales.
 - Existe módulo administrativo para operar cursos y sesiones.
 - El detalle funcional/técnico vive en `docs/business-rules.md`, `docs/payments-mercado-pago.md`, `docs/supabase-auth-and-roles.md` y `docs/architecture.md`.
 
@@ -237,6 +238,7 @@ Resumen rápido de alcance comercial actual:
 - `SUPABASE_SERVICE_ROLE_KEY` debe quedar en backend seguro.
 - `MP_ACCESS_TOKEN_PROD` solo backend.
 - Validar pagos por backend/webhook; no confiar en estado del cliente.
+- No exponer PII de órdenes por identificadores públicos (`external_reference`, `payment_id`); usar token de comprobante o sesión autorizada.
 - No usar documentación para almacenar credenciales reales.
 
 ---
