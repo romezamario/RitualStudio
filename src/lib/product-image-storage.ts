@@ -29,7 +29,7 @@ export const PRODUCT_IMAGE_VARIANT_CONTRACT: Record<ProductImageVariant, Product
 };
 
 const PRODUCT_IMAGE_RENDER_PRESETS: Record<ProductImageRenderUsage, ProductImageRenderPreset> = {
-  "marketplace-list": { variant: "thumb" },
+  "marketplace-list": { variant: "card" },
   "product-card": { variant: "card" },
   "product-detail": { variant: "detail" },
   "cart-item": { variant: "thumb" },
