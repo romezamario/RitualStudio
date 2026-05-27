@@ -463,8 +463,7 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
       const mp = new window.MercadoPago(publicKey, { locale: "es-MX" });
       const bricksBuilder = mp.bricks();
 
-      const prefillEmail =
-        !isProductionKey && isMercadoPagoGeneratedTestUserEmail(normalizedUserEmail) ? "" : normalizedUserEmail;
+      const prefillEmail = isProductionKey ? normalizedUserEmail : "";
 
       window.cardPaymentBrickController = await bricksBuilder.create("cardPayment", "mp-card-payment-brick", {
         initialization: {
@@ -858,7 +857,7 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
               ))}
             </section>
           ) : null}
-          {normalizedUserEmail ? (
+          {normalizedUserEmail && isProductionKey ? (
             <label className="checkout-receipt-email">
               <span>Correo electrónico para el pago</span>
               <input
