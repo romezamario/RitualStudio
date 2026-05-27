@@ -38,6 +38,10 @@ type MpBrickError = {
   cause?: Array<{ code?: string; description?: string }>;
 };
 
+function isMercadoPagoTestUserEmail(email: string) {
+  return /^test_user_\d+@testuser\.com$/i.test(email.trim());
+}
+
 type CourseParticipantsByLine = Record<string, string[]>;
 type CourseErrorsByLine = Record<string, string | null>;
 
@@ -133,11 +137,19 @@ function getHumanReadableBrickError(error: unknown, isProductionKey: boolean) {
   const mpError = error as MpBrickError;
   const causeCode = mpError.cause?.[0]?.code?.toLowerCase() ?? "";
   const causeDescription = mpError.cause?.[0]?.description;
+  const normalizedMessage = (mpError.message ?? "").toLowerCase();
+  const normalizedCauseDescription = (causeDescription ?? "").toLowerCase();
 
   if (causeCode.includes("get_payment_methods") || causeCode.includes("bin")) {
     return isProductionKey
       ? "No pudimos validar esta tarjeta en producción. Si estás probando integración, usa llaves TEST con tarjetas de prueba; con llaves APP_USR usa una tarjeta real habilitada."
       : "No pudimos obtener la información de esta tarjeta de prueba. Revisa número, vencimiento y CVV o intenta otra tarjeta de test de Mercado Pago.";
+  }
+
+  if (normalizedMessage.includes("failed to create card token") || normalizedCauseDescription.includes("failed to create card token")) {
+    return isProductionKey
+      ? "No se pudo tokenizar la tarjeta. Verifica los datos y vuelve a intentar; si estás haciendo pruebas, usa llaves TEST + usuario/tarjeta de prueba de Mercado Pago."
+      : "No se pudo tokenizar la tarjeta en modo TEST. Usa un comprador de prueba (email test_user_xxxxx@testuser.com) junto con tarjetas de prueba de Mercado Pago.";
   }
 
   if (causeDescription) {
@@ -451,12 +463,18 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
       const mp = new window.MercadoPago(publicKey, { locale: "es-MX" });
       const bricksBuilder = mp.bricks();
 
+      const prefillEmail = isProductionKey
+        ? normalizedUserEmail
+        : isMercadoPagoTestUserEmail(normalizedUserEmail)
+          ? normalizedUserEmail
+          : "";
+
       window.cardPaymentBrickController = await bricksBuilder.create("cardPayment", "mp-card-payment-brick", {
         initialization: {
           amount: total,
-          payer: normalizedUserEmail
+          payer: prefillEmail
             ? {
-                email: normalizedUserEmail,
+                email: prefillEmail,
               }
             : undefined,
         },
@@ -484,6 +502,15 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
                 resolve();
                 return;
               }
+              if (!isProductionKey && !isMercadoPagoTestUserEmail(normalizedPayerEmail)) {
+                setCheckoutStatus("error");
+                setFeedback(
+                  "En modo TEST debes pagar con un comprador de prueba de Mercado Pago (email test_user_xxxxx@testuser.com).",
+                );
+                resolve();
+                return;
+              }
+
               const currentSelectedSavedAddress = selectedSavedAddressRef.current;
               const currentDeliveryAddress = deliveryAddressRef.current;
               const activeAddress = currentSelectedSavedAddress
