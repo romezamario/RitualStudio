@@ -38,7 +38,7 @@ type MpBrickError = {
   cause?: Array<{ code?: string; description?: string }>;
 };
 
-function isMercadoPagoTestUserEmail(email: string) {
+function isMercadoPagoGeneratedTestUserEmail(email: string) {
   return /^test_user_\d+@testuser\.com$/i.test(email.trim());
 }
 
@@ -149,7 +149,7 @@ function getHumanReadableBrickError(error: unknown, isProductionKey: boolean) {
   if (normalizedMessage.includes("failed to create card token") || normalizedCauseDescription.includes("failed to create card token")) {
     return isProductionKey
       ? "No se pudo tokenizar la tarjeta. Verifica los datos y vuelve a intentar; si estás haciendo pruebas, usa llaves TEST + usuario/tarjeta de prueba de Mercado Pago."
-      : "No se pudo tokenizar la tarjeta en modo TEST. Usa un comprador de prueba (email test_user_xxxxx@testuser.com) junto con tarjetas de prueba de Mercado Pago.";
+      : "No se pudo tokenizar la tarjeta en modo TEST. Para pagos con tarjeta, no uses emails test_user_...@testuser.com en el Brick; usa otro email y una tarjeta de prueba de Mercado Pago.";
   }
 
   if (causeDescription) {
@@ -463,11 +463,8 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
       const mp = new window.MercadoPago(publicKey, { locale: "es-MX" });
       const bricksBuilder = mp.bricks();
 
-      const prefillEmail = isProductionKey
-        ? normalizedUserEmail
-        : isMercadoPagoTestUserEmail(normalizedUserEmail)
-          ? normalizedUserEmail
-          : "";
+      const prefillEmail =
+        !isProductionKey && isMercadoPagoGeneratedTestUserEmail(normalizedUserEmail) ? "" : normalizedUserEmail;
 
       window.cardPaymentBrickController = await bricksBuilder.create("cardPayment", "mp-card-payment-brick", {
         initialization: {
@@ -502,10 +499,10 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
                 resolve();
                 return;
               }
-              if (!isProductionKey && !isMercadoPagoTestUserEmail(normalizedPayerEmail)) {
+              if (!isProductionKey && isMercadoPagoGeneratedTestUserEmail(normalizedPayerEmail)) {
                 setCheckoutStatus("error");
                 setFeedback(
-                  "En modo TEST debes pagar con un comprador de prueba de Mercado Pago (email test_user_xxxxx@testuser.com).",
+                  "En modo TEST con tarjeta no uses un email test_user_...@testuser.com en el Brick. Usa otro correo distinto al de la cuenta de Mercado Pago.",
                 );
                 resolve();
                 return;
