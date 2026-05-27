@@ -1213,6 +1213,16 @@ p {
   margin: 0;
 }
 
+.marketplace-card .card-image-wrap {
+  border-radius: 0.95rem 0.95rem 0.55rem 0.55rem;
+  margin: -1.25rem -1.25rem 0.3rem;
+}
+
+.marketplace-card .card-image {
+  height: 260px;
+  width: 100%;
+}
+
 .clickable-card {
   cursor: pointer;
   position: relative;
