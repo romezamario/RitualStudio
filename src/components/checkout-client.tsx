@@ -50,6 +50,7 @@ type CheckoutClientProps = {
 };
 
 const MIN_PARTICIPANT_NAME_LENGTH = 2;
+const MERCADO_PAGO_TEST_CARD_PAYER_EMAIL = "comprador.test@ritualstudio.com";
 
 function normalizeStatusDetailCode(statusDetail?: string | null) {
   return (statusDetail ?? "").trim().toLowerCase().replace(/\s+/g, "_");
@@ -149,7 +150,7 @@ function getHumanReadableBrickError(error: unknown, isProductionKey: boolean) {
   if (normalizedMessage.includes("failed to create card token") || normalizedCauseDescription.includes("failed to create card token")) {
     return isProductionKey
       ? "No se pudo tokenizar la tarjeta. Verifica los datos y vuelve a intentar; si estás haciendo pruebas, usa llaves TEST + usuario/tarjeta de prueba de Mercado Pago."
-      : "No se pudo tokenizar la tarjeta en modo TEST. Para pagos con tarjeta, no uses emails test_user_...@testuser.com en el Brick; usa otro email y una tarjeta de prueba de Mercado Pago.";
+      : `No se pudo tokenizar la tarjeta en modo TEST. Usa un correo distinto al de la cuenta de Mercado Pago, por ejemplo ${MERCADO_PAGO_TEST_CARD_PAYER_EMAIL}, junto con una tarjeta de prueba.`;
   }
 
   if (causeDescription) {
@@ -463,7 +464,7 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
       const mp = new window.MercadoPago(publicKey, { locale: "es-MX" });
       const bricksBuilder = mp.bricks();
 
-      const prefillEmail = isProductionKey ? normalizedUserEmail : "";
+      const prefillEmail = isProductionKey ? normalizedUserEmail : MERCADO_PAGO_TEST_CARD_PAYER_EMAIL;
 
       window.cardPaymentBrickController = await bricksBuilder.create("cardPayment", "mp-card-payment-brick", {
         initialization: {
@@ -502,6 +503,14 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
                 setCheckoutStatus("error");
                 setFeedback(
                   "En modo TEST con tarjeta no uses un email test_user_...@testuser.com en el Brick. Usa otro correo distinto al de la cuenta de Mercado Pago.",
+                );
+                resolve();
+                return;
+              }
+              if (!isProductionKey && normalizedUserEmail && normalizedPayerEmail === normalizedUserEmail) {
+                setCheckoutStatus("error");
+                setFeedback(
+                  `En modo TEST con tarjeta usa un correo distinto al de tu cuenta de Mercado Pago, por ejemplo ${MERCADO_PAGO_TEST_CARD_PAYER_EMAIL}.`,
                 );
                 resolve();
                 return;
