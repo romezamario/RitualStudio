@@ -1151,13 +1151,15 @@ p {
 }
 
 .marketplace-featured-image-wrap {
+  background: color-mix(in srgb, var(--panel) 92%, white);
   border-radius: 0.95rem;
-  min-height: 360px;
+  min-height: 420px;
 }
 
 .marketplace-featured-image {
   height: 100%;
-  min-height: 360px;
+  min-height: 420px;
+  object-fit: contain;
 }
 
 .marketplace-featured-copy {
@@ -1196,11 +1198,13 @@ p {
 }
 
 .marketplace-secondary-image-wrap {
+  background: color-mix(in srgb, var(--panel) 92%, white);
   border-radius: 0.75rem;
 }
 
 .marketplace-secondary-image {
-  height: 170px;
+  height: 240px;
+  object-fit: contain;
 }
 
 .marketplace-card h3 {
@@ -1628,7 +1632,7 @@ p {
 
   .marketplace-featured-image-wrap,
   .marketplace-featured-image {
-    min-height: 300px;
+    min-height: 340px;
   }
 
   .marketplace-featured-actions {
