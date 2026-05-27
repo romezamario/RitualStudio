@@ -250,7 +250,7 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
   const [checkoutStatus, setCheckoutStatus] = useState<CheckoutStatus>("idle");
   const [feedback, setFeedback] = useState("Completa tus datos para procesar el pago con tarjeta sin salir del sitio.");
   const isBrickMounted = useRef(false);
-  const initializedPayerEmail = useRef("");
+  const initializedBrickKey = useRef("");
 
 
   useEffect(() => {
@@ -370,6 +370,11 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
   const isProductionKey = /^APP_USR-/i.test(publicKey ?? "");
   const isBelowMercadoPagoMinAmount = total < MIN_MX_CARD_PAYMENT_AMOUNT;
   const normalizedUserEmail = user?.email.trim().toLowerCase() ?? "";
+  const brickPrefillEmail = isProductionKey ? normalizedUserEmail : MERCADO_PAGO_TEST_CARD_PAYER_EMAIL;
+  const brickInitializationKey = useMemo(
+    () => [publicKey, total, isProductionKey ? "prod" : "test", brickPrefillEmail, items.length].join("|"),
+    [brickPrefillEmail, isProductionKey, items.length, publicKey, total],
+  );
   const addressBookStorageKey = useMemo(() => getAddressBookStorageKey(user?.email), [user?.email]);
   const [savedAddresses, setSavedAddresses] = useState<DeliveryAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState("new");
@@ -464,14 +469,12 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
       const mp = new window.MercadoPago(publicKey, { locale: "es-MX" });
       const bricksBuilder = mp.bricks();
 
-      const prefillEmail = isProductionKey ? normalizedUserEmail : MERCADO_PAGO_TEST_CARD_PAYER_EMAIL;
-
       window.cardPaymentBrickController = await bricksBuilder.create("cardPayment", "mp-card-payment-brick", {
         initialization: {
           amount: total,
-          payer: prefillEmail
+          payer: brickPrefillEmail
             ? {
-                email: prefillEmail,
+                email: brickPrefillEmail,
               }
             : undefined,
         },
@@ -657,7 +660,7 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
       });
 
       isBrickMounted.current = true;
-      initializedPayerEmail.current = normalizedUserEmail;
+      initializedBrickKey.current = brickInitializationKey;
     } catch (error) {
       setCheckoutStatus("error");
       setFeedback("No se pudo inicializar Mercado Pago. Intenta recargar la página.");
@@ -666,6 +669,8 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
   }, [
     checkoutItems,
     clearCart,
+    brickInitializationKey,
+    brickPrefillEmail,
     isBelowMercadoPagoMinAmount,
     isProductionKey,
     normalizedUserEmail,
@@ -688,7 +693,7 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
       return;
     }
 
-    if (initializedPayerEmail.current === normalizedUserEmail) {
+    if (initializedBrickKey.current === brickInitializationKey) {
       return;
     }
 
@@ -699,7 +704,7 @@ export default function CheckoutClient({ mercadoPagoPublicKey }: CheckoutClientP
 
     isBrickMounted.current = false;
     void mountBrick();
-  }, [mountBrick, normalizedUserEmail]);
+  }, [brickInitializationKey, mountBrick]);
 
   if (!publicKey) {
     return (
